@@ -1,0 +1,57 @@
+PASS DLOG-INVERSE-SYMPY Lg*Eg - 1 = 0 ; Ld*Ed - 1 = 0 (plan orthogonal, exact)
+PASS DLOG-BERNOULLI-SYMPY g(-2i th) - Lg|perp = 0  (g(z) = z/(e^z-1), dérivée de log trivialisée à gauche)
+PASS DLOG-BCH-SYMPY Lg - (1 + [w x] + [w x]^2/3) = O(w^4) : reste à l'ordre 2 = 0
+PASS DLOG-PI-SYMPY lim_(th->pi) (pi - th) th cot th = -pi : d log diverge en W -> -1 (coupure)
+PASS DLOG-EG-PI-SYMPY lim_(th->pi) sin th cos th/th = 0, lim sin^2 th/th^2 = 0 : E_g(th -> pi) = n n^T (pas n n^T - (1/pi)[n x] : désaccord D2 tranché)
+PASS DLOG-DF-Lg max |forme fermée - DF centrée (log par diagonalisation mp.eig / expm générique, 60 chiffres, h = 1e-25)| = 3.05e-34 sur 24 points, th in [1e-6, pi - 1e-3] (seuil 1e-25)
+PASS DLOG-DF-Ld max |forme fermée - DF centrée (log par diagonalisation mp.eig / expm générique, 60 chiffres, h = 1e-25)| = 3.06e-34 sur 24 points, th in [1e-6, pi - 1e-3] (seuil 1e-25)
+PASS DLOG-DF-Eg max |forme fermée - DF centrée (log par diagonalisation mp.eig / expm générique, 60 chiffres, h = 1e-25)| = 1.68e-36 sur 24 points, th in [1e-6, pi - 1e-3] (seuil 1e-25)
+PASS DLOG-DF-Ed max |forme fermée - DF centrée (log par diagonalisation mp.eig / expm générique, 60 chiffres, h = 1e-25)| = 1.71e-36 sur 24 points, th in [1e-6, pi - 1e-3] (seuil 1e-25)
+PASS DLOG-ADJOINT R(AB) = R(A)R(B), R orthogonale det 1, A(i e.s)A^dag = i(Re).s, R(exp(i th e3.s)) = rotation -2th : max écart 2.33e-61
+PASS DLOG-DERIVEES dLg/dw_k, dEg/dw_k (formes fermées, docs §3.2) = DF centrées : max écart 1.98e-34 sur 10 points x 3 directions
+PASS DLOG-DERIVEES-ZERO limites en th -> 0 de F'/th pour F = f, h, s, k, m : [-2/3, 2/45, -4/3, -4/15, -2/3] (attendu [-2/3, 2/45, -4/3, -4/15, -2/3]) : dérivées régulières en w = 0
+PASS FIB-DERIV-JOUET-DF jacobien analytique (formule des chemins) - DF centrées génériques : max |dJ| = 3.59e-28 sur 30 configurations de Haar, t in {1/2, 3/10, 8/10} (seuil 1e-8)
+PASS FIB-JOUET-J-FERME J = [1 - A, A], A = t R1 Eg(t w) Lg(w) R1^T : max écart 2.67e-51
+PASS FIB-JOUET-DETJJT det(J J^T) = ((1-t)^2 + t^2) ((sin^2(t th) + sin^2((1-t) th))/sin^2 th)^2 : max écart relatif 4.41e-50
+PASS FIB-JOUET-METRIQUE sqrt(det g_fibre) (DF du plongement) = sqrt(t^2+(1-t)^2) (sin^2(t th)+sin^2((1-t) th))/th^2 : max écart relatif 3.63e-31 sur 60 points
+PASS FIB-COAIRE-JOUET-NUM sqrt(det g) det(J J^T)^(-1/2) / (sin^2 th/th^2) - 1 : max 3.63e-31 sur 60 points (coaire = densité de Haar de W)
+PASS FIB-COAIRE-JOUET-SYMPY 1 - alpha = sin((1-t)th) e^(-i t th)/sin th : reste 0 ; sqrt(det g)/sqrt(det JJ^T) - sin^2th/th^2 = 0 ; t = 1/2 : det JJ^T - 1/(8 cos^4(th/2)) = 0
+PASS FIB-JOUET-BESSEL deux canaux (Bessel exact / quadrature) : max écart 9.86e-32 (<x> = I2/I1, <x^2> = (I3 + I2/b)/I1, U(1) I1/I0)
+PASS FIB-JOUET-MUTANT-BESSEL mutant t = 1/2 : quadrature = (I1 - (I0+I2)/2)/(I0 - I1) : max écart 7.05e-29
+PASS FIB-JOUET-U1-J U(1) : J = [1 - t, t] constant hors coupure (DF) : max écart 6.33e-10
+PASS FIB-DERIV-CHEMINS-B jouet B : max |J analytique - DF centrées| = 2.21e-28 sur 12 configurations (amplitudes 0,3 / 0,8 / Haar ; seuil 1e-8)
+PASS FIB-TRIVIALISATION-B jouet B : det(J J^T) identique en trivialisation à droite (source) : max écart relatif 7.22e-50 ; det(J J^T) dans [0.1525, 289.3]
+PASS FIB-DERIV-CHEMINS-C jouet C : max |J analytique - DF centrées| = 1.73e-28 sur 12 configurations (amplitudes 0,3 / 0,8 / Haar ; seuil 1e-8)
+PASS FIB-TRIVIALISATION-C jouet C : det(J J^T) identique en trivialisation à droite (source) : max écart relatif 2.14e-50 ; det(J J^T) dans [0.6755, 146.4]
+PASS FIB-CARTE-CHEMINS 10473 chemins par lien grossier (attendu 10 473), longueur max 11 (+ 3 de la référence = 14)
+PASS FIB-CARTE-REG Ubar (balaban_np, énumération indépendante) = fixtures WP6 (g_nl.py) : max |dq| = 2.86e-15 sur 3 x 324 liens grossiers (seuil 1e-12)
+PASS FIB-DERIV-BALABAN-DF jacobien forme fermée - DF (Richardson, h = 1e-3) : max |dJ| = 1.79e-11 sur 432 blocs 3x3 (3 fixtures x 3 liens grossiers x 48 liens fins ; seuil 1e-8)
+PASS FIB-U1-Q Q d lambda = 0 si lambda(centres) = 0 : 4.0e-15 ; Q(a e_0) = 3a e_0 : 5.8e-15 ; somme signée des lignes = 3 : 2.0e-14 ; (rang de Q = 64 = n = 64)
+PASS FIB-U1-CARTE-PETITS configurations diagonales exp(i th s3), amplitude 0,1 : phibar = Q th, max écart 2.2e-15
+PASS FIB-U1-CARTE-BRANCHES amplitude 1,0 : phibar = Q th - 2 pi sum w_G n_G (n_G entiers de branche, 9880 chemins sautés sur 3 x 10473) : max écart 1.6e-14
+PASS FIB-U1-JACOBIEN-CONSTANT bloc (3,3) de J = Q (amplitudes 0,1 et 1,0) : 5.5e-14 ; blocs mixtes U(1)/chargés nuls : 0.0e+00
+PASS FIB-U1-DIMENSIONS dim(ker Q ∩ tranche) = 3840 (attendu 3 (L^4 - L_c^4) = 3840) ; cond(M_V) = 1.600e+01
+PASS FIB-U1-EQUIPARTITION <S> = Tr(M Gam)/2 = 1920.0000000000 = dim S/2 = 1920.0
+PASS FIB-U1-PLAQUETTES beta <th_p^2> : invariance par translation de 3 : 1.2e-15 ; moyenne = 0.493827160494 (40/81 = 0.493827160494) ; 486 classes (r, plan), 9 valeurs distinctes dans [0.467309, 0.498914]
+PASS FIB-U1-KKT Q H = 1 : 3.3e-15 ; M_c[c,c] = 13.239314327096 (tous égaux à 1.6e-13 près) ; S_min = beta phibar^T M_c phibar
+PASS FIB-U1-ROUTEA-LIMITE kappa -> 0 : beta Var(th_W) (pénalité, kappa = 1e-6) / conditionnelle - 1 = 8.30e-06 (deux calculs indépendants : inverse pénalisée / base de la tranche)
+PASS FIB-U1-TYPES les 486 classes se réduisent à 9 types (côtés franchis, transverses au centre) : dispersion interne 2.8e-16 ; m (contrainte dure, beta-réduit) = [0.4673092809, 0.4747537091, 0.4804255256, 0.4905874009, 0.4927463133, 0.4943773844, 0.4984310324, 0.4987060909, 0.4989139643, 1.8347247577]
+PASS FIB-BINF-J1 J(U = 1) = Q (x) 1_3 : max écart 5.5e-14 (64 liens grossiers, 5184 liens fins ; seuil 1e-12 : sommes de 10 473 termes en F64 ; le premier passage à 1e-14 a échoué à 5,5e-14, arrondi d'accumulation)
+PASS FIB-BINF-Q-S1 Q (énumération indépendante) = op_Q de geom.py (S1) en espace direct : max écart 3.6e-15
+PASS FIB-BINF-KKT-S1 variances de plaquettes par classe : espace direct (t5) = picov.Classe (Bloch, 16 moments) à 5.1e-15 près ; M_c[c,c] = 13.239314327096 contre 13.239314327096 (écart 4.0e-13)
+PASS FIB-BINF-JAUGE log det(J J^T) = 42.333479311690 ; après jauge de Haar en chaque site : 42.333479311690 (écart 2.8e-14) ; covariance de Ubar 4.4e-15 ; à U = 1 : 3 log det(Q Q^T) = -359.806069590841
+PASS FIB-BINF-SANS-LINEAIRE log det JJ^T(exp(s a)), partie impaire c1 s + c3 s^3 + c5 s^5 ajustée sur s = 0,001/0,002/0,004 : c1 = 2.67e-11 (seuil 1e-6 ; bruit ~1e-9) ; c3 = -9.2369e+01 ; c5 = -3.6076e+03 ; partie paire / s^2 : 1822.5509 (s = 0,002), 1837.5266 (s = 0,01)
+PASS FIB-BINF-PAS-PAIR log det JJ^T n'est PAS pair en A (c3 = -9.237e+01, partie impaire -5.915e-06 à s = 0,004, ~1e5 x le bruit) : l'argument « inversion des liens » de Kimi (Ubar(U^-1) = Ubar(U)^-1) est faux en non abélien ; seul le terme LINÉAIRE s'annule (trace de couleur, docs §6.3)
+PASS FIB-BINF-EQUIPARTITION lim beta <1 - P> (conditionnel, V = 1) = 0.740740740741 = 20/27 = (3/4)(1 - 3^-4) ; boucle des centres : beta <1 - 1/2 Tr W> = 2.752087136546 (libre 3.377085607294)
+PASS FIB-ARB-SYMPY int e^(-p^2/2g) dp - sqrt(2 pi g) = 0 (marginale de Liouville ∝ e^(-V) sqrt(g) dx = e^(-V) sigma_M) ; g/A - m1 m2 = 0 (prescription +1/2 log A : densité ∝ e^(-V) dx = cible exacte)
+PASS FIB-ARB-A-1 M = diag(1.0, 1.0), potentiel A (Kimi : « rien à ajouter pour M = 1 ») est loin de la cible : |z| max = 135.2 > 10
+PASS FIB-ARB-LIOUVILLE-A1 M = diag(1.0, 1.0), potentiel A : la loi échantillonnée = prédiction « e^(-V) sigma_M » (Liouville) à |z| = 1.2 < 4 (thèse Kimi : |z| = 284.4)
+PASS FIB-ARB-B-1 M = diag(1.0, 1.0), potentiel B (Opus, +1/2 log det(J M^-1 J^T)) retrouve la cible : |z| = 0.9 < 4
+PASS FIB-ARB-LIOUVILLE-B1 M = diag(1.0, 1.0), potentiel B : la loi échantillonnée = prédiction « e^(-V) sigma_M » (Liouville) à |z| = 0.9 < 4 (thèse Kimi : |z| = 282.0)
+PASS FIB-ARB-C-1 M = diag(1.0, 1.0), potentiel C (formule encadrée de Kimi, -1/2 log det(J M^-1 J^T)) est loin de la cible : |z| max = 277.9 > 10
+PASS FIB-ARB-LIOUVILLE-C1 M = diag(1.0, 1.0), potentiel C : la loi échantillonnée = prédiction « e^(-V) sigma_M » (Liouville) à |z| = 1.1 < 4 (thèse Kimi : |z| = 277.9)
+PASS FIB-ARB-LIOUVILLE-A4 M = diag(1.0, 4.0), potentiel A : la loi échantillonnée = prédiction « e^(-V) sigma_M » (Liouville) à |z| = 0.9 < 4 (thèse Kimi : |z| = 425.6)
+PASS FIB-ARB-B-4 M = diag(1.0, 4.0), potentiel B (Opus, +1/2 log det(J M^-1 J^T)) retrouve la cible : |z| = 0.5 < 4
+PASS FIB-ARB-LIOUVILLE-B4 M = diag(1.0, 4.0), potentiel B : la loi échantillonnée = prédiction « e^(-V) sigma_M » (Liouville) à |z| = 0.5 < 4 (thèse Kimi : |z| = 395.2)
+PASS FIB-ARB-C-4 M = diag(1.0, 4.0), potentiel C (formule encadrée de Kimi, -1/2 log det(J M^-1 J^T)) est loin de la cible : |z| max = 421.9 > 10
+PASS FIB-ARB-LIOUVILLE-C4 M = diag(1.0, 4.0), potentiel C : la loi échantillonnée = prédiction « e^(-V) sigma_M » (Liouville) à |z| = 1.4 < 4 (thèse Kimi : |z| = 421.9)

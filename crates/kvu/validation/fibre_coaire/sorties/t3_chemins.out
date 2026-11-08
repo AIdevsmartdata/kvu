@@ -1,0 +1,5 @@
+PASS FIB-DERIV-CHEMINS-B jouet B : max |J analytique - DF centrées| = 2.21e-28 sur 12 configurations (amplitudes 0,3 / 0,8 / Haar ; seuil 1e-8)
+PASS FIB-TRIVIALISATION-B jouet B : det(J J^T) identique en trivialisation à droite (source) : max écart relatif 7.22e-50 ; det(J J^T) dans [0.1525, 289.3]
+PASS FIB-DERIV-CHEMINS-C jouet C : max |J analytique - DF centrées| = 1.73e-28 sur 12 configurations (amplitudes 0,3 / 0,8 / Haar ; seuil 1e-8)
+PASS FIB-TRIVIALISATION-C jouet C : det(J J^T) identique en trivialisation à droite (source) : max écart relatif 2.14e-50 ; det(J J^T) dans [0.6755, 146.4]
+BILAN FIB-CHEMINS PASS

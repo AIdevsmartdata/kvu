@@ -1,0 +1,15 @@
+{
+ "cas": [
+  "L4_plat",
+  "L4_pi_flux",
+  "L4_haar0",
+  "L4_haar1",
+  "L4_haar2",
+  "L8_plat",
+  "L8_pi_flux",
+  "L8_haar0",
+  "L8_haar1"
+ ],
+ "petit": true,
+ "cb_sha256": "e028040dfbce4691a6cd710fd8c671e40c5f1ee041bc25a15eef47af49260790"
+}

@@ -1,0 +1,330 @@
+{
+  "binaire_sha256": "38ba1d3b011ad62abf93b58be78d9e087d5b4faaa7490ec3bdddede4fbfedea5",
+  "commandes": [
+    "kvu su2 gen --L 16 --beta B --graine S --chaines 1 --start hot --therm 2000 --nmeas N --skip 100 --nor 4 --precision f64 --options compat-prod --dump-every 1 --format q64 --reprise-every 500 --arret-apres W (fenêtres, scratch/wp19/gen/chaine.sh ; orchestre_gen.py)",
+    "kvu obs topo --ens E --chaine K --backend-gen hip|cuda --backend hip|cuda --flot-complet-chaque 1|10 (orchestre_mesure*.py)",
+    "kvu obs topo-gates analyse --ens q|obs4|lit|lit_mut --jsonl <chaînes 01..> (scratch/wp19/analyse_wp19.sh)",
+    "kvu obs topo-gates inst|cool-id|gpu --backend cpu|hip|cuda"
+  ],
+  "git_head": "feb3a22a9192461a1d41b75eee8db3a2df9dd6aa",
+  "lignes": [
+    {
+      "detail": "backend=cpu ecart_max=1.7763568394002505e-15",
+      "id": "TOPO-COOL-ID",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "backend=cpu ecart_max=1.2952536625579972e1 mutant sans dagger",
+      "id": "TOPO-COOL-ID-MUT",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "backend=cuda ecart_max=1.7763568394002505e-15",
+      "id": "TOPO-COOL-ID",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "backend=cuda ecart_max=1.2952536625579972e1 mutant sans dagger",
+      "id": "TOPO-COOL-ID-MUT",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "backend=hip ecart_max=1.7763568394002505e-15",
+      "id": "TOPO-COOL-ID",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "backend=hip ecart_max=1.2952536625579972e1 mutant sans dagger",
+      "id": "TOPO-COOL-ID-MUT",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "(a) attribution ambiguë : 356/3200 hors |Q-round(Q)| < 0.250000 ; X̂=8.807500, σ=0.269557, référence AT21 β=2.427000 L=16 : 8.066000 ± 0.064000 ; 3200 configurations",
+      "id": "TOPO-LIT",
+      "verdict": "SKIP"
+    },
+    {
+      "detail": "X̂=8.807500, V=65536, χ_lat=1.343918e-4, ⟨Q_I⟩=0.033750",
+      "id": "TOPO-LIT-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "s=1.139000, X̂′=8.740937, |X̂′-X̂|=0.066563, désaccords=195/3200 ; chaînes figées=[]",
+      "id": "TOPO-LIT-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "⟨Q_L²⟩=6.702373 (trèfle non amélioré, non arrondi, cooling 20) ; référence AT21 6.635000 ± 0.056000",
+      "id": "TOPO-LIT-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "X̂ flot=9.559375 ; procédure de lissage différente (flot t/a² = 3), sans verdict ; disponibles=3200/3200",
+      "id": "TOPO-LIT-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "τ_int(Q_I²), Sokal c=6.000000 : médiane=0.422208, max=0.606040 (chaînes estimables seulement) ; estimables=32/32 ; non estimable pour chaînes=[]",
+      "id": "TOPO-LIT-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend_gen=cuda X̂=9.207500, erreur standard=0.452733, chaînes=16, configurations=1600",
+      "id": "TOPO-LIT-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend_gen=hip X̂=8.407500, erreur standard=0.272087, chaînes=16, configurations=1600",
+      "id": "TOPO-LIT-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "⟨½Re Tr U_p⟩=0.636422, σ_jackknife=1.411308e-5 ; référence AT21 0.6364293(15), réseau 20³×16 ≠ 16⁴ ; écart=-6.915281e-6, écart en σ combinés=-0.487247 ; sans verdict, réseau différent",
+      "id": "TOPO-LIT-PLAQ",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "mutant rouge ; X̂=2.085000, σ=0.112934, référence AT21 β=2.427000 L=16 : 8.066000 ± 0.064000 ; 800 configurations ; z=-46.075858 ; quantile Student ν=31 : 3.260942",
+      "id": "TOPO-LIT-MUT",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "X̂=2.085000, V=65536, χ_lat=3.181458e-5, ⟨Q_I⟩=0.012500",
+      "id": "TOPO-LIT-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "s=1.093000, X̂′=2.082500, |X̂′-X̂|=0.002500, désaccords=4/800 ; chaînes figées=[]",
+      "id": "TOPO-LIT-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "⟨Q_L²⟩=1.731743 (trèfle non amélioré, non arrondi, cooling 20) ; référence AT21 6.635000 ± 0.056000",
+      "id": "TOPO-LIT-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "X̂ flot=2.180000 ; procédure de lissage différente (flot t/a² = 3), sans verdict ; disponibles=800/800",
+      "id": "TOPO-LIT-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "τ_int(Q_I²), Sokal c=6.000000 : médiane=0.312182, max=1.267776 (chaînes estimables seulement) ; estimables=32/32 ; non estimable pour chaînes=[]",
+      "id": "TOPO-LIT-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend_gen=cuda X̂=2.025000, erreur standard=0.130837, chaînes=16, configurations=400",
+      "id": "TOPO-LIT-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend_gen=hip X̂=2.145000, erreur standard=0.187399, chaînes=16, configurations=400",
+      "id": "TOPO-LIT-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "⟨½Re Tr U_p⟩=0.661067, σ_jackknife=2.416917e-5 ; référence AT21 0.6364293(15), réseau 20³×16 ≠ 16⁴ ; écart=2.463740e-2, écart en σ combinés=1017.415593 ; sans verdict, réseau différent",
+      "id": "TOPO-LIT-PLAQ",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "amélioré t/a²=3.000000 : 15/20, 20 configurations ; seuil historique 18/20 ; FAIL historique à titre indicatif",
+      "id": "OBS-4-L16-REJEU",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "N=70/100 ; seuil 90/100 ; |Q-round(Q)| < 0.100000",
+      "id": "TOPO-Q",
+      "verdict": "FAIL"
+    },
+    {
+      "detail": "N′=4/100 ; Q′=Q+0.500000 ; PASS = mutant rouge ; si TOPO-Q passe, N′ ≤ 10 par construction",
+      "id": "TOPO-Q-MUT",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "Clopper–Pearson 95 % [0.600185, 0.787594] sur 100 charges finies ; sous hypothèse iid, couverture non garantie (chaînes corrélées)",
+      "id": "TOPO-Q-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "chaîne=1 quantifiées=18/25 disponibles sur 25",
+      "id": "TOPO-Q-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "chaîne=2 quantifiées=19/25 disponibles sur 25",
+      "id": "TOPO-Q-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "chaîne=3 quantifiées=18/25 disponibles sur 25",
+      "id": "TOPO-Q-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "chaîne=4 quantifiées=15/25 disponibles sur 25",
+      "id": "TOPO-Q-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "trèfle non amélioré=30/100 ; accord cooling/flot=65/100 disponibles sur 100",
+      "id": "TOPO-Q-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "histogramme Q ; [-8.000000,-7.750000):0 [-7.750000,-7.500000):0 [-7.500000,-7.250000):0 [-7.250000,-7.000000):0 [-7.000000,-6.750000):0 [-6.750000,-6.500000):0 [-6.500000,-6.250000):0 [-6.250000,-6.000000):0 [-6.000000,-5.750000):1 [-5.750000,-5.500000):0 [-5.500000,-5.250000):0 [-5.250000,-5.000000):0 [-5.000000,-4.750000):1 [-4.750000,-4.500000):0 [-4.500000,-4.250000):0 [-4.250000,-4.000000):0 [-4.000000,-3.750000):1 [-3.750000,-3.500000):1 [-3.500000,-3.250000):0 [-3.250000,-3.000000):2 [-3.000000,-2.750000):4 [-2.750000,-2.500000):2 [-2.500000,-2.250000):0 [-2.250000,-2.000000):3 [-2.000000,-1.750000):10 [-1.750000,-1.500000):1 [-1.500000,-1.250000):1 [-1.250000,-1.000000):9 [-1.000000,-0.750000):7 [-0.750000,-0.500000):2 [-0.500000,-0.250000):0 [-0.250000,0.000000):10 [0.000000,0.250000):8 [0.250000,0.500000):1 [0.500000,0.750000):3 [0.750000,1.000000):4 [1.000000,1.250000):4 [1.250000,1.500000):1 [1.500000,1.750000):0 [1.750000,2.000000):5 [2.000000,2.250000):9 [2.250000,2.500000):0 [2.500000,2.750000):0 [2.750000,3.000000):2 [3.000000,3.250000):4 [3.250000,3.500000):1 [3.500000,3.750000):0 [3.750000,4.000000):1 [4.000000,4.250000):2 [4.250000,4.500000):0 [4.500000,4.750000):0 [4.750000,5.000000):0 [5.000000,5.250000):0 [5.250000,5.500000):0 [5.500000,5.750000):0 [5.750000,6.000000):0 [6.000000,6.250000):0 [6.250000,6.500000):0 [6.500000,6.750000):0 [6.750000,7.000000):0 [7.000000,7.250000):0 [7.250000,7.500000):0 [7.500000,7.750000):0 [7.750000,8.000000]:0 sous_borne=0 hors_borne_haute=0 n=100",
+      "id": "TOPO-Q-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "histogramme Q-round(Q) ; [-0.500000,-0.450000):0 [-0.450000,-0.400000):1 [-0.400000,-0.350000):1 [-0.350000,-0.300000):1 [-0.300000,-0.250000):1 [-0.250000,-0.200000):1 [-0.200000,-0.150000):1 [-0.150000,-0.100000):5 [-0.100000,-0.050000):5 [-0.050000,0.000000):24 [0.000000,0.050000):36 [0.050000,0.100000):5 [0.100000,0.150000):3 [0.150000,0.200000):4 [0.200000,0.250000):3 [0.250000,0.300000):3 [0.300000,0.350000):1 [0.350000,0.400000):2 [0.400000,0.450000):0 [0.450000,0.500000]:3 sous_borne=0 hors_borne_haute=0 n=100",
+      "id": "TOPO-Q-INFO",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "t/a²=1.000000 amélioré=27/100 trèfle=24/100 disponibles sur 100",
+      "id": "TOPO-Q-T",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "t/a²=2.000000 amélioré=56/100 trèfle=27/100 disponibles sur 100",
+      "id": "TOPO-Q-T",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "t/a²=3.000000 amélioré=70/100 trèfle=30/100 disponibles sur 100",
+      "id": "TOPO-Q-T",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "t/a²=5.000000 amélioré=89/100 trèfle=30/100 disponibles sur 100",
+      "id": "TOPO-Q-T",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "t=1.000000·t₀ amélioré=85/99 trèfle=32/99 disponibles sur 100 ; absences de t₀ exclues des comptes",
+      "id": "TOPO-Q-T",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "t=2.000000·t₀ amélioré=95/99 trèfle=43/99 disponibles sur 100 ; absences de t₀ exclues des comptes",
+      "id": "TOPO-Q-T",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "t=3.000000·t₀ amélioré=98/99 trèfle=49/99 disponibles sur 100 ; absences de t₀ exclues des comptes",
+      "id": "TOPO-Q-T",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "t=5.000000·t₀ amélioré=98/99 trèfle=60/99 disponibles sur 100 ; absences de t₀ exclues des comptes",
+      "id": "TOPO-Q-T",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "10/10 actions non croissantes (tri chaîne,cfg), tolérance 1e-12·|action[k]|",
+      "id": "TOPO-COOL",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "backend=cuda trois champs flotés et refroidis ; seuil_delta_q_imp=1e-12",
+      "id": "TOPO-GPU",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "backend=cuda cfg=/home/utilisateur/kvu_unif/wp19/ens/q/run_03/cfg_000001.npy mode=flot delta_q_imp=2.220446049250313e-16 delta_q_tre=0e0 delta_E_plaq=0e0",
+      "id": "TOPO-GPU-DETAIL",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend=cuda cfg=/home/utilisateur/kvu_unif/wp19/ens/q/run_03/cfg_000001.npy mode=cooling delta_q_imp=0e0 delta_q_tre=0e0 delta_E_plaq=0e0",
+      "id": "TOPO-GPU-DETAIL",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend=cuda cfg=/home/utilisateur/kvu_unif/wp19/ens/q/run_03/cfg_000002.npy mode=flot delta_q_imp=0e0 delta_q_tre=2.220446049250313e-16 delta_E_plaq=0e0",
+      "id": "TOPO-GPU-DETAIL",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend=cuda cfg=/home/utilisateur/kvu_unif/wp19/ens/q/run_03/cfg_000002.npy mode=cooling delta_q_imp=0e0 delta_q_tre=0e0 delta_E_plaq=0e0",
+      "id": "TOPO-GPU-DETAIL",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend=cuda cfg=/home/utilisateur/kvu_unif/wp19/ens/q/run_03/cfg_000003.npy mode=flot delta_q_imp=1.4155343563970746e-15 delta_q_tre=1.1657341758564144e-15 delta_E_plaq=0e0",
+      "id": "TOPO-GPU-DETAIL",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend=cuda cfg=/home/utilisateur/kvu_unif/wp19/ens/q/run_03/cfg_000003.npy mode=cooling delta_q_imp=0e0 delta_q_tre=0e0 delta_E_plaq=0e0",
+      "id": "TOPO-GPU-DETAIL",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend=hip trois champs flotés et refroidis ; seuil_delta_q_imp=1e-12",
+      "id": "TOPO-GPU",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "backend=hip cfg=/chemin/vers/projet/chantiers/kevinotron_unification/scratch/wp19/ens/q/run_01/cfg_000001.npy mode=flot delta_q_imp=4.440892098500626e-16 delta_q_tre=0e0 delta_E_plaq=0e0",
+      "id": "TOPO-GPU-DETAIL",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend=hip cfg=/chemin/vers/projet/chantiers/kevinotron_unification/scratch/wp19/ens/q/run_01/cfg_000001.npy mode=cooling delta_q_imp=0e0 delta_q_tre=0e0 delta_E_plaq=0e0",
+      "id": "TOPO-GPU-DETAIL",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend=hip cfg=/chemin/vers/projet/chantiers/kevinotron_unification/scratch/wp19/ens/q/run_01/cfg_000002.npy mode=flot delta_q_imp=4.440892098500626e-16 delta_q_tre=4.440892098500626e-16 delta_E_plaq=0e0",
+      "id": "TOPO-GPU-DETAIL",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend=hip cfg=/chemin/vers/projet/chantiers/kevinotron_unification/scratch/wp19/ens/q/run_01/cfg_000002.npy mode=cooling delta_q_imp=0e0 delta_q_tre=0e0 delta_E_plaq=0e0",
+      "id": "TOPO-GPU-DETAIL",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend=hip cfg=/chemin/vers/projet/chantiers/kevinotron_unification/scratch/wp19/ens/q/run_01/cfg_000003.npy mode=flot delta_q_imp=1.3322676295501878e-15 delta_q_tre=8.881784197001252e-16 delta_E_plaq=0e0",
+      "id": "TOPO-GPU-DETAIL",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend=hip cfg=/chemin/vers/projet/chantiers/kevinotron_unification/scratch/wp19/ens/q/run_01/cfg_000003.npy mode=cooling delta_q_imp=0e0 delta_q_tre=0e0 delta_E_plaq=0e0",
+      "id": "TOPO-GPU-DETAIL",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "backend=cpu ; L=8 gel_tre=4.440892098500626e-16 gel_imp=0e0 jauge_tre=4.440892098500626e-16 jauge_imp=0e0 reflexion_tre=0e0 reflexion_imp=0e0 ameliore_moins_trefle=7.942608305722576e-3 ; L=12 gel_tre=6.661338147750939e-16 gel_imp=1.3322676295501878e-15 jauge_tre=8.881784197001252e-16 jauge_imp=1.3322676295501878e-15 reflexion_tre=0e0 reflexion_imp=0e0 ameliore_moins_trefle=1.3295351636855024e-3 ; L=16 gel_tre=2.220446049250313e-16 gel_imp=4.440892098500626e-16 jauge_tre=4.440892098500626e-16 jauge_imp=0e0 reflexion_tre=0e0 reflexion_imp=0e0 ameliore_moins_trefle=4.076505298611366e-4",
+      "id": "TOPO-INST",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "backend=cuda ; L=8 gel_tre=4.440892098500626e-16 gel_imp=0e0 jauge_tre=4.440892098500626e-16 jauge_imp=0e0 reflexion_tre=0e0 reflexion_imp=0e0 ameliore_moins_trefle=7.942608305722576e-3 ; L=12 gel_tre=6.661338147750939e-16 gel_imp=1.3322676295501878e-15 jauge_tre=8.881784197001252e-16 jauge_imp=1.3322676295501878e-15 reflexion_tre=0e0 reflexion_imp=0e0 ameliore_moins_trefle=1.3295351636855024e-3 ; L=16 gel_tre=2.220446049250313e-16 gel_imp=4.440892098500626e-16 jauge_tre=4.440892098500626e-16 jauge_imp=0e0 reflexion_tre=0e0 reflexion_imp=0e0 ameliore_moins_trefle=4.076505298611366e-4",
+      "id": "TOPO-INST",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "backend=hip ; L=8 gel_tre=4.440892098500626e-16 gel_imp=0e0 jauge_tre=4.440892098500626e-16 jauge_imp=0e0 reflexion_tre=0e0 reflexion_imp=0e0 ameliore_moins_trefle=7.942608305722576e-3 ; L=12 gel_tre=6.661338147750939e-16 gel_imp=1.3322676295501878e-15 jauge_tre=8.881784197001252e-16 jauge_imp=1.3322676295501878e-15 reflexion_tre=0e0 reflexion_imp=0e0 ameliore_moins_trefle=1.3295351636855024e-3 ; L=16 gel_tre=2.220446049250313e-16 gel_imp=4.440892098500626e-16 jauge_tre=4.440892098500626e-16 jauge_imp=0e0 reflexion_tre=0e0 reflexion_imp=0e0 ameliore_moins_trefle=4.076505298611366e-4",
+      "id": "TOPO-INST",
+      "verdict": "PASS"
+    }
+  ],
+  "non_vert": [
+    {
+      "detail": "(a) attribution ambiguë : 356/3200 hors |Q-round(Q)| < 0.250000 ; X̂=8.807500, σ=0.269557, référence AT21 β=2.427000 L=16 : 8.066000 ± 0.064000 ; 3200 configurations",
+      "id": "TOPO-LIT",
+      "verdict": "SKIP"
+    },
+    {
+      "detail": "N=70/100 ; seuil 90/100 ; |Q-round(Q)| < 0.100000",
+      "id": "TOPO-Q",
+      "verdict": "FAIL"
+    }
+  ],
+  "schema": "kvu-topo/1"
+}

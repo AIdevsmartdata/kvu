@@ -1,0 +1,39 @@
+INFO FIB-JOUET-MC Haar x Haar, 200000 tirages, t = 1/2 : <x_W> = 0.00080 +- 0.00112 (0) ; <x_W^2> = 0.25006 +- 0.00056 (1/4) ; <x_Ubar> = -0.00158, <x_Ubar^2> = 0.24905 (0, 1/4) ; corr(x_W, x_Ubar) = +0.0010, corr(x_W^2, x_Ubar^2) = +0.0022 (indépendance : 0 +- 0.0022)
+INFO FIB-JOUET-GEL-b2 <x> = 0.433127426722312 (I2/I1) ; <x^2> = 0.350308859916532 ; mutant t=1/2 : <x> = 0.15439468653312 ; mutant t=0,3 : <x> = 0.222907311718793 ; écart relatif de <1-x> (mutant t=1/2) : 0.491703 ; U(1) <cos psi> = 0.697774657964008
+INFO FIB-JOUET-GEL-b2.8 <x> = 0.545098533322141 (I2/I1) ; <x^2> = 0.415965857154849 ; mutant t=1/2 : <x> = 0.376887225945948 ; mutant t=0,3 : <x> = 0.420582423877691 ; écart relatif de <1-x> (mutant t=1/2) : 0.369775 ; U(1) <cos psi> = 0.794038834374382
+INFO FIB-JOUET-GEL-b8 <x> = 0.819249410355621 (I2/I1) ; <x^2> = 0.692781471116642 ; mutant t=1/2 : <x> = 0.80506952128661 ; mutant t=0,3 : <x> = 0.808484173193561 ; écart relatif de <1-x> (mutant t=1/2) : 0.07845 ; U(1) <cos psi> = 0.935235493529439
+INFO FIB-JOUET-GEL-b1000 <x> = 0.998500375375493 (I2/I1) ; <x^2> = 0.997004498873874 ; mutant t=1/2 : <x> = 0.998499624436301 ; mutant t=0,3 : <x> = 0.998499802596186 ; écart relatif de <1-x> (mutant t=1/2) : 0.000500751 ; U(1) <cos psi> = 0.999499874874804
+INFO FIB-DOMAINE-FIXTURES s7 : th max 3.133, fraction th > pi/2 = 4.78e-01 ; s11 : th max 3.130, fraction th > pi/2 = 4.73e-01 ; s13 : th max 3.128, fraction th > pi/2 = 4.77e-01
+INFO FIB-U1-BOUCLE-CENTRES beta Var(th_W), boucle 3x3 des centres (plan 01) : conditionnelle 1.834724757698 ; libre (sans contrainte) 2.251390404863 ; moyenne beta <th_p^2> libre 0.499614197531 ((3V-3)/(6V) = 0.499614197531)
+INFO FIB-U1-SPECTRE-MC spectre de M_c (64 valeurs) : min -0.000000, max 51.624007 ; la pénalité domine un mode grossier ssi 2 kappa lambda << 1 (kappa = beta eps^2)
+INFO FIB-U1-ROUTEA-b8_e0.2 kappa = 0.32 : <S> = 1939.697943 (exact 1920.0) ; beta Var(th_W) = 2.200151 (exact 1.834725, écart +19.92 %)
+INFO FIB-U1-ROUTEA-b8_e0.1 kappa = 0.08 : <S> = 1934.964407 (exact 1920.0) ; beta Var(th_W) = 2.111837 (exact 1.834725, écart +15.10 %)
+INFO FIB-U1-ROUTEA-b8_e0.05 kappa = 0.02 : <S> = 1928.404357 (exact 1920.0) ; beta Var(th_W) = 1.988517 (exact 1.834725, écart +8.38 %)
+INFO FIB-U1-ROUTEA-b2.8_e0.2 kappa = 0.112 : <S> = 1936.381225 (exact 1920.0) ; beta Var(th_W) = 2.138442 (exact 1.834725, écart +16.55 %)
+INFO FIB-U1-ROUTEA-b2.8_e0.1 kappa = 0.028 : <S> = 1929.986240 (exact 1920.0) ; beta Var(th_W) = 2.018119 (exact 1.834725, écart +10.00 %)
+INFO FIB-U1-ROUTEA-b2.8_e0.05 kappa = 0.007 : <S> = 1924.275529 (exact 1920.0) ; beta Var(th_W) = 1.912210 (exact 1.834725, écart +4.22 %)
+INFO FIB-U1-ROUTEA-b1000_e0.05 kappa = 2.5 : <S> = 1942.074688 (exact 1920.0) ; beta Var(th_W) = 2.243673 (exact 1.834725, écart +22.29 %)
+INFO FIB-U1-ROUTEA-k1e-4 kappa = 0.0001 : <S> = 1920.084227 (exact 1920.0) ; beta Var(th_W) = 1.836239 (exact 1.834725, écart +0.08 %)
+INFO FIB-U1-ROUTEA-k1e-3 kappa = 0.001 : <S> = 1920.800023 (exact 1920.0) ; beta Var(th_W) = 1.849127 (exact 1.834725, écart +0.78 %)
+INFO FIB-U1-ROUTEA-k1e-2 kappa = 0.01 : <S> = 1925.502976 (exact 1920.0) ; beta Var(th_W) = 1.934734 (exact 1.834725, écart +5.45 %)
+INFO FIB-U1-M-EPS b8_e0.2 (kappa 0.32) : m1 = 0.496781, m10 = 2.200151 ; b8_e0.1 (kappa 0.08) : m1 = 0.491382, m10 = 2.111837 ; b8_e0.05 (kappa 0.02) : m1 = 0.482297, m10 = 1.988517 ; b2.8_e0.2 (kappa 0.112) : m1 = 0.493088, m10 = 2.138442 ; b2.8_e0.1 (kappa 0.028) : m1 = 0.484681, m10 = 2.018119 ; b2.8_e0.05 (kappa 0.007) : m1 = 0.475435, m10 = 1.912210 ; k1e-3 (kappa 0.001) : m1 = 0.468910, m10 = 1.849127 ; k2e-3 (kappa 0.002) : m1 = 0.470314, m10 = 1.862077 ; k4e-3 (kappa 0.004) : m1 = 0.472675, m10 = 1.884587
+INFO FIB-U1-MUTANT-V-b8 phibar_0 = 0,05 : décalage relatif des 10 moments (moyennes de classes sur les 16 blocs) max 4.0236 % ; plaquette la plus touchée beta F*^2 = 7.230e-03 (contre beta Var ~ 0,49)
+INFO FIB-U1-MUTANT-V-b2.8 phibar_0 = 0,05 : décalage relatif des 10 moments (moyennes de classes sur les 16 blocs) max 1.4082 % ; plaquette la plus touchée beta F*^2 = 2.531e-03 (contre beta Var ~ 0,49)
+INFO FIB-U1-DUREE 82 s
+INFO FIB-BINF-MC-BLOCH spectre de M_c(q) aux 16 moments : q = 0 : [0.0, 0.0, 0.0, 0.0] ; q = (pi,pi,pi,pi) : [-0.0, 51.624007, 51.624007, 51.624007]
+INFO FIB-BINF-INVERSION max |Ubar(U^-1) - Ubar(U)^-1| = 4.634e-01 (amplitude 0,3) : l'équivariance par inversion n'a pas lieu (les holonomies U(G) ne sont pas inversées, leur ordre est conservé)
+INFO FIB-BINF-QUADRATIQUE log det JJ^T - 3 log det QQ^T ~ c2 s^2 avec a ~ N(0,1) par composante : c2 = 1837.5266 pour 15552 composantes (1.182e-01 par composante fine, 9.570e+00 par composante grossière)
+INFO FIB-BINF-DUREE 46 s
+INFO FIB-ARB-CIBLE loi conditionnelle exacte de x sachant xi = 0 (quadrature, 2e5 points) : <cos x> = -0.2829288041, <cos 2x> = 0.2054655606
+INFO FIB-ARB-RATTLE M = diag(1.0, 1.0), potentiel A : <cos x>, <cos 2x> = -0.30458 +- 0.00192, 0.30019 +- 0.00070 ; acceptation 0.999, rejets de réversibilité 0.0e+00 ; z(cible) = -11.3, +135.2 ; z(thèse Opus) = +0.2, -1.2 ; z(thèse Kimi) = -23.9, +284.4
+INFO FIB-ARB-RATTLE M = diag(1.0, 1.0), potentiel B : <cos x>, <cos 2x> = -0.28210 +- 0.00166, 0.20477 +- 0.00076 ; acceptation 0.999, rejets de réversibilité 0.0e+00 ; z(cible) = +0.5, -0.9 ; z(thèse Opus) = +0.5, -0.9 ; z(thèse Kimi) = -29.4, +282.0
+INFO FIB-ARB-RATTLE M = diag(1.0, 1.0), potentiel C : <cos x>, <cos 2x> = -0.32197 +- 0.00230, 0.38530 +- 0.00065 ; acceptation 0.999, rejets de réversibilité 0.0e+00 ; z(cible) = -17.0, +277.9 ; z(thèse Opus) = +1.1, -1.1 ; z(thèse Kimi) = -17.0, +277.9
+INFO FIB-ARB-RATTLE M = diag(1.0, 4.0), potentiel A : <cos x>, <cos 2x> = -0.32084 +- 0.00273, 0.38056 +- 0.00093 ; acceptation 0.999, rejets de réversibilité 2.2e-05 ; z(cible) = -13.9, +189.0 ; z(thèse Opus) = +0.8, +0.9 ; z(thèse Kimi) = -32.5, +425.6
+INFO FIB-ARB-RATTLE M = diag(1.0, 4.0), potentiel B : <cos x>, <cos 2x> = -0.28258 +- 0.00212, 0.20489 +- 0.00116 ; acceptation 0.997, rejets de réversibilité 4.6e-05 ; z(cible) = +0.2, -0.5 ; z(thèse Opus) = +0.2, -0.5 ; z(thèse Kimi) = -50.0, +395.2
+INFO FIB-ARB-RATTLE M = diag(1.0, 4.0), potentiel C : <cos x>, <cos 2x> = -0.35457 +- 0.00370, 0.50814 +- 0.00072 ; acceptation 0.999, rejets de réversibilité 1.3e-05 ; z(cible) = -19.4, +421.9 ; z(thèse Opus) = -0.6, +1.4 ; z(thèse Kimi) = -19.4, +421.9
+INFO FIB-MUT-HUTCHINSON Tr((Gam (x) 1) H_L) = 1336.0 +- 9.4 (16 vecteurs, s = 0.01)
+INFO FIB-MUT-EFFET beta = 1000 : <S>_correct - <S>_mutant ~ -0.167 +- 0.001 sur <S> = 5760 : relatif -0.003 % (+- 0.000 %) [ordre dominant en 1/beta ; non fiable à beta ~ 3]
+INFO FIB-MUT-EFFET beta = 16 : <S>_correct - <S>_mutant ~ -10.438 +- 0.074 sur <S> = 5760 : relatif -0.181 % (+- 0.001 %) [ordre dominant en 1/beta ; non fiable à beta ~ 3]
+INFO FIB-MUT-EFFET beta = 8 : <S>_correct - <S>_mutant ~ -20.875 +- 0.148 sur <S> = 5760 : relatif -0.362 % (+- 0.003 %) [ordre dominant en 1/beta ; non fiable à beta ~ 3]
+INFO FIB-MUT-EFFET beta = 2.8 : <S>_correct - <S>_mutant ~ -59.644 +- 0.422 sur <S> = 5760 : relatif -1.035 % (+- 0.007 %) [ordre dominant en 1/beta ; non fiable à beta ~ 3]
+INFO FIB-MUT-DUREE 122 s

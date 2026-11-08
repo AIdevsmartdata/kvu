@@ -1,0 +1,5 @@
+PASS FIB-CARTE-CHEMINS 10473 chemins par lien grossier (attendu 10 473), longueur max 11 (+ 3 de la référence = 14)
+PASS FIB-CARTE-REG Ubar (balaban_np, énumération indépendante) = fixtures WP6 (g_nl.py) : max |dq| = 2.86e-15 sur 3 x 324 liens grossiers (seuil 1e-12)
+PASS FIB-DERIV-BALABAN-DF jacobien forme fermée - DF (Richardson, h = 1e-3) : max |dJ| = 1.79e-11 sur 432 blocs 3x3 (3 fixtures x 3 liens grossiers x 48 liens fins ; seuil 1e-8)
+INFO FIB-DOMAINE-FIXTURES s7 : th max 3.133, fraction th > pi/2 = 4.78e-01 ; s11 : th max 3.130, fraction th > pi/2 = 4.73e-01 ; s13 : th max 3.128, fraction th > pi/2 = 4.77e-01
+BILAN FIB-JAC-BALABAN PASS

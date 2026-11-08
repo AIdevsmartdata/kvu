@@ -1,0 +1,16 @@
+{
+ "cas": "L4_haar0",
+ "L": 4,
+ "nom": "haar0",
+ "plaquette": 0.013018649133825,
+ "q_construit_cote_rust": false,
+ "gp_pas": 1,
+ "ecart_q_vs_cfg_origine": 0.0,
+ "ref_libCb": true,
+ "nF": 54,
+ "nnz_wf": 12288,
+ "Dnorm": 6.119279462810561,
+ "t": 0.18,
+ "numpy": "2.5.3",
+ "sha_cb": "e028040dfbce4691a6cd710fd8c671e40c5f1ee041bc25a15eef47af49260790"
+}

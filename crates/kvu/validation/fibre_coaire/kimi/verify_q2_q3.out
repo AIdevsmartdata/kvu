@@ -1,0 +1,6 @@
+Q2 max error L_g = 9.5056947e-42
+Q2 max error L_d = 5.681913e-42
+Q2 max error E_g = 4.8731117e-42
+Q3 max error J block link 1 = 3.0345511e-41
+Q3 max error J block link 2 = 1.9653313e-41
+weights = ['0.21', '0.34', '0.27', '0.18']

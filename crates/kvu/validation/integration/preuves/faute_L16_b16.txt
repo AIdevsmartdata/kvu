@@ -1,0 +1,14 @@
+# Faute transitoire FP64 (su2_hip de reference/, acemagic, suite valide --complet du 04/10 ~15:05)
+# chaîne L16 β16 départ froid graine 20261004701603, therm 2000, nmeas 20000
+babf123d9f5848af27c7cf85e5ba6c4c23ce92b9a13d1196b4ab5742ddee04d5  f32/f64/L16_b16_c3/therm.csv
+8234d0cf7a84f19eaa53a49a9f52a2186f0995c126fbc2186107d135730a8ecf  f32/f64/L16_b16_c3/measurements.csv
+babf123d9f5848af27c7cf85e5ba6c4c23ce92b9a13d1196b4ab5742ddee04d5  integ/nan_check/hip_c3/therm.csv
+a1afe2344464856f62003179bee1b8681907b29646bcef59a5eca20cbc284060  integ/nan_check/hip_c3/measurements.csv
+babf123d9f5848af27c7cf85e5ba6c4c23ce92b9a13d1196b4ab5742ddee04d5  integ/nan_check/kvu_c3/therm.csv
+a1afe2344464856f62003179bee1b8681907b29646bcef59a5eca20cbc284060  integ/nan_check/kvu_c3/measurements.csv
+# première ligne différente (originale fautive, puis relance)
+2085,20002c2085,20002
+< 2083,4083,sample,nan,-nan,0.4940420951976624,-0.19137644777343782,0.48087731712674264
+---
+> 2083,4083,sample,0.95254211330293526,-0.2009170717442269,0.49064554678980576,-0.1897955643119682,0.4868120848223082
+# relance su2_hip = moteur unifié compat-prod : cmp therm.csv et measurements.csv identiques (22000 pas)

@@ -1,0 +1,23 @@
+# Compilation et caches
+target/
+**/__pycache__/
+*.pyc
+
+# Données lourdes : jamais dans le dépôt. Les ensembles, dumps et stores se placent HORS du dépôt (store du profil de
+# kvu.toml). Seules les petites fixtures de test (< 1,1 Mo chacune, tests/donnees/ et validation/) sont suivies.
+*.zst
+*.part
+*.npz
+*.h5
+*.hdf5
+kevinotron_store/
+store/
+
+# Sorties des exemples et de la recette locale
+/ens_*/
+/arch_*/
+/tordu_*/
+/wilson_*/
+/action_*/
+/flux_*.json
+/scratch/

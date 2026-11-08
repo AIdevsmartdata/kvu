@@ -1,0 +1,13 @@
+PASS DLOG-INVERSE-SYMPY Lg*Eg - 1 = 0 ; Ld*Ed - 1 = 0 (plan orthogonal, exact)
+PASS DLOG-BERNOULLI-SYMPY g(-2i th) - Lg|perp = 0  (g(z) = z/(e^z-1), dérivée de log trivialisée à gauche)
+PASS DLOG-BCH-SYMPY Lg - (1 + [w x] + [w x]^2/3) = O(w^4) : reste à l'ordre 2 = 0
+PASS DLOG-PI-SYMPY lim_(th->pi) (pi - th) th cot th = -pi : d log diverge en W -> -1 (coupure)
+PASS DLOG-EG-PI-SYMPY lim_(th->pi) sin th cos th/th = 0, lim sin^2 th/th^2 = 0 : E_g(th -> pi) = n n^T (pas n n^T - (1/pi)[n x] : désaccord D2 tranché)
+PASS DLOG-DF-Lg max |forme fermée - DF centrée (log par diagonalisation mp.eig / expm générique, 60 chiffres, h = 1e-25)| = 3.05e-34 sur 24 points, th in [1e-6, pi - 1e-3] (seuil 1e-25)
+PASS DLOG-DF-Ld max |forme fermée - DF centrée (log par diagonalisation mp.eig / expm générique, 60 chiffres, h = 1e-25)| = 3.06e-34 sur 24 points, th in [1e-6, pi - 1e-3] (seuil 1e-25)
+PASS DLOG-DF-Eg max |forme fermée - DF centrée (log par diagonalisation mp.eig / expm générique, 60 chiffres, h = 1e-25)| = 1.68e-36 sur 24 points, th in [1e-6, pi - 1e-3] (seuil 1e-25)
+PASS DLOG-DF-Ed max |forme fermée - DF centrée (log par diagonalisation mp.eig / expm générique, 60 chiffres, h = 1e-25)| = 1.71e-36 sur 24 points, th in [1e-6, pi - 1e-3] (seuil 1e-25)
+PASS DLOG-ADJOINT R(AB) = R(A)R(B), R orthogonale det 1, A(i e.s)A^dag = i(Re).s, R(exp(i th e3.s)) = rotation -2th : max écart 2.33e-61
+PASS DLOG-DERIVEES dLg/dw_k, dEg/dw_k (formes fermées, docs §3.2) = DF centrées : max écart 1.98e-34 sur 10 points x 3 directions
+PASS DLOG-DERIVEES-ZERO limites en th -> 0 de F'/th pour F = f, h, s, k, m : [-2/3, 2/45, -4/3, -4/15, -2/3] (attendu [-2/3, 2/45, -4/3, -4/15, -2/3]) : dérivées régulières en w = 0
+BILAN FIB-DLOG PASS

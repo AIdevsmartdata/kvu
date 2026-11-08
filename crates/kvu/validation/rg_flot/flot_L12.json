@@ -1,0 +1,1108 @@
+{
+  "a_j_definition": "a_j = β′ − β − 0,4081 (SU(2), L_b = 3, Bałaban, un pas) ; quantité cible, jamais une gate",
+  "cellules": [
+    {
+      "beta": 2.3,
+      "chaines": [
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b2.3_c1",
+          "p_moyenne": 0.13321264793056997,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.022215803583053837
+        },
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b2.3_c2",
+          "p_moyenne": 0.13527774436986215,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.022294452740663523
+        },
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b2.3_c3",
+          "p_moyenne": 0.14041434637207625,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.0202488368361849
+        }
+      ],
+      "domaine": [
+        {
+          "etiquette": "HORS_DOMAINE",
+          "fraction_hors": 0.4400581903068207,
+          "n_ambigues": 0,
+          "n_boucles": 643461120,
+          "pas": 1,
+          "theta_max": 3.1389173361736025
+        }
+      ],
+      "estimateurs": {
+        "mcrg2": {
+          "etat": "hors_etalonnage",
+          "plaquette": {
+            "beta_extreme": 1.8,
+            "cible": 0.13630157955750286,
+            "cote": "bas",
+            "etat": "hors_etalonnage",
+            "note": "aucune extrapolation : aucune valeur de β′ n'est rendue",
+            "valeur_extreme": 0.44091207101946017
+          },
+          "rectangle": {
+            "beta_extreme": 1.8,
+            "cible": 0.02158636438663408,
+            "cote": "bas",
+            "etat": "hors_etalonnage",
+            "note": "aucune extrapolation : aucune valeur de β′ n'est rendue",
+            "valeur_extreme": 0.1976414660632091
+          }
+        },
+        "plaq": {
+          "beta_extreme": 1.8,
+          "cible": 0.13630157955750286,
+          "cote": "bas",
+          "etat": "hors_etalonnage",
+          "note": "aucune extrapolation : aucune valeur de β′ n'est rendue",
+          "valeur_extreme": 0.44091207101946017
+        },
+        "sd": {
+          "a_j": {
+            "a_j": -2.19024890799206,
+            "delta_beta_1": 0.4081,
+            "erreur": 0.00885012491240934,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "erreur_jackknife": 0.00885012491240934,
+          "erreur_totale": 0.00885012491240934,
+          "etat": "ok",
+          "jackknife": {
+            "erreur": 0.00885012491240934,
+            "moyenne_replicats": 0.5178638770311785,
+            "replicats": [
+              0.5252022746926553,
+              0.5184788902686577,
+              0.5099104661322227
+            ]
+          },
+          "sigma_etalonnage": null,
+          "valeur": 0.5178510920079398
+        }
+      },
+      "l_entree": 12,
+      "l_fin": 4,
+      "n_chaines": 3,
+      "n_configs": 60,
+      "p_moyenne": 0.13630157955750286,
+      "r_moyenne": 0.02158636438663408,
+      "tau_int": {
+        "chaines": [
+          {
+            "chaine": "L12_b2.3_c1",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.4183300132670378,
+              "fenetre": 3,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 0.5
+            },
+            "plaquette_production": {
+              "dtau": 0.25631059521908234,
+              "err": 0.00006196631434345022,
+              "fenetre": 11,
+              "n": 2000,
+              "tau": 1.6900620161191444
+            }
+          },
+          {
+            "chaine": "L12_b2.3_c2",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 1.2767025186100462,
+              "fenetre": 4,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 1.345762617760418
+            },
+            "plaquette_production": {
+              "dtau": 0.3873233217666481,
+              "err": 0.00007647485018105444,
+              "fenetre": 14,
+              "n": 2000,
+              "tau": 2.274440860309752
+            }
+          },
+          {
+            "chaine": "L12_b2.3_c3",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.6435138733006277,
+              "fenetre": 4,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 0.678323181849
+            },
+            "plaquette_production": {
+              "dtau": 0.25649912671018016,
+              "err": 0.00006347394599823517,
+              "fenetre": 11,
+              "n": 2000,
+              "tau": 1.6913051559576453
+            }
+          }
+        ],
+        "fenetre_sokal_c": 6.0
+      }
+    },
+    {
+      "beta": 2.5,
+      "chaines": [
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b2.5_c1",
+          "p_moyenne": 0.31208974917550836,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.12104387863821016
+        },
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b2.5_c2",
+          "p_moyenne": 0.3149647805005525,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.12182429201786038
+        },
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b2.5_c3",
+          "p_moyenne": 0.3197922344969974,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.12461747898593048
+        }
+      ],
+      "domaine": [
+        {
+          "etiquette": "HORS_DOMAINE",
+          "fraction_hors": 0.3929599755770792,
+          "n_ambigues": 0,
+          "n_boucles": 643461120,
+          "pas": 1,
+          "theta_max": 3.139904781140346
+        }
+      ],
+      "estimateurs": {
+        "mcrg2": {
+          "etat": "hors_etalonnage",
+          "plaquette": {
+            "beta_extreme": 1.8,
+            "cible": 0.315615588057686,
+            "cote": "bas",
+            "etat": "hors_etalonnage",
+            "note": "aucune extrapolation : aucune valeur de β′ n'est rendue",
+            "valeur_extreme": 0.44091207101946017
+          },
+          "rectangle": {
+            "beta_extreme": 1.8,
+            "cible": 0.12249521654733367,
+            "cote": "bas",
+            "etat": "hors_etalonnage",
+            "note": "aucune extrapolation : aucune valeur de β′ n'est rendue",
+            "valeur_extreme": 0.1976414660632091
+          }
+        },
+        "plaq": {
+          "beta_extreme": 1.8,
+          "cible": 0.315615588057686,
+          "cote": "bas",
+          "etat": "hors_etalonnage",
+          "note": "aucune extrapolation : aucune valeur de β′ n'est rendue",
+          "valeur_extreme": 0.44091207101946017
+        },
+        "sd": {
+          "a_j": {
+            "a_j": -1.8627661519024135,
+            "delta_beta_1": 0.4081,
+            "erreur": 0.0068979216928501735,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "erreur_jackknife": 0.0068979216928501735,
+          "erreur_totale": 0.0068979216928501735,
+          "etat": "ok",
+          "jackknife": {
+            "erreur": 0.0068979216928501735,
+            "moyenne_replicats": 1.0453432462727807,
+            "replicats": [
+              1.051642403003094,
+              1.0446281003108207,
+              1.0397592355044278
+            ]
+          },
+          "sigma_etalonnage": null,
+          "valeur": 1.0453338480975867
+        }
+      },
+      "l_entree": 12,
+      "l_fin": 4,
+      "n_chaines": 3,
+      "n_configs": 60,
+      "p_moyenne": 0.315615588057686,
+      "r_moyenne": 0.12249521654733367,
+      "tau_int": {
+        "chaines": [
+          {
+            "chaine": "L12_b2.5_c1",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.3535533905932738,
+              "fenetre": 2,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 0.5
+            },
+            "plaquette_production": {
+              "dtau": 0.16115124002750034,
+              "err": 0.00004301394721996023,
+              "fenetre": 8,
+              "n": 2000,
+              "tau": 1.235973590104317
+            }
+          },
+          {
+            "chaine": "L12_b2.5_c2",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.3535533905932738,
+              "fenetre": 2,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 0.5
+            },
+            "plaquette_production": {
+              "dtau": 0.2028121148560251,
+              "err": 0.000049494327474061625,
+              "fenetre": 9,
+              "n": 2000,
+              "tau": 1.4713537256263007
+            }
+          },
+          {
+            "chaine": "L12_b2.5_c3",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.4183300132670378,
+              "fenetre": 3,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 0.5
+            },
+            "plaquette_production": {
+              "dtau": 0.14066135483613734,
+              "err": 0.00004209559939311158,
+              "fenetre": 7,
+              "n": 2000,
+              "tau": 1.148495152923678
+            }
+          }
+        ],
+        "fenetre_sokal_c": 6.0
+      }
+    },
+    {
+      "beta": 2.8,
+      "chaines": [
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b2.8_c1",
+          "p_moyenne": 0.5003572724423575,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.2886741423364305
+        },
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b2.8_c2",
+          "p_moyenne": 0.5062357621853304,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.2963334276978478
+        },
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b2.8_c3",
+          "p_moyenne": 0.5053232086511927,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.29342237059869697
+        }
+      ],
+      "domaine": [
+        {
+          "etiquette": "HORS_DOMAINE",
+          "fraction_hors": 0.33788304101419525,
+          "n_ambigues": 0,
+          "n_boucles": 643461120,
+          "pas": 1,
+          "theta_max": 3.1396102524338336
+        }
+      ],
+      "estimateurs": {
+        "mcrg2": {
+          "a_j": {
+            "a_j": -1.1652054306955204,
+            "delta_beta_1": 0.4081,
+            "erreur": 0.005039839297414189,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "a_j_p": {
+            "a_j": -1.200701941407539,
+            "delta_beta_1": 0.4081,
+            "erreur": null,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "a_j_r": {
+            "a_j": -1.1297089199835018,
+            "delta_beta_1": 0.4081,
+            "erreur": null,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "beta_p": 2.007398058592461,
+          "beta_r": 2.078391080016498,
+          "ecart_schema": {
+            "jackknife": {
+              "erreur": 0.0013632299934069466,
+              "moyenne_replicats": 0.07100520457231152,
+              "replicats": [
+                0.07009733526104789,
+                0.07057844234680744,
+                0.07233983610907924
+              ]
+            },
+            "note": "systématique de schéma rapportée, jamais un seuil",
+            "signe_r_moins_p": 0.0709930214240373,
+            "valeur": 0.0709930214240373
+          },
+          "erreur_jackknife": 0.005034860791286097,
+          "erreur_totale": 0.005039839297414189,
+          "etat": "ok",
+          "jackknife": {
+            "erreur": 0.005034860791286097,
+            "moyenne_replicats": 2.0428803138677574,
+            "replicats": [
+              2.0477464059108312,
+              2.039327790931776,
+              2.0415667447606656
+            ]
+          },
+          "sigma_etalonnage": 0.0002239574873280183,
+          "valeur": 2.0428945693044795
+        },
+        "plaq": {
+          "a_j": {
+            "a_j": -1.200701941407539,
+            "delta_beta_1": 0.4081,
+            "erreur": 0.0053862876665497945,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "erreur_jackknife": 0.005377512255090173,
+          "erreur_totale": 0.0053862876665497945,
+          "etat": "ok",
+          "interpolation_lineaire_info": 2.006784395824525,
+          "jackknife": {
+            "erreur": 0.005377512255090173,
+            "moyenne_replicats": 2.007377711581602,
+            "replicats": [
+              2.0126977382803073,
+              2.0040385697583725,
+              2.005396826706126
+            ]
+          },
+          "p_cible": 0.5039720810929602,
+          "pente": 0.33854262140971686,
+          "sigma_etalonnage": 0.0003073382065110618,
+          "valeur": 2.007398058592461
+        },
+        "sd": {
+          "a_j": {
+            "a_j": -1.6297879451161665,
+            "delta_beta_1": 0.4081,
+            "erreur": 0.009422915264990176,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "erreur_jackknife": 0.009422915264990176,
+          "erreur_totale": 0.009422915264990176,
+          "etat": "ok",
+          "jackknife": {
+            "erreur": 0.009422915264990176,
+            "moyenne_replicats": 1.5783362742590328,
+            "replicats": [
+              1.5876743877035289,
+              1.5747595668589693,
+              1.5725748682145997
+            ]
+          },
+          "sigma_etalonnage": null,
+          "valeur": 1.5783120548838332
+        }
+      },
+      "l_entree": 12,
+      "l_fin": 4,
+      "n_chaines": 3,
+      "n_configs": 60,
+      "p_moyenne": 0.5039720810929602,
+      "r_moyenne": 0.2928099802109917,
+      "tau_int": {
+        "chaines": [
+          {
+            "chaine": "L12_b2.8_c1",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.3535533905932738,
+              "fenetre": 2,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 0.5
+            },
+            "plaquette_production": {
+              "dtau": 0.1289286886739259,
+              "err": 0.000034142479353608896,
+              "fenetre": 7,
+              "n": 2000,
+              "tau": 1.0526983348575574
+            }
+          },
+          {
+            "chaine": "L12_b2.8_c2",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.4743416490252569,
+              "fenetre": 4,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 0.5
+            },
+            "plaquette_production": {
+              "dtau": 0.10772504866528013,
+              "err": 0.00003101144333121713,
+              "fenetre": 6,
+              "n": 2000,
+              "tau": 0.9448111781212393
+            }
+          },
+          {
+            "chaine": "L12_b2.8_c3",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.4183300132670378,
+              "fenetre": 3,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 0.5
+            },
+            "plaquette_production": {
+              "dtau": 0.09920186423081138,
+              "err": 0.00003039389492379898,
+              "fenetre": 6,
+              "n": 2000,
+              "tau": 0.8700579055384027
+            }
+          }
+        ],
+        "fenetre_sokal_c": 6.0
+      }
+    },
+    {
+      "beta": 4.0,
+      "chaines": [
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b4_c1",
+          "p_moyenne": 0.80196911964317,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.6671819826456011
+        },
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b4_c2",
+          "p_moyenne": 0.8027043188298972,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.6676758120987625
+        },
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b4_c3",
+          "p_moyenne": 0.8033224216800129,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.6670487775761001
+        }
+      ],
+      "domaine": [
+        {
+          "etiquette": "HORS_DOMAINE",
+          "fraction_hors": 0.188931893818231,
+          "n_ambigues": 0,
+          "n_boucles": 643461120,
+          "pas": 1,
+          "theta_max": 3.1343655820123564
+        }
+      ],
+      "estimateurs": {
+        "mcrg2": {
+          "a_j": {
+            "a_j": -0.43295991502246733,
+            "delta_beta_1": 0.4081,
+            "erreur": 0.0038436530299527714,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "a_j_p": {
+            "a_j": -0.3597483215383023,
+            "delta_beta_1": 0.4081,
+            "erreur": null,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "a_j_r": {
+            "a_j": -0.5061715085066324,
+            "delta_beta_1": 0.4081,
+            "erreur": null,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "beta_p": 4.048351678461698,
+          "beta_r": 3.9019284914933676,
+          "ecart_schema": {
+            "jackknife": {
+              "erreur": 0.008291254075485824,
+              "moyenne_replicats": -0.14642781853516298,
+              "replicats": [
+                -0.1525538540835205,
+                -0.14820344075104241,
+                -0.13852616077092605
+              ]
+            },
+            "note": "systématique de schéma rapportée, jamais un seuil",
+            "signe_r_moins_p": -0.14642318696833012,
+            "valeur": 0.14642318696833012
+          },
+          "erreur_jackknife": 0.003822700034945604,
+          "erreur_totale": 0.0038436530299527714,
+          "etat": "ok",
+          "jackknife": {
+            "erreur": 0.003822700034945604,
+            "moyenne_replicats": 3.975143329345856,
+            "replicats": [
+              3.978901937902212,
+              3.973867699614058,
+              3.9726603505212985
+            ]
+          },
+          "sigma_etalonnage": 0.00040079054067180284,
+          "valeur": 3.9751400849775327
+        },
+        "plaq": {
+          "a_j": {
+            "a_j": -0.3597483215383023,
+            "delta_beta_1": 0.4081,
+            "erreur": 0.00768325921143525,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "erreur_jackknife": 0.00766284849930443,
+          "erreur_totale": 0.00768325921143525,
+          "etat": "ok",
+          "interpolation_lineaire_info": 4.058542798926423,
+          "jackknife": {
+            "erreur": 0.00766284849930443,
+            "moyenne_replicats": 4.048357238613438,
+            "replicats": [
+              4.055178864943972,
+              4.047969419989579,
+              4.0419234309067615
+            ]
+          },
+          "p_cible": 0.8026652867176935,
+          "pente": 0.05105091129558706,
+          "sigma_etalonnage": 0.0005596650666358086,
+          "valeur": 4.048351678461698
+        },
+        "sd": {
+          "a_j": {
+            "a_j": -0.3876427841791069,
+            "delta_beta_1": 0.4081,
+            "erreur": 0.01317481213500374,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "erreur_jackknife": 0.01317481213500374,
+          "erreur_totale": 0.01317481213500374,
+          "etat": "ok",
+          "jackknife": {
+            "erreur": 0.01317481213500374,
+            "moyenne_replicats": 4.020478447608173,
+            "replicats": [
+              4.031716794903094,
+              4.020813803216126,
+              4.008904744705302
+            ]
+          },
+          "sigma_etalonnage": null,
+          "valeur": 4.020457215820893
+        }
+      },
+      "l_entree": 12,
+      "l_fin": 4,
+      "n_chaines": 3,
+      "n_configs": 60,
+      "p_moyenne": 0.8026652867176935,
+      "r_moyenne": 0.6673021907734881,
+      "tau_int": {
+        "chaines": [
+          {
+            "chaine": "L12_b4_c1",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.8546607123741011,
+              "fenetre": 4,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 0.900891492588071
+            },
+            "plaquette_production": {
+              "dtau": 0.05793409309165588,
+              "err": 0.000016450415120395917,
+              "fenetre": 4,
+              "n": 2000,
+              "tau": 0.6106789611528621
+            }
+          },
+          {
+            "chaine": "L12_b4_c2",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.3535533905932738,
+              "fenetre": 2,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 0.5
+            },
+            "plaquette_production": {
+              "dtau": 0.0769336469599771,
+              "err": 0.0000181497717397854,
+              "fenetre": 5,
+              "n": 2000,
+              "tau": 0.7335335423056606
+            }
+          },
+          {
+            "chaine": "L12_b4_c3",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.3535533905932738,
+              "fenetre": 2,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 0.5
+            },
+            "plaquette_production": {
+              "dtau": 0.06229495638480223,
+              "err": 0.00001684502939387201,
+              "fenetre": 4,
+              "n": 2000,
+              "tau": 0.6566464963894122
+            }
+          }
+        ],
+        "fenetre_sokal_c": 6.0
+      }
+    },
+    {
+      "beta": 8.0,
+      "chaines": [
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b8_c1",
+          "p_moyenne": 0.94724456747788,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.8997862915317094
+        },
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b8_c2",
+          "p_moyenne": 0.9476448803586269,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.9009747131454855
+        },
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b8_c3",
+          "p_moyenne": 0.9468845932117826,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.899767077088501
+        }
+      ],
+      "domaine": [
+        {
+          "etiquette": "HORS_DOMAINE",
+          "fraction_hors": 0.024870040321938954,
+          "n_ambigues": 0,
+          "n_boucles": 643461120,
+          "pas": 1,
+          "theta_max": 3.106653083934651
+        }
+      ],
+      "estimateurs": {
+        "mcrg2": {
+          "a_j": {
+            "a_j": 5.145260173698271,
+            "delta_beta_1": 0.4081,
+            "erreur": 0.050053195772525275,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "a_j_p": {
+            "a_j": 5.841209473238362,
+            "delta_beta_1": 0.4081,
+            "erreur": null,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "a_j_r": {
+            "a_j": 4.44931087415818,
+            "delta_beta_1": 0.4081,
+            "erreur": null,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "beta_p": 14.249309473238363,
+          "beta_r": 12.85741087415818,
+          "ecart_schema": {
+            "jackknife": {
+              "erreur": 0.02557176698611927,
+              "moyenne_replicats": -1.3920118915448552,
+              "replicats": [
+                -1.3701371846749524,
+                -1.391479312564524,
+                -1.4144191773950894
+              ]
+            },
+            "note": "systématique de schéma rapportée, jamais un seuil",
+            "signe_r_moins_p": -1.3918985990801822,
+            "valeur": 1.3918985990801822
+          },
+          "erreur_jackknife": 0.0500380996347324,
+          "erreur_totale": 0.050053195772525275,
+          "etat": "ok",
+          "jackknife": {
+            "erreur": 0.0500380996347324,
+            "moyenne_replicats": 13.553480110433611,
+            "replicats": [
+              13.565928850860903,
+              13.505283961515437,
+              13.589227518924496
+            ]
+          },
+          "sigma_etalonnage": 0.0012292241403971899,
+          "valeur": 13.553360173698271
+        },
+        "plaq": {
+          "a_j": {
+            "a_j": 5.841209473238362,
+            "delta_beta_1": 0.4081,
+            "erreur": 0.055135479482625954,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "erreur_jackknife": 0.05510773361450461,
+          "erreur_totale": 0.055135479482625954,
+          "etat": "ok",
+          "interpolation_lineaire_info": 14.68056203314873,
+          "jackknife": {
+            "erreur": 0.05510773361450461,
+            "moyenne_replicats": 14.249486056206038,
+            "replicats": [
+              14.25099744319838,
+              14.201023617797699,
+              14.29643710762204
+            ]
+          },
+          "p_cible": 0.9472580136827632,
+          "pente": 0.003983733716653245,
+          "sigma_etalonnage": 0.0017489407227994258,
+          "valeur": 14.249309473238363
+        },
+        "sd": {
+          "a_j": {
+            "a_j": 7.083544125143635,
+            "delta_beta_1": 0.4081,
+            "erreur": 0.07760653717611822,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "erreur_jackknife": 0.07760653717611822,
+          "erreur_totale": 0.07760653717611822,
+          "etat": "ok",
+          "jackknife": {
+            "erreur": 0.07760653717611822,
+            "moyenne_replicats": 15.49183765138659,
+            "replicats": [
+              15.477014454867234,
+              15.433277395094022,
+              15.565221104198512
+            ]
+          },
+          "sigma_etalonnage": null,
+          "valeur": 15.491644125143635
+        }
+      },
+      "l_entree": 12,
+      "l_fin": 4,
+      "n_chaines": 3,
+      "n_configs": 60,
+      "p_moyenne": 0.9472580136827632,
+      "r_moyenne": 0.9001760272552325,
+      "tau_int": {
+        "chaines": [
+          {
+            "chaine": "L12_b8_c1",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.7655251135414208,
+              "fenetre": 4,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 0.8069343216166325
+            },
+            "plaquette_production": {
+              "dtau": 0.061949815290696604,
+              "err": 8.125966622356374e-6,
+              "fenetre": 4,
+              "n": 2000,
+              "tau": 0.6530083898177579
+            }
+          },
+          {
+            "chaine": "L12_b8_c2",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 1.1172729268362023,
+              "fenetre": 4,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 1.1777090722816876
+            },
+            "plaquette_production": {
+              "dtau": 0.05841628328354367,
+              "err": 7.734775822086061e-6,
+              "fenetre": 4,
+              "n": 2000,
+              "tau": 0.6157616920587257
+            }
+          },
+          {
+            "chaine": "L12_b8_c3",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.3535533905932738,
+              "fenetre": 2,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 0.5
+            },
+            "plaquette_production": {
+              "dtau": 0.0604705742664712,
+              "err": 8.030662747132938e-6,
+              "fenetre": 4,
+              "n": 2000,
+              "tau": 0.6374158203347159
+            }
+          }
+        ],
+        "fenetre_sokal_c": 6.0
+      }
+    },
+    {
+      "beta": 16.0,
+      "chaines": [
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b16_c1",
+          "p_moyenne": 0.9787001865199606,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.9582035571412832
+        },
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b16_c2",
+          "p_moyenne": 0.9790116938022002,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.9588895384944418
+        },
+        {
+          "derniere": "cfg_002000.npy",
+          "n_configs": 20,
+          "nom": "L12_b16_c3",
+          "p_moyenne": 0.9788981952370512,
+          "premiere": "cfg_000100.npy",
+          "r_moyenne": 0.9586222536591229
+        }
+      ],
+      "domaine": [
+        {
+          "etiquette": "DANS_DOMAINE",
+          "fraction_hors": 0.0003885269711400745,
+          "n_ambigues": 0,
+          "n_boucles": 643461120,
+          "pas": 1,
+          "theta_max": 2.500697850804641
+        }
+      ],
+      "estimateurs": {
+        "mcrg2": {
+          "etat": "hors_etalonnage",
+          "plaquette": {
+            "beta_extreme": 16.0,
+            "cible": 0.9788700251864041,
+            "cote": "haut",
+            "etat": "hors_etalonnage",
+            "note": "aucune extrapolation : aucune valeur de β′ n'est rendue",
+            "valeur_extreme": 0.9525758764510857
+          },
+          "rectangle": {
+            "beta_extreme": 16.0,
+            "cible": 0.9585717830982825,
+            "cote": "haut",
+            "etat": "hors_etalonnage",
+            "note": "aucune extrapolation : aucune valeur de β′ n'est rendue",
+            "valeur_extreme": 0.9196040159773191
+          }
+        },
+        "plaq": {
+          "beta_extreme": 16.0,
+          "cible": 0.9788700251864041,
+          "cote": "haut",
+          "etat": "hors_etalonnage",
+          "note": "aucune extrapolation : aucune valeur de β′ n'est rendue",
+          "valeur_extreme": 0.9525758764510857
+        },
+        "sd": {
+          "a_j": {
+            "a_j": 22.886991227077626,
+            "delta_beta_1": 0.4081,
+            "erreur": 0.18665206952926353,
+            "note": "quantité cible rapportée, jamais une gate ; aucune lecture physique dans ce lot (WP9 et chantier vision)"
+          },
+          "erreur_jackknife": 0.18665206952926353,
+          "erreur_totale": 0.18665206952926353,
+          "etat": "ok",
+          "jackknife": {
+            "erreur": 0.18665206952926353,
+            "moyenne_replicats": 39.29553341062482,
+            "replicats": [
+              39.47302790272147,
+              39.156775913115595,
+              39.2567964160374
+            ]
+          },
+          "sigma_etalonnage": null,
+          "valeur": 39.29509122707763
+        }
+      },
+      "l_entree": 12,
+      "l_fin": 4,
+      "n_chaines": 3,
+      "n_configs": 60,
+      "p_moyenne": 0.9788700251864041,
+      "r_moyenne": 0.9585717830982825,
+      "tau_int": {
+        "chaines": [
+          {
+            "chaine": "L12_b16_c1",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.4183300132670378,
+              "fenetre": 3,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 0.5
+            },
+            "plaquette_production": {
+              "dtau": 0.05614846182144219,
+              "err": 3.777133856483849e-6,
+              "fenetre": 4,
+              "n": 2000,
+              "tau": 0.591856754902546
+            }
+          },
+          {
+            "chaine": "L12_b16_c2",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.9739653442357038,
+              "fenetre": 4,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 1.0266496166182573
+            },
+            "plaquette_production": {
+              "dtau": 0.05392939336742437,
+              "err": 3.671749822833482e-6,
+              "fenetre": 4,
+              "n": 2000,
+              "tau": 0.5684657195741295
+            }
+          },
+          {
+            "chaine": "L12_b16_c3",
+            "espacement_pas": 100,
+            "plaquette_bloquee_indicatif": {
+              "dtau": 0.3535533905932738,
+              "fenetre": 2,
+              "n": 20,
+              "note": "série courte (une valeur par configuration gardée) : indicatif",
+              "tau": 0.5
+            },
+            "plaquette_production": {
+              "dtau": 0.05261507657767682,
+              "err": 3.7391700039344356e-6,
+              "fenetre": 4,
+              "n": 2000,
+              "tau": 0.5546116041654532
+            }
+          }
+        ],
+        "fenetre_sokal_c": 6.0
+      }
+    }
+  ],
+  "courbes": [
+    {
+      "beta_max": 16.0,
+      "beta_min": 1.8,
+      "fichier": "validation/rg_flot/etalonnages/etal_L4.json",
+      "interpolation": "PCHIP monotone (Fritsch-Carlson), aucune extrapolation",
+      "l": 4,
+      "points": 14,
+      "sha256": "bb97bb12142023fd1125f69877408017cf13cc9abb28d58e2d63841178e3f811"
+    }
+  ],
+  "ensemble": "/chemin/vers/projet/chantiers/wilson_gpu_grandL_20260926/ensembles/production",
+  "estimateurs": {
+    "mcrg2": true,
+    "plaq": true,
+    "sd": true
+  },
+  "facteur_de_bloc": 3,
+  "filtre": "L12_b*_c*",
+  "format": "kvu-rg-flot/1",
+  "jackknife": "suppression d'une chaîne ; σ² = (C−1)/C Σ(θ_c − θ̄)² ; estimateurs recalculés à chaque réplicat",
+  "pas": 1,
+  "schema": "balaban",
+  "sd": {
+    "bissection": "sur [0, 50]",
+    "mode": "exact (fraction continue)",
+    "rapport": "I2/I1 (SU(2))"
+  },
+  "version": "0.1.0 | source_hash (kvu-source/1) : ed1abf4cc0f6b3d535ddc800cc5f832a9af843def0be74cf044df5f6bbb9795a | git_head : f787e7f97b7ee522cc6758149772c7a1f1be18f6"
+}

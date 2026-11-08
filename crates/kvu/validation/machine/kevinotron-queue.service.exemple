@@ -1,0 +1,29 @@
+# Proposition d'unité systemd (NON installée par ce lot) : un worker de la file de jobs par machine.
+#
+# Installation (à décider par Kévin) :
+#   mkdir -p ~/.config/systemd/user && cp kevinotron-queue.service.exemple ~/.config/systemd/user/kevinotron-queue.service
+#   systemctl --user daemon-reload && systemctl --user enable --now kevinotron-queue
+#
+# Le worker ne tue rien : il prend un job quand la RAM, le moniteur de charge et la garde SSD le permettent,
+# et chaque job GPU est enveloppé dans `flock -w <attente> <verrou de la machine>` (ou rien si le worker lui-même
+# tourne sous un flock ancêtre). Plafond mémoire du worker : les jobs > 4 Go passent par leur propre
+# `systemd-run --scope -p MemoryMax=…`.
+[Unit]
+Description=kevinotron : worker de la file de jobs (queue run --boucle)
+After=network-online.target
+
+[Service]
+Type=simple
+# Binaire figé par scripts/build_auto.sh (acemagic : /chemin/vers/projet/kevinotron_dev/bin/acemagic ; gamer : ~/kevinotron_dev/bin).
+ExecStart=%h/kevinotron_dev/bin/kevinotron queue run --boucle --pause-s 10
+Nice=10
+# Gamer : cœurs E seulement (les cœurs P sont instables et réservés à maison3d).
+# CPUAffinity=12-19
+MemoryMax=2G
+Restart=on-failure
+RestartSec=30
+# KillMode=process : un arrêt du service ne tue PAS les jobs en cours (règle « ne jamais tuer »).
+KillMode=process
+
+[Install]
+WantedBy=default.target

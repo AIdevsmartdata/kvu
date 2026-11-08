@@ -1,0 +1,20 @@
+PASS FIB-ARB-SYMPY int e^(-p^2/2g) dp - sqrt(2 pi g) = 0 (marginale de Liouville ∝ e^(-V) sqrt(g) dx = e^(-V) sigma_M) ; g/A - m1 m2 = 0 (prescription +1/2 log A : densité ∝ e^(-V) dx = cible exacte)
+INFO FIB-ARB-CIBLE loi conditionnelle exacte de x sachant xi = 0 (quadrature, 2e5 points) : <cos x> = -0.2829288041, <cos 2x> = 0.2054655606
+INFO FIB-ARB-RATTLE M = diag(1.0, 1.0), potentiel A : <cos x>, <cos 2x> = -0.30458 +- 0.00192, 0.30019 +- 0.00070 ; acceptation 0.999, rejets de réversibilité 0.0e+00 ; z(cible) = -11.3, +135.2 ; z(thèse Opus) = +0.2, -1.2 ; z(thèse Kimi) = -23.9, +284.4
+PASS FIB-ARB-A-1 M = diag(1.0, 1.0), potentiel A (Kimi : « rien à ajouter pour M = 1 ») est loin de la cible : |z| max = 135.2 > 10
+PASS FIB-ARB-LIOUVILLE-A1 M = diag(1.0, 1.0), potentiel A : la loi échantillonnée = prédiction « e^(-V) sigma_M » (Liouville) à |z| = 1.2 < 4 (thèse Kimi : |z| = 284.4)
+INFO FIB-ARB-RATTLE M = diag(1.0, 1.0), potentiel B : <cos x>, <cos 2x> = -0.28210 +- 0.00166, 0.20477 +- 0.00076 ; acceptation 0.999, rejets de réversibilité 0.0e+00 ; z(cible) = +0.5, -0.9 ; z(thèse Opus) = +0.5, -0.9 ; z(thèse Kimi) = -29.4, +282.0
+PASS FIB-ARB-B-1 M = diag(1.0, 1.0), potentiel B (Opus, +1/2 log det(J M^-1 J^T)) retrouve la cible : |z| = 0.9 < 4
+PASS FIB-ARB-LIOUVILLE-B1 M = diag(1.0, 1.0), potentiel B : la loi échantillonnée = prédiction « e^(-V) sigma_M » (Liouville) à |z| = 0.9 < 4 (thèse Kimi : |z| = 282.0)
+INFO FIB-ARB-RATTLE M = diag(1.0, 1.0), potentiel C : <cos x>, <cos 2x> = -0.32197 +- 0.00230, 0.38530 +- 0.00065 ; acceptation 0.999, rejets de réversibilité 0.0e+00 ; z(cible) = -17.0, +277.9 ; z(thèse Opus) = +1.1, -1.1 ; z(thèse Kimi) = -17.0, +277.9
+PASS FIB-ARB-C-1 M = diag(1.0, 1.0), potentiel C (formule encadrée de Kimi, -1/2 log det(J M^-1 J^T)) est loin de la cible : |z| max = 277.9 > 10
+PASS FIB-ARB-LIOUVILLE-C1 M = diag(1.0, 1.0), potentiel C : la loi échantillonnée = prédiction « e^(-V) sigma_M » (Liouville) à |z| = 1.1 < 4 (thèse Kimi : |z| = 277.9)
+INFO FIB-ARB-RATTLE M = diag(1.0, 4.0), potentiel A : <cos x>, <cos 2x> = -0.32084 +- 0.00273, 0.38056 +- 0.00093 ; acceptation 0.999, rejets de réversibilité 2.2e-05 ; z(cible) = -13.9, +189.0 ; z(thèse Opus) = +0.8, +0.9 ; z(thèse Kimi) = -32.5, +425.6
+PASS FIB-ARB-LIOUVILLE-A4 M = diag(1.0, 4.0), potentiel A : la loi échantillonnée = prédiction « e^(-V) sigma_M » (Liouville) à |z| = 0.9 < 4 (thèse Kimi : |z| = 425.6)
+INFO FIB-ARB-RATTLE M = diag(1.0, 4.0), potentiel B : <cos x>, <cos 2x> = -0.28258 +- 0.00212, 0.20489 +- 0.00116 ; acceptation 0.997, rejets de réversibilité 4.6e-05 ; z(cible) = +0.2, -0.5 ; z(thèse Opus) = +0.2, -0.5 ; z(thèse Kimi) = -50.0, +395.2
+PASS FIB-ARB-B-4 M = diag(1.0, 4.0), potentiel B (Opus, +1/2 log det(J M^-1 J^T)) retrouve la cible : |z| = 0.5 < 4
+PASS FIB-ARB-LIOUVILLE-B4 M = diag(1.0, 4.0), potentiel B : la loi échantillonnée = prédiction « e^(-V) sigma_M » (Liouville) à |z| = 0.5 < 4 (thèse Kimi : |z| = 395.2)
+INFO FIB-ARB-RATTLE M = diag(1.0, 4.0), potentiel C : <cos x>, <cos 2x> = -0.35457 +- 0.00370, 0.50814 +- 0.00072 ; acceptation 0.999, rejets de réversibilité 1.3e-05 ; z(cible) = -19.4, +421.9 ; z(thèse Opus) = -0.6, +1.4 ; z(thèse Kimi) = -19.4, +421.9
+PASS FIB-ARB-C-4 M = diag(1.0, 4.0), potentiel C (formule encadrée de Kimi, -1/2 log det(J M^-1 J^T)) est loin de la cible : |z| max = 421.9 > 10
+PASS FIB-ARB-LIOUVILLE-C4 M = diag(1.0, 4.0), potentiel C : la loi échantillonnée = prédiction « e^(-V) sigma_M » (Liouville) à |z| = 1.4 < 4 (thèse Kimi : |z| = 421.9)
+BILAN FIB-ARB-RATTLE PASS

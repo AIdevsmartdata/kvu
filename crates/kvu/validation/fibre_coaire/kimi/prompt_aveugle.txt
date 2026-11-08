@@ -1,0 +1,46 @@
+Tu es consulté pour une DÉRIVATION INDÉPENDANTE (en aveugle). Règles : ne lis AUCUN fichier en dehors de ton dossier de travail courant, n'utilise pas le web ; travaille à partir des premiers principes. Tu peux (et tu dois) écrire et exécuter des scripts Python (numpy, mpmath ; sympy si disponible) DANS ton dossier de travail pour vérifier numériquement chaque formule. Si un point est incertain, dis-le explicitement au lieu de deviner. Rédige en français. Livrables dans ton dossier de travail : `reponse.md` (formules finales, hypothèses, valeurs numériques demandées) et les scripts de vérification avec leurs sorties ; recopie aussi le contenu de `reponse.md` dans ta réponse finale.
+
+## Conventions (imposées)
+
+- σ_1, σ_2, σ_3 matrices de Pauli. Tout W ∈ SU(2) s'écrit W = exp(i ω·σ) = cos θ · 1 + i sin θ (n·σ), avec θ = |ω| ∈ [0, π], n = ω/θ (« demi-angle » : les valeurs propres de W sont e^{±iθ}).
+- Logarithme principal : log W = i ω·σ avec θ ∈ [0, π) ; il est défini sur SU(2) privé de −1. On note ω(W) ∈ ℝ³ ses coordonnées.
+- Mesure de Haar dU sur SU(2), normalisée à 1 ; sur SU(2)^N, produit des Haar.
+- Perturbation À GAUCHE d'un élément : U → exp(i ε·σ) U, ε ∈ ℝ³ (coordonnées tangentes). Métrique riemannienne bi-invariante sur SU(2) pour laquelle ces coordonnées ε sont orthonormées (la norme d'un vecteur tangent est |ε|) ; sur un produit, métrique produit.
+- Adjointe : A (i ε·σ) A⁻¹ = i (R(A) ε)·σ, R(A) ∈ SO(3).
+- Chemins : un chemin Γ est une suite (ℓ_1^{s_1}, …, ℓ_m^{s_m}) de liens ℓ_k ∈ {1, …, N} parcourus dans le sens s_k ∈ {+1, −1} ; U(Γ) = U_{ℓ_1}^{s_1} U_{ℓ_2}^{s_2} ⋯ U_{ℓ_m}^{s_m} (produit matriciel dans l'ordre du chemin ; U^{−1} = U† pour un parcours à rebours). Un même lien peut apparaître plusieurs fois dans un chemin.
+- Carte grossière (moyenne de Bałaban, forme covariante) : pour chaque lien grossier c = 1, …, n, on se donne un chemin de référence Γ₀(c), une famille finie de chemins Γ ∈ 𝒢(c) de mêmes extrémités que Γ₀(c), et des poids w_Γ > 0 de somme 1. Alors
+      Ū_c(U) = U₀ · exp( Σ_{Γ∈𝒢(c)} w_Γ · log( U₀⁻¹ U(Γ) ) ),   U₀ = U(Γ₀(c)),
+  où exp( Σ w log(…) ) signifie : on somme les coordonnées ω des logarithmes avec les poids w, puis on exponentie. La carte Ū : SU(2)^N → SU(2)^n est lisse là où aucun U₀⁻¹ U(Γ) ne vaut −1.
+- Action S(U) invariante de jauge, par exemple l'action de Wilson S = β Σ_p (1 − ½ Tr U(∂p)) sur un réseau 4D périodique.
+- Mesure conditionnelle (définition) : μ(dU | Ū = V) ∝ e^{−S(U)} ∏_c δ(Ū_c(U) V_c⁻¹) dU, où δ est la masse de Dirac à l'identité relative à la mesure de Haar de SU(2) (∫ f(V′) δ(V′V⁻¹) dV′ = f(V)). Autrement dit, c'est la désintégration de la mesure e^{−S} dU par l'application Ū.
+- Notation : J = DŪ(U), matrice 3n × 3N dans les coordonnées tangentes ci-dessus (perturbation à gauche de chaque lien fin et de chaque lien grossier) : si U_ℓ → exp(i ε_ℓ·σ) U_ℓ pour tout ℓ, alors Ū_c → exp(i Δ_c·σ) Ū_c avec Δ_c = Σ_ℓ J_{cℓ} ε_ℓ + O(ε²), J_{cℓ} bloc 3×3.
+
+## Questions
+
+Q1 (désintégration). Écris μ(dU | Ū = V) comme une densité par rapport à la mesure riemannienne (de Hausdorff) de dimension 3N − 3n sur la fibre F_V = {U : Ū(U) = V}. Donne le facteur en fonction de J, avec les constantes de normalisation (volume de SU(2) pour cette métrique) et l'expression de la loi marginale de V. Énonce les hypothèses (domaine de lissité, rang). Montre que ce facteur ne dépend pas du choix de trivialisation (gauche ou droite, lien par lien) et qu'il est invariant de jauge. Dis ce qui change si l'on échantillonne la fibre par une dynamique hamiltonienne contrainte (RATTLE) dont l'énergie cinétique est ½ pᵀ M⁻¹ p avec une matrice de masse M constante non triviale : quel potentiel effectif faut-il ajouter à S pour cibler μ(· | Ū = V) ?
+
+Q2 (dérivées de log et exp sur SU(2), forme fermée). Pour W = exp(iω·σ), donne les matrices 3×3 L_g(ω), L_d(ω), E_g(ω) telles que
+  log( exp(iη·σ) W ) = i (ω + L_g(ω) η + O(η²))·σ,   log( W exp(iη·σ) ) = i (ω + L_d(ω) η + O(η²))·σ,
+  exp( i(ω + δ)·σ ) = exp( i (E_g(ω) δ + O(δ²))·σ ) · exp(iω·σ),
+en fonction de θ, n et de fonctions élémentaires de θ. Donne leur comportement quand θ → 0 et θ → π. Vérifie-les numériquement (différences finies en haute précision).
+
+Q3 (jacobien de la carte de Bałaban). À l'aide de Q2, donne une formule fermée du bloc J_{cℓ} pour la carte grossière ci-dessus (chemins quelconques, avec répétitions et parcours à rebours). Vérifie-la numériquement par différences finies sur un exemple aléatoire de ton choix (au moins deux liens fins, plusieurs chemins dont certains contiennent des liens à rebours et des répétitions), et donne l'écart maximal obtenu.
+
+Q4 (bloc jouet à deux liens). N = 2 liens fins U_1, U_2 ; n = 1 lien grossier ; Ū = U_1 · exp( t · log(U_1⁻¹ U_2) ), t ∈ (0, 1) fixé. Soit W = U_1⁻¹ U_2 = exp(iω·σ), θ = |ω|.
+  (a) Calcule J (3 × 6) et det(J Jᵀ) en forme fermée en fonction de θ et t ; cas t = ½.
+  (b) Paramètre la fibre {Ū = V} et calcule sa densité de volume riemannien induit.
+  (c) En déduire, par la formule de la question Q1, la loi conditionnelle de W sachant Ū = V sous Haar ⊗ Haar (sans action), et vérifie-la par un argument direct indépendant.
+  (d) Avec l'action S = −β · ½ Tr(U_1⁻¹ U_2) : donne ⟨½ Tr(U_1⁻¹ U_2) | Ū = V⟩ en forme fermée (fonctions de Bessel si possible) et ses valeurs numériques à 12 chiffres pour β = 2 et β = 8, t = ½ puis t = 0,3. Dépend-elle de V ?
+  (e) Même quantité si l'on oublie le facteur trouvé en Q1 (on prend e^{−S} fois la mesure de Hausdorff de la fibre) : forme fermée pour t = ½ et valeurs numériques à 12 chiffres pour β = 2 et β = 8. Écart relatif avec (d) pour ⟨1 − ½ Tr(U_1⁻¹U_2)⟩ à β = 2, 8, 1000.
+
+Q5 (cas U(1)). Liens e^{iθ_ℓ}, logarithme = angle principal dans (−π, π] ; même carte grossière (abélienne).
+  (a) Que vaut le facteur de Q1 ? Écris la loi conditionnelle EXACTE (action quelconque), y compris la structure de la fibre (rôle de la branche du logarithme).
+  (b) Pour une action gaussienne non compacte S = (β/2) θᵀ K θ (θ ∈ ℝ^N, K symétrique positive avec des modes nuls de jauge) et une contrainte linéaire Q θ = φ̄ (Q : ℝ^N → ℝ^n surjective), écris la loi conditionnelle exacte de θ (moyenne, covariance ; traitement des modes nuls ; observables invariantes de jauge).
+  (c) Même chose quand la contrainte est remplacée par une pénalité e^{−|Qθ − φ̄|²/(2ε²)} : loi exacte en fonction de ε, et comment le biais dépend de ε et de β.
+  (d) Bloc jouet U(1) à deux liens : φ̄ = θ_1 + t·[θ_2 − θ_1] (angle principal), S = −β cos(θ_2 − θ_1) : ⟨cos(θ_2 − θ_1) | φ̄⟩ en forme fermée et valeurs numériques (12 chiffres) pour β = 2 et 8.
+
+Q6 (limite β → ∞, SU(2), action de Wilson, réseau 4D périodique L⁴ découpé en blocs 3⁴, réseau grossier (L/3)⁴). On suppose que pour U proche de 1 la carte linéarisée est une moyenne linéaire Q (application linéaire des champs fins A ∈ ℝ^{4L⁴} vers les champs grossiers, appliquée composante de couleur par composante de couleur).
+  (a) Que vaut J au point U = 1 ? Quel est l'espace tangent à la fibre en U = 1 ?
+  (b) Loi conditionnelle des fluctuations à l'ordre dominant en β pour V = 1 : covariance en fonction de β, du rotationnel du réseau et de Q ; traitement des modes de jauge g avec g = 1 aux centres des blocs (ils laissent Ū invariant) ; lien avec le problème d'optimisation sous contrainte min{ S : Q A = ȳ } (conditions KKT) pour V = exp(i ȳ) proche de 1.
+  (c) log det(J Jᵀ) a-t-il un terme linéaire en la fluctuation au voisinage de U = 1 ? À quel ordre relatif en 1/β le facteur de Q1 modifie-t-il des observables comme ⟨1 − P⟩ ?
+  (d) Valeur exacte de lim_{β→∞} β ⟨1 − ½ Tr U_p⟩, moyenne sur toutes les plaquettes, pour la mesure conditionnelle à V = 1, en fonction de L (compare à la mesure non conditionnée).

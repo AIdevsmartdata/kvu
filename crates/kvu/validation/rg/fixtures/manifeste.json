@@ -1,0 +1,18 @@
+{
+ "amplitude": 0.6,
+ "fichiers": {
+  "cfg_s11_q64.npy": "03966d2ccc7b8fcaaf2cbafad213e05e22de00e38a081102e4d6b100a6c1df5b",
+  "cfg_s13_q64.npy": "48c145759a23f8fd8546370c64e8eb4d02bc0197be90acf7e5a05044bb838710",
+  "cfg_s7_q64.npy": "768b50a031d524a55d7338025cbe1ca8fbfcc69ec674a792da5e4b53f38c60e6",
+  "ubar_s11_q64.npy": "587e2cd50a2a5166eeac8efb750fe586142251cb77444d6942452c0e1526c476",
+  "ubar_s13_q64.npy": "566fcc517260fbc8926e0ac816676724d5f701558f6354d7da2cdb73691c5af2",
+  "ubar_s7_q64.npy": "75ad4c704dee65116d7159617eaca49183a5b5fbddb0e19100f6761e291c5a41"
+ },
+ "format": "kvu-rg-fixtures/1",
+ "g_nl_sha256": "24df84b21c174adf0c9de1073ec5283b8a7a0f4ef927c910fa9a186effe47540",
+ "geom_sha256": "5d2d85ec40df1a4a588ba3bea1debb6ee1a868408ee022bc9d3926c49a803a51",
+ "numpy": "2.5.3",
+ "python": "3.14.4",
+ "q3_lib_sha256": "22cdb92de5c59b7f968de4797b1b9af1a45260d7df5eec6de710fc39147375a1",
+ "tore_fin": 9
+}

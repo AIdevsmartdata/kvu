@@ -1,0 +1,105 @@
+{
+  "backend": "cpu",
+  "binaire_sha256": "a2d7c03b0816806db93f35d9eb0d0b2b48e88193973198a56bda67b3483844ca",
+  "horodatage": "2026-10-25T21:10:33Z",
+  "schema": "kvu-rg-flot-cert/1",
+  "tout_vert": true,
+  "verdicts": [
+    {
+      "detail": "121 points x ∈ [1e-8, 1e3] contre mpmath (60 chiffres) : max relatif I2/I1 = 1.11e-15, I1/I0 = 1.00e-15 (seuil 1e-14)",
+      "id": "RG-BESSEL",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "L12_b2.3_c1, 2000 valeurs de plaquette : τ = 1.6900620161191444 (analyse_plaquette.py 1.6900620161191204, écart 2.40e-14), W = 11 (11), dτ écart 3.61e-15, err écart 4.20e-19 (seuil 1e-10)",
+      "id": "RG-TAU",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "la série de la fixture = la colonne `plaquette` (phase sample) de measurements.csv de grandL (2000 valeurs) : true",
+      "id": "RG-TAU-SOURCE",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "mutant c = 3 : τ = 1.758434 (écart 6.84e-2), W = 6 : doit s'écarter",
+      "id": "RG-TAU-MUT",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "sd (mode tableau-script) sur la configuration bloquée par le script (ape, c = 0,5, L = 6) : β_eff = 2.149259049613022 (script 2.149259049612999, écart 2.31e-14), P écart 1.11e-16 (seuil 1e-10)",
+      "id": "RG-N3-FIXTURE",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "INFO mode exact (fraction continue) contre le script sur la même configuration : écart 8.183e-6 = erreur d'interpolation de la table du script (4000 nœuds, np.interp)",
+      "id": "RG-N3-EXACT",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "mutant « exact au lieu de tableau-script » : écart 8.18e-6 doit dépasser 1e-10",
+      "id": "RG-N3-MUT",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "grandL L12_b2.3_c1/cfg_002000, sd en mode tableau-script contre n3_blocage_beta_eff.py (ape, c = 0,5) : niveau 0 β_eff 2.299738175498739 (script 2.299738175498826, écart 8.70e-14), P 6.77e-15 / 4.44e-16 ; niveau 1 (blocage ape porté en Rust) β_eff 2.149259049613025 (script 2.149259049612999, écart 2.66e-14), P écart 2.22e-16 ; pire écart 8.70e-14 (seuil 1e-10) ; max|Δq| des liens ape Rust contre blocage du script 7.77e-16 (INFO) ; témoin de Swendsen de WP6 (autre schéma) : max|Δq| 1.12e0, β_eff 2.228703 (INFO, RG-SCHEMA)",
+      "id": "RG-N3",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "INFO mode exact contre script : niveau 0 écart 9.008e-6",
+      "id": "RG-N3-EXACT-L12",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "grandL L = 12, β = 2.3, 3 chaînes × 20 configurations : b = 2.299662 ± 0.000989 (jackknife par chaîne, 3 réplicats), |b/β − 1| = 1.469e-4 (seuil 0.005), σ(b)/β = 4.299e-4 (seuil 0.0025) ; par chaîne : L12_b2.3_c1: 2.29824, L12_b2.3_c2: 2.29919, L12_b2.3_c3: 2.30156",
+      "id": "RG-SD-b2.3",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "grandL L = 12, β = 8, 3 chaînes × 20 configurations : b = 8.002122 ± 0.003781 (jackknife par chaîne, 3 réplicats), |b/β − 1| = 2.653e-4 (seuil 0.005), σ(b)/β = 4.726e-4 (seuil 0.0025) ; par chaîne : L12_b8_c1: 8.00118, L12_b8_c2: 8.00910, L12_b8_c3: 7.99610",
+      "id": "RG-SD-b8",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "mutant I2/I1 → I1/I0 (forme U(1)) : 2 β rouge(s) sur 2 (≥ 1 exigé, sinon ECHEC_OUTIL) ; β = 2.3 : ROUGE (b = 0.874276 ± 0.000280 (jackknife par chaîne, 3 réplicats), |b/β − 1| = 6.199e-1 (seuil 0.005), σ(b)/β = 1.218e-4 (seuil 0.0025) ; par chaîne : L12_b2.3_c1: 0.87387, L12_b2.3_c2: 0.87414, L12_b2.3_c3: 0.87481) ; |b/β − 1| = 6.199e-1, σ/β = 1.218e-4 | β = 8 : ROUGE (b = 2.729724 ± 0.001256 (jackknife par chaîne, 3 réplicats), |b/β − 1| = 6.588e-1 (seuil 0.005), σ(b)/β = 1.569e-4 (seuil 0.0025) ; par chaîne : L12_b8_c1: 2.72941, L12_b8_c2: 2.73204, L12_b8_c3: 2.72772) ; |b/β − 1| = 6.588e-1, σ/β = 1.569e-4",
+      "id": "RG-SD-MUT",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "protocole du journal respecté (grille de 14 β, L = 4, 3 chaînes par point + 1 indépendante, therm 2000, mesures 20000, graines 26102608000 + 100 i + c) : true",
+      "id": "RG-PLAQ-PROTOCOLE",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "14 points, chaîne indépendante (c = 9) contre la courbe L = 4 : max|z| = 2.16 (seuil < 3), χ² = 15.71 pour 14 degrés, p = 0.3317 (seuil > 0.01), 1 point(s) hors plage rapportés « hors étalonnage » ; β=1.8: HORS_ETALONNAGE z(P) -0.40 ; β=2: β_eff 2.0000±0.0006 z -0.06 ; β=2.2: β_eff 2.1999±0.0008 z -0.17 ; β=2.4: β_eff 2.4013±0.0007 z +2.03 ; β=2.6: β_eff 2.5999±0.0007 z -0.14 ; β=2.8: β_eff 2.8002±0.0008 z +0.24 ; β=3: β_eff 2.9988±0.0008 z -1.48 ; β=3.5: β_eff 3.4989±0.0009 z -1.20 ; β=4: β_eff 3.9992±0.0011 z -0.74 ; β=5: β_eff 5.0012±0.0013 z +0.96 ; β=6: β_eff 5.9996±0.0016 z -0.23 ; β=8: β_eff 7.9975±0.0022 z -1.11 ; β=12: β_eff 12.0017±0.0031 z +0.54 ; β=16: β_eff 15.9866±0.0062 z -2.16",
+      "id": "RG-PLAQ",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "INFO systématique d'interpolation : max |P_PCHIP − P_linéaire| au milieu des intervalles = 3.017e-3",
+      "id": "RG-PLAQ-INTERP",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "mutant : chaîne indépendante simulée à 1.05 β : max|z| = 193.9, χ² = 439402.2, p = 0.00e0 ⇒ ROUGE (ROUGE exigé, sinon ECHEC_OUTIL) ; protocole du mutant respecté : true",
+      "id": "RG-PLAQ-MUT",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "INFO β = 2.3, un pas, différence de schéma RAPPORTÉE (pas un échec ; facteurs de bloc 3 et 2 différents, aucune lecture physique ici) : balaban (L 12 → 4) : sd 0.5179 ± 0.0089 ; plaq hors_etalonnage ; mcrg2 hors_etalonnage, domaine HORS_DOMAINE f = 4.401e-1 || swendsen (L 12 → 6) : sd 2.2131 ± 0.0003 ; plaq 2.0260 ± 0.0004 ; mcrg2 1.9722 ± 0.0004",
+      "id": "RG-SCHEMA-b2.3",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "INFO β = 8, un pas, différence de schéma RAPPORTÉE (pas un échec ; facteurs de bloc 3 et 2 différents, aucune lecture physique ici) : balaban (L 12 → 4) : sd 15.4916 ± 0.0776 ; plaq 14.2493 ± 0.0551 ; mcrg2 13.5534 ± 0.0501, domaine HORS_DOMAINE f = 2.487e-2 || swendsen (L 12 → 6) : sd 15.7719 ± 0.0261 ; plaq 13.6774 ± 0.0179 ; mcrg2 12.8633 ± 0.0148",
+      "id": "RG-SCHEMA-b8",
+      "verdict": "INFO"
+    },
+    {
+      "detail": "flot.json de L12_b8_c* (Bałaban, 1 pas, sd+plaq+mcrg2) identique à l'octet pour 1, 4 et 16 fils (7960 octets) : true",
+      "id": "RG-FILS-FLOT",
+      "verdict": "PASS"
+    }
+  ],
+  "version": "0.1.0 | source_hash (kvu-source/1) : 294f2d3afa94b2a62c025adebf020045da323d990c1bfdca993603493659ecfd | git_head : 56a07d344eefa942fe051007ec637aaab939a2fc"
+}

@@ -1,0 +1,29 @@
+{
+  "_commentaire": "sha256 du texte assembl\u00e9, calcul\u00e9s par un script Python IND\u00c9PENDANT de gpu::assembler (sp\u00e9cification \u00a74.3). \u00c0 recalculer \u00e0 la main si prelude_*.h ou test_runtime.cu changent volontairement.",
+  "hip": {
+    "sha256": "49f71d622445ff2421d0a45e41149d6cc70e82228c19d3e05a128aa9400f54bb",
+    "parties": [
+      [
+        "prelude_hip.h",
+        "af9fd3106f6270485043c104a216c25dbc7e821f36f762b9c599e95e49dc624a"
+      ],
+      [
+        "test_runtime.cu",
+        "6b429664d32848a60a4eab8960c968434147442c88b8c9426b17f75a831c38ad"
+      ]
+    ]
+  },
+  "cuda": {
+    "sha256": "7fbbd2a1ca02549498a69b84c639acbf68d0d88dce66325ff2fcb4c4595e00b0",
+    "parties": [
+      [
+        "prelude_cuda.h",
+        "0977a79c29c1f96e9a382000440581b2ced240a3dbb20cb38dfeeb816c01f52c"
+      ],
+      [
+        "test_runtime.cu",
+        "6b429664d32848a60a4eab8960c968434147442c88b8c9426b17f75a831c38ad"
+      ]
+    ]
+  }
+}

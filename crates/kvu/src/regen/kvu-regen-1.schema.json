@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kvu-regen-1.schema.json",
+  "title": "Manifeste de regeneration kvu-regen/1 (ARCHITECTURE 7.1)",
+  "description": "Sous-ensemble de JSON Schema utilise (valide par scripts/regen_valider.py et par kvu::regen::schema) : type, required, properties, additionalProperties (booleen), items, enum, const, minimum, minItems, minLength, format=sha256 (64 hexadecimaux minuscules), if/then. Les champs obligatoires sont ceux de ARCHITECTURE 7.1 plus schema et origine.",
+  "type": "object",
+  "required": [
+    "schema", "origine", "binaire_sha256", "git_head", "source_hash", "noyaux_embarques", "modules_compiles",
+    "backend", "arch", "versions", "machine", "graines", "parametres", "commande", "entrees", "fichiers",
+    "duree_s", "statut", "classe_regen", "regen_verifiee"
+  ],
+  "properties": {
+    "schema": { "const": "kvu-regen/1" },
+    "origine": {
+      "type": "object",
+      "required": ["schema", "manifeste", "sha256_manifeste"],
+      "properties": {
+        "schema": { "type": "string", "enum": ["su2_hip/1", "su2_gen/1", "kvu-regen/1", "kevinotron-unifie/1"] },
+        "manifeste": { "type": "string", "minLength": 1 },
+        "sha256_manifeste": { "type": "string", "format": "sha256" }
+      }
+    },
+    "binaire_sha256": { "type": ["string", "null"], "format": "sha256" },
+    "binaire_provenance": { "type": "string", "enum": ["manifeste", "ancre_publication", "inconnu"] },
+    "git_head": { "type": "string", "minLength": 1 },
+    "source_hash": { "type": ["string", "null"], "format": "sha256" },
+    "noyaux_embarques": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["nom", "sha256"],
+        "properties": {
+          "nom": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "format": "sha256" }
+        }
+      }
+    },
+    "modules_compiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source_sha256", "options", "arguments", "objet_sha256"],
+        "properties": {
+          "source_sha256": { "type": "string", "format": "sha256" },
+          "options": { "type": "string" },
+          "arguments": { "type": "array", "items": { "type": "string" } },
+          "objet_sha256": { "type": ["string", "null"], "format": "sha256" }
+        }
+      }
+    },
+    "backend": { "type": "string", "enum": ["hip", "cuda", "cpu"] },
+    "arch": { "type": ["string", "null"] },
+    "versions": { "type": "object" },
+    "machine": {
+      "type": "object",
+      "required": ["nom", "cpu", "gpu", "ram"],
+      "properties": {
+        "nom": { "type": "string", "minLength": 1 },
+        "cpu": { "type": ["string", "null"] },
+        "gpu": { "type": ["string", "null"] },
+        "ram": { "type": ["string", "number", "null"] }
+      }
+    },
+    "graines": {
+      "type": "object",
+      "required": ["cle", "etiquettes"],
+      "properties": {
+        "cle": { "type": ["integer", "null"], "minimum": 0 },
+        "etiquettes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "parametres": {
+      "type": "object",
+      "required": ["groupe", "L", "beta", "start", "therm", "nmeas", "skip", "nor", "precision", "options"],
+      "properties": {
+        "groupe": { "type": "string", "minLength": 1 },
+        "L": { "type": "integer", "minimum": 2 },
+        "beta": { "type": "number" },
+        "start": { "type": "string", "enum": ["hot", "cold"] },
+        "therm": { "type": "integer", "minimum": 0 },
+        "nmeas": { "type": "integer", "minimum": 0 },
+        "skip": { "type": "integer", "minimum": 0 },
+        "nor": { "type": "integer", "minimum": 0 },
+        "precision": { "type": "string", "enum": ["f64", "f32"] },
+        "options": { "type": "string", "enum": ["ref-k1", "compat-prod", "rapide"] },
+        "dump_every": { "type": "integer", "minimum": 0 },
+        "bord": { "type": "boolean" }
+      }
+    },
+    "commande": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "entrees": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["nom", "sha256"],
+        "properties": {
+          "nom": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "format": "sha256" }
+        }
+      }
+    },
+    "fichiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["nom", "sha256", "octets"],
+        "properties": {
+          "nom": { "type": "string", "minLength": 1 },
+          "sha256": { "type": ["string", "null"], "format": "sha256" },
+          "octets": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "fichiers_hachage": { "type": "string", "enum": ["manifeste", "disque", "non_calcule"] },
+    "duree_s": { "type": ["number", "null"], "minimum": 0 },
+    "statut": { "type": "string", "enum": ["COMPLETE", "INCOMPLETE", "ECHEC"] },
+    "classe_regen": { "type": "string", "enum": ["A", "B", "C"] },
+    "raisons_classe": { "type": "array", "items": { "type": "string" } },
+    "regen_verifiee": {
+      "type": "object",
+      "required": ["date", "machine", "resultat"],
+      "properties": {
+        "date": { "type": ["string", "null"] },
+        "machine": { "type": ["string", "null"] },
+        "resultat": { "type": "string", "enum": ["non_verifiee", "identique", "different"] }
+      }
+    }
+  },
+  "if": { "properties": { "classe_regen": { "enum": ["A", "B"] } } },
+  "then": {
+    "properties": {
+      "binaire_sha256": { "type": "string", "format": "sha256" },
+      "source_hash": { "type": "string", "format": "sha256" },
+      "graines": { "properties": { "cle": { "type": "integer" } } }
+    }
+  }
+}

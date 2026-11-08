@@ -1,0 +1,8 @@
+hard constraint mean residual: 1.1102230246251565e-16
+hard covariance tangent residual: 6.943230712597171e-17
+epsilon = 0.05 mean error = 1.5543122344752192e-15 covariance error = 1.4988010832439613e-15
+soft constraint bias Qm-phi = [-0.00784265 -0.00199954]
+epsilon = 0.4 mean error = 8.326672684688674e-17 covariance error = 1.1102230246251565e-16
+soft constraint bias Qm-phi = [-2.90518854e-01 -9.55371927e-05]
+epsilon = 2.0 mean error = 6.938893903907228e-18 covariance error = 5.551115123125783e-17
+soft constraint bias Qm-phi = [-0.74312907  0.17178928]

@@ -1,0 +1,19 @@
+PLAN build_auto
+machine         : acemagic
+mode            : paquet kvu
+cargo           : cargo
+features        : (aucune)
+profil          : release (LTO off, codegen-units 8)
+jobs            : -j 8
+priorité        : nice -n 10
+affinité        : aucune
+LD_LIBRARY_PATH : (inchangé)
+cible           : <U>/cibles/wp1
+binaire         : kvu
+sortie          : <U>/bin/wp1/acemagic
+seuil SSD       : 110 Go libres minimum (100 + 10)
+dépôt           : propre exigé (sauf --sale-ok)
+KEV_GIT_HEAD    : exporté (git rev-parse HEAD)
+nettoyage       : non
+commande        : nice -n 10 cargo build --release -j 8 --offline -p kvu --bin kvu
+--- fin du plan ---

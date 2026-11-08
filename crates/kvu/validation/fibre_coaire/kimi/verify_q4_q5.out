@@ -1,0 +1,32 @@
+Q4(d), <cos(theta)> = I2/I1 (independant de t et V)
+t = 0.5 beta = 2.0 : 0.4331274267223117583171835
+t = 0.5 beta = 8.0 : 0.8192494103556205425833
+t = 0.3 beta = 2.0 : 0.4331274267223117583171835
+t = 0.3 beta = 8.0 : 0.8192494103556205425833
+Q4(e), t=1/2, Hausdorff sans co-aire
+beta = 2.0 : 0.1543946865331200342373338
+beta = 8.0 : 0.8050695212866102027364295
+Q4(e), ecart relatif (oublie-correct)/correct pour <1-cos>
+beta = 2.0 : 0.4917026388797464061795983 ; correct = 0.56687257327768824168 ; oublie = 0.84560531346687996576
+beta = 8.0 : 0.07845002938529153272774208 ; correct = 0.18075058964437945742 ; oublie = 0.19493047871338979726
+beta = 1000.0 : 0.0005007514409160607153813886 ; correct = 0.0014996246245069668904 ; oublie = 0.0015003755636985219606
+Q5(d), <cos(delta)> = I1/I0
+beta = 2.0 : 0.6977746579640079820067906
+beta = 8.0 : 0.9352354935294386052996753
+quadrature errors beta 2.0 9.0557e-72 -2.0375e-71
+quadrature errors beta 8.0 0.0 1.7206e-70
+Q4(b,c), coarea identity checks
+t = 0.3 theta = 0.2 error = 0.0
+t = 0.3 theta = 1.4 error = -4.5278e-72
+t = 0.3 theta = 2.8 error = -1.4149e-73
+t = 0.5 theta = 0.2 error = 9.0557e-72
+t = 0.5 theta = 1.4 error = -4.5278e-72
+t = 0.5 theta = 2.8 error = 0.0
+t = 1.0 theta = 0.2 error = 0.0
+t = 1.0 theta = 1.4 error = 0.0
+t = 1.0 theta = 2.8 error = 0.0
+Q4(a), det(JJ^T) checks at t=1/2
+theta = 0.0001 error = 0.0
+theta = 0.4 error = -2.2639e-72
+theta = 1.7 error = -9.0557e-72
+theta = 3.0 error = 8.9021e-67

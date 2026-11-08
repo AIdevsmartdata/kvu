@@ -1,0 +1,10 @@
+# G-H11-DOC (lot WP2, 25/10/2026) : su2_hip de production (sha256 d62ff7d2…af93cf, lecture seule) lancé SEUL sur les graines de G-H07, L = 8, β = 3,5,
+# --therm 2000 --nmeas 20000 --skip 1 --nor 4 --dump-every 1000 ; sous flock /tmp/kevinotron_gpu.lock. Empreintes de therm.csv et measurements.csv,
+# identiques à l'octet à celles des chaînes kvu de G-H07 (Phase A, binaire 8486bd05…) ; les measurements.csv recoupent gh11_bit_identite.txt (section b).
+# format : sha256, deux espaces, chemin relatif à gh07/ (chaîne kvu correspondante : 27092708021 = L8_hot/c004, …022 = L8_hot/c005, …023 = L8_cold/c002)
+b47586e9b62980dcbd25a510b66283928c73c8c314517b4aad6d2a9c3afecdfd  L8_hot/c004/therm.csv
+37fb932b43e12a0a008dbe4086613912c3ca9dee34f4d34df9a423e8b8ad13cb  L8_hot/c004/measurements.csv
+a9e825ed46e0810729616f33a01fcafc6022d77d0bc58717344a24125821eb7c  L8_hot/c005/therm.csv
+a7b5621e0188c366c63873960901a9ae17534b98e9ac0867c35f011248a98bc4  L8_hot/c005/measurements.csv
+2db5d4b32a595f5ea5fbf4c3575576b4bf4c7128b3deafd78ee9f64286ee3c8e  L8_cold/c002/therm.csv
+cb24da48a6f723aba66248bb4ff087b383a4b55000ec405f1d139c2a13494ce8  L8_cold/c002/measurements.csv

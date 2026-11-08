@@ -1,0 +1,19 @@
+PLAN build_auto
+machine         : gamer
+mode            : paquet kvu
+cargo           : ~/.cargo/bin/cargo
+features        : --features cuda
+profil          : release (LTO off, codegen-units 8)
+jobs            : -j 6
+priorité        : nice -n 10
+affinité        : taskset -c 12-19
+LD_LIBRARY_PATH : /usr/local/cuda-13.3/lib64
+cible           : ~/kvu_unif/cibles/wp1
+binaire         : kvu
+sortie          : ~/kvu_unif/bin/wp1
+seuil SSD       : 60 Go libres minimum (50 + 10)
+dépôt           : propre exigé (sauf --sale-ok)
+KEV_GIT_HEAD    : exporté (git rev-parse HEAD)
+nettoyage       : non
+commande        : nice -n 10 taskset -c 12-19 ~/.cargo/bin/cargo build --release -j 6 --offline --features cuda -p kvu --bin kvu
+--- fin du plan ---

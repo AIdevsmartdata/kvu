@@ -1,0 +1,6 @@
+L = 3 , links = 324 , plaquettes = 486
+rank(C) = 240 ; predicted 3 L^4 - 3 = 240
+rank(Q) = 4 ; max |Q B0^T| = 5.995204332975845e-15
+conditioned rank = 240 ; predicted 3(L^4-1) = 240
+conditional limit = 0.7407407407407407 ; 20/27 = 0.7407407407407407
+unconditioned limit = 0.7407407407407407 ; 3/4-3/(4L^4) = 0.7407407407407407

@@ -1,0 +1,99 @@
+# crates/kvu/kvu.toml — FIXTURE DE TEST : profils des deux machines de référence de l'auteur (SPDX-License-Identifier: Apache-2.0)
+#
+# Ce fichier n'est PAS un modèle à copier : il décrit les deux machines sur lesquelles kvu a été développé et validé, et les
+# tests unitaires et d'intégration (lancés par cargo depuis crates/kvu) le lisent comme ./kvu.toml. Il reconnaît une machine
+# par son CPU ou son GPU (gfx1151, sm_120) : lancé depuis ce dossier, kvu appliquerait ces profils (affinité, plafonds,
+# chemins) à toute machine de même GPU. Le modèle à adapter est le kvu.toml de la racine du dépôt.
+# Publication : nom d'hôte et chemins privés remplacés par des valeurs neutres (« pc-nvidia-exemple », « /chemin/vers/... »).
+#
+#
+# Tout nom d'hôte, chemin et seuil propre à une machine est ICI et nulle part dans le code de src/.
+# Recherche du fichier : KEVINOTRON_CONFIG > ./kvu.toml > ~/.config/kvu/kvu.toml > défauts compilés du profil `inconnue`.
+# Priorité d'une valeur : variable KEVINOTRON_* > ce fichier > défaut de `inconnue`.
+# Format et clés : docs/MACHINES.md. Une clé absente d'un profil prend la valeur du profil prudent `inconnue`.
+# Chemins : « ~/ » = répertoire personnel. Texte vide = « absent » (pas d'affinité, pas de câble, etc.).
+
+schema = "kvu-config/1"
+
+# --- machine principale (APU AMD, GPU HIP, 115 Go unifiés) -----------------------------------------------------------
+[profils.acemagic]
+hotes            = ["acemagic"]
+cpu              = ["RYZEN AI MAX+ 395"]
+gpu_arch         = ["gfx1151"]
+backend          = "hip"
+verrou           = "/tmp/kevinotron_gpu.lock"
+attente_verrou_s = 7200
+fenetre_banc_s   = 600
+nice             = 10
+cpus             = ""
+fils_max         = 8
+mem_max          = "24G"
+ram_min_go       = 25.0
+ssd_min_go       = 100.0
+alerte           = "/chemin/vers/projet/outils/machines/ALERTE.txt"
+precision        = "f32"
+store            = "/chemin/vers/projet/kevinotron_store"
+file             = "~/.local/state/kevinotron/file"
+cable            = "gamer-eth"
+reference_bench  = "/chemin/vers/projet/chantiers/wilson_gpu_grandL_20260926/bin/su2_hip"
+
+# --- machine secondaire (GPU NVIDIA ; cœurs P réservés, cœurs E 12-19 pour les jobs) ---------------------------------------
+[profils.gamer]
+hotes            = ["pc-nvidia-exemple"]
+cpu              = ["I5-14600KF"]
+gpu_arch         = ["sm_120"]
+backend          = "cuda"
+verrou           = "/tmp/gamer_gpu.lock"
+attente_verrou_s = 7200
+fenetre_banc_s   = 600
+nice             = 5
+cpus             = "12-19"
+fils_max         = 8
+mem_max          = "12G"
+ram_min_go       = 6.0
+ssd_min_go       = 50.0
+alerte           = ""
+precision        = "f32"
+store            = "~/kevinotron_store"
+file             = "~/.local/state/kevinotron/file"
+cable            = ""
+reference_bench  = "~/ym4_calcul/su2_cuda/bin/su2_cuda"
+
+# --- machine non reconnue (et défauts compilés si ce fichier est absent) : politique prudente ------------------------
+[profils.inconnue]
+backend          = "auto"
+verrou           = "/tmp/kevinotron_gpu.lock"
+attente_verrou_s = 7200
+fenetre_banc_s   = 600
+nice             = 10
+cpus             = ""
+fils_max         = 4
+mem_max          = "8G"
+ram_min_go       = 8.0
+ssd_min_go       = 20.0
+alerte           = ""
+precision        = "f64"
+store            = "~/kevinotron_store"
+file             = "~/.local/state/kevinotron/file"
+cable            = ""
+
+# --- machine louée (Vast.ai, conteneur) : aucun nom d'hôte, aucun câble, aucun ssh, verrou local, store sous $HOME -----
+# Sélection : KEVINOTRON_PROFIL=location. L'architecture GPU est lue sur le périphérique (jamais écrite ici) ;
+# `arch_hip` et `arch_cuda` ne servent qu'à la forcer. Sans systemd dans un conteneur : pas de plafond mémoire (mem_max
+# vide) ; la limite du conteneur s'applique. Tout résultat produit ici est de classe B (recertifié sur la machine principale).
+[profils.location]
+backend          = "auto"
+verrou           = "/tmp/kvu_gpu.lock"
+attente_verrou_s = 7200
+fenetre_banc_s   = 600
+nice             = 10
+cpus             = ""
+fils_max         = 16
+mem_max          = ""
+ram_min_go       = 8.0
+ssd_min_go       = 20.0
+alerte           = ""
+precision        = "f64"
+store            = "~/kevinotron_store"
+file             = "~/.local/state/kevinotron/file"
+cable            = ""

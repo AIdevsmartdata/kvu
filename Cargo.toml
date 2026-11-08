@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Dépôt `kvu` autonome. Aucune dépendance au moteur interne dont il est issu : voir SOURCES_IMPORTEES.md.
+[workspace]
+members = ["crates/kvu"]
+resolver = "2"

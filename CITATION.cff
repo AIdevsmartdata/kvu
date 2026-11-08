@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+type: software
+title: "kvu: a generator and measurement bench for lattice gauge theory (SU(2) Wilson action, single-source HIP/CUDA kernels, FP64 CPU reference)"
+abstract: >-
+  kvu is a Rust command-line tool for lattice gauge theory, centred on four-dimensional SU(2) Yang-Mills theory with
+  the Wilson action. One GPU kernel source serves two backends, HIP (AMD) and CUDA (NVIDIA), compiled at run time, next
+  to a double-precision CPU reference. It provides a heat-bath and overrelaxation generator with counter-based Philox
+  random numbers (FP64 reference, bit-identical to su2-heatbath-gpu with the compat-prod options, and a fast FP32 mode),
+  Dirichlet boxes, a conditional heat bath, Wilson and Polyakov loops, gradient flow and topology, Balaban and Swendsen
+  block-spin maps, effective-coupling estimators, verifiable compressed archives of configurations, couplings of a
+  truncated effective action (plaquette, rectangle, chair, twist) by pseudo-likelihood and Schwinger-Dyson equations,
+  block-face flux statistics, 't Hooft twisted boundary conditions, provenance manifests for every run and bit-exact
+  regeneration. It is an instrument: it contains and claims no physics result.
+authors:
+  - family-names: "Rémondière"
+    given-names: "Kévin"
+    orcid: "https://orcid.org/0009-0008-2443-7166"
+    affiliation: "Independent Researcher, Oloron-Sainte-Marie, France"
+license: Apache-2.0
+version: "0.1.0"
+repository-code: "https://github.com/AIdevsmartdata/kvu"
+keywords:
+  - lattice gauge theory
+  - SU(2)
+  - Yang-Mills
+  - Wilson action
+  - Monte Carlo
+  - heat bath
+  - GPU
+  - HIP
+  - CUDA
+  - Rust
+  - reproducibility
+  - provenance
+references:
+  - type: software
+    title: "su2-heatbath-gpu: SU(2) Wilson-action heat-bath generator for GPUs (HIP and CUDA)"
+    authors:
+      - family-names: "Rémondière"
+        given-names: "Kévin"
+    doi: "10.5281/zenodo.23644087"
+    version: "1.0.0"
+    notes: "Reference generator: the FP64 generator of kvu reproduces its outputs bit for bit (compat-prod options)."

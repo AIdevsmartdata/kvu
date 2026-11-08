@@ -1,0 +1,27 @@
+PASS FIB-U1-Q Q d lambda = 0 si lambda(centres) = 0 : 4.0e-15 ; Q(a e_0) = 3a e_0 : 5.8e-15 ; somme signée des lignes = 3 : 2.0e-14 ; (rang de Q = 64 = n = 64)
+PASS FIB-U1-CARTE-PETITS configurations diagonales exp(i th s3), amplitude 0,1 : phibar = Q th, max écart 2.2e-15
+PASS FIB-U1-CARTE-BRANCHES amplitude 1,0 : phibar = Q th - 2 pi sum w_G n_G (n_G entiers de branche, 9880 chemins sautés sur 3 x 10473) : max écart 1.6e-14
+PASS FIB-U1-JACOBIEN-CONSTANT bloc (3,3) de J = Q (amplitudes 0,1 et 1,0) : 5.5e-14 ; blocs mixtes U(1)/chargés nuls : 0.0e+00
+PASS FIB-U1-DIMENSIONS dim(ker Q ∩ tranche) = 3840 (attendu 3 (L^4 - L_c^4) = 3840) ; cond(M_V) = 1.600e+01
+PASS FIB-U1-EQUIPARTITION <S> = Tr(M Gam)/2 = 1920.0000000000 = dim S/2 = 1920.0
+PASS FIB-U1-PLAQUETTES beta <th_p^2> : invariance par translation de 3 : 1.2e-15 ; moyenne = 0.493827160494 (40/81 = 0.493827160494) ; 486 classes (r, plan), 9 valeurs distinctes dans [0.467309, 0.498914]
+INFO FIB-U1-BOUCLE-CENTRES beta Var(th_W), boucle 3x3 des centres (plan 01) : conditionnelle 1.834724757698 ; libre (sans contrainte) 2.251390404863 ; moyenne beta <th_p^2> libre 0.499614197531 ((3V-3)/(6V) = 0.499614197531)
+PASS FIB-U1-KKT Q H = 1 : 3.3e-15 ; M_c[c,c] = 13.239314327096 (tous égaux à 1.6e-13 près) ; S_min = beta phibar^T M_c phibar
+INFO FIB-U1-SPECTRE-MC spectre de M_c (64 valeurs) : min -0.000000, max 51.624007 ; la pénalité domine un mode grossier ssi 2 kappa lambda << 1 (kappa = beta eps^2)
+PASS FIB-U1-ROUTEA-LIMITE kappa -> 0 : beta Var(th_W) (pénalité, kappa = 1e-6) / conditionnelle - 1 = 8.30e-06 (deux calculs indépendants : inverse pénalisée / base de la tranche)
+INFO FIB-U1-ROUTEA-b8_e0.2 kappa = 0.32 : <S> = 1939.697943 (exact 1920.0) ; beta Var(th_W) = 2.200151 (exact 1.834725, écart +19.92 %)
+INFO FIB-U1-ROUTEA-b8_e0.1 kappa = 0.08 : <S> = 1934.964407 (exact 1920.0) ; beta Var(th_W) = 2.111837 (exact 1.834725, écart +15.10 %)
+INFO FIB-U1-ROUTEA-b8_e0.05 kappa = 0.02 : <S> = 1928.404357 (exact 1920.0) ; beta Var(th_W) = 1.988517 (exact 1.834725, écart +8.38 %)
+INFO FIB-U1-ROUTEA-b2.8_e0.2 kappa = 0.112 : <S> = 1936.381225 (exact 1920.0) ; beta Var(th_W) = 2.138442 (exact 1.834725, écart +16.55 %)
+INFO FIB-U1-ROUTEA-b2.8_e0.1 kappa = 0.028 : <S> = 1929.986240 (exact 1920.0) ; beta Var(th_W) = 2.018119 (exact 1.834725, écart +10.00 %)
+INFO FIB-U1-ROUTEA-b2.8_e0.05 kappa = 0.007 : <S> = 1924.275529 (exact 1920.0) ; beta Var(th_W) = 1.912210 (exact 1.834725, écart +4.22 %)
+INFO FIB-U1-ROUTEA-b1000_e0.05 kappa = 2.5 : <S> = 1942.074688 (exact 1920.0) ; beta Var(th_W) = 2.243673 (exact 1.834725, écart +22.29 %)
+INFO FIB-U1-ROUTEA-k1e-4 kappa = 0.0001 : <S> = 1920.084227 (exact 1920.0) ; beta Var(th_W) = 1.836239 (exact 1.834725, écart +0.08 %)
+INFO FIB-U1-ROUTEA-k1e-3 kappa = 0.001 : <S> = 1920.800023 (exact 1920.0) ; beta Var(th_W) = 1.849127 (exact 1.834725, écart +0.78 %)
+INFO FIB-U1-ROUTEA-k1e-2 kappa = 0.01 : <S> = 1925.502976 (exact 1920.0) ; beta Var(th_W) = 1.934734 (exact 1.834725, écart +5.45 %)
+PASS FIB-U1-TYPES les 486 classes se réduisent à 9 types (côtés franchis, transverses au centre) : dispersion interne 2.8e-16 ; m (contrainte dure, beta-réduit) = [0.4673092809, 0.4747537091, 0.4804255256, 0.4905874009, 0.4927463133, 0.4943773844, 0.4984310324, 0.4987060909, 0.4989139643, 1.8347247577]
+INFO FIB-U1-M-EPS b8_e0.2 (kappa 0.32) : m1 = 0.496781, m10 = 2.200151 ; b8_e0.1 (kappa 0.08) : m1 = 0.491382, m10 = 2.111837 ; b8_e0.05 (kappa 0.02) : m1 = 0.482297, m10 = 1.988517 ; b2.8_e0.2 (kappa 0.112) : m1 = 0.493088, m10 = 2.138442 ; b2.8_e0.1 (kappa 0.028) : m1 = 0.484681, m10 = 2.018119 ; b2.8_e0.05 (kappa 0.007) : m1 = 0.475435, m10 = 1.912210 ; k1e-3 (kappa 0.001) : m1 = 0.468910, m10 = 1.849127 ; k2e-3 (kappa 0.002) : m1 = 0.470314, m10 = 1.862077 ; k4e-3 (kappa 0.004) : m1 = 0.472675, m10 = 1.884587
+INFO FIB-U1-MUTANT-V-b8 phibar_0 = 0,05 : décalage relatif des 10 moments (moyennes de classes sur les 16 blocs) max 4.0236 % ; plaquette la plus touchée beta F*^2 = 7.230e-03 (contre beta Var ~ 0,49)
+INFO FIB-U1-MUTANT-V-b2.8 phibar_0 = 0,05 : décalage relatif des 10 moments (moyennes de classes sur les 16 blocs) max 1.4082 % ; plaquette la plus touchée beta F*^2 = 2.531e-03 (contre beta Var ~ 0,49)
+INFO FIB-U1-DUREE 82 s
+BILAN FIB-U1 PASS

@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+# Chaîne épinglée (version installée sur acemagic et sur le gamer le 25/10/2026) : reconstruire un binaire
+# identique exige la même chaîne ; une machine louée installe cette version par rustup.
+[toolchain]
+channel = "1.97.0"
+components = ["clippy"]
+profile = "minimal"

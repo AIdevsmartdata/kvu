@@ -1,0 +1,32 @@
+[package]
+name = "kvu"
+version = "0.1.0"
+edition = "2021"
+description = "Générateur et banc de mesure pour les théories de jauge sur réseau (SU(2) Wilson 4D) : noyaux GPU à source unique HIP/CUDA, référence CPU F64, provenance, archives, action effective, flux de bloc, torsion de 't Hooft"
+authors = ["Kevin Remondiere <kevin.remondiere@gmail.com>"]
+publish = false
+license = "Apache-2.0"
+
+# Règle des dépendances : AUCUNE nouvelle dépendance sans accord de l'architecte (Cargo.lock commun).
+# cudarc : MÊMES features que le crate racine (l'unification des features du workspace l'exige :
+# deux jeux cuda-XXXXX différents ne compilent pas ensemble).
+[dependencies]
+rayon = "1.10"
+libloading = "0.9"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+cudarc = { version = "0.19", default-features = false, features = ["std", "driver", "nvrtc", "cuda-12080", "dynamic-loading"], optional = true }
+
+[features]
+default = []
+# Backend CUDA (gamer). Le backend HIP est TOUJOURS compilé (dlopen à l'exécution, aucune dépendance de build).
+cuda = ["dep:cudarc"]
+
+[lib]
+name = "kvu"
+path = "src/lib.rs"
+
+[[bin]]
+name = "kvu"
+path = "src/bin/kvu.rs"

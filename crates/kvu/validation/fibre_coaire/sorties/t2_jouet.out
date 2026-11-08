@@ -1,0 +1,15 @@
+PASS FIB-DERIV-JOUET-DF jacobien analytique (formule des chemins) - DF centrées génériques : max |dJ| = 3.59e-28 sur 30 configurations de Haar, t in {1/2, 3/10, 8/10} (seuil 1e-8)
+PASS FIB-JOUET-J-FERME J = [1 - A, A], A = t R1 Eg(t w) Lg(w) R1^T : max écart 2.67e-51
+PASS FIB-JOUET-DETJJT det(J J^T) = ((1-t)^2 + t^2) ((sin^2(t th) + sin^2((1-t) th))/sin^2 th)^2 : max écart relatif 4.41e-50
+PASS FIB-JOUET-METRIQUE sqrt(det g_fibre) (DF du plongement) = sqrt(t^2+(1-t)^2) (sin^2(t th)+sin^2((1-t) th))/th^2 : max écart relatif 3.63e-31 sur 60 points
+PASS FIB-COAIRE-JOUET-NUM sqrt(det g) det(J J^T)^(-1/2) / (sin^2 th/th^2) - 1 : max 3.63e-31 sur 60 points (coaire = densité de Haar de W)
+PASS FIB-COAIRE-JOUET-SYMPY 1 - alpha = sin((1-t)th) e^(-i t th)/sin th : reste 0 ; sqrt(det g)/sqrt(det JJ^T) - sin^2th/th^2 = 0 ; t = 1/2 : det JJ^T - 1/(8 cos^4(th/2)) = 0
+INFO FIB-JOUET-MC Haar x Haar, 200000 tirages, t = 1/2 : <x_W> = 0.00080 +- 0.00112 (0) ; <x_W^2> = 0.25006 +- 0.00056 (1/4) ; <x_Ubar> = -0.00158, <x_Ubar^2> = 0.24905 (0, 1/4) ; corr(x_W, x_Ubar) = +0.0010, corr(x_W^2, x_Ubar^2) = +0.0022 (indépendance : 0 +- 0.0022)
+INFO FIB-JOUET-GEL-b2 <x> = 0.433127426722312 (I2/I1) ; <x^2> = 0.350308859916532 ; mutant t=1/2 : <x> = 0.15439468653312 ; mutant t=0,3 : <x> = 0.222907311718793 ; écart relatif de <1-x> (mutant t=1/2) : 0.491703 ; U(1) <cos psi> = 0.697774657964008
+INFO FIB-JOUET-GEL-b2.8 <x> = 0.545098533322141 (I2/I1) ; <x^2> = 0.415965857154849 ; mutant t=1/2 : <x> = 0.376887225945948 ; mutant t=0,3 : <x> = 0.420582423877691 ; écart relatif de <1-x> (mutant t=1/2) : 0.369775 ; U(1) <cos psi> = 0.794038834374382
+INFO FIB-JOUET-GEL-b8 <x> = 0.819249410355621 (I2/I1) ; <x^2> = 0.692781471116642 ; mutant t=1/2 : <x> = 0.80506952128661 ; mutant t=0,3 : <x> = 0.808484173193561 ; écart relatif de <1-x> (mutant t=1/2) : 0.07845 ; U(1) <cos psi> = 0.935235493529439
+INFO FIB-JOUET-GEL-b1000 <x> = 0.998500375375493 (I2/I1) ; <x^2> = 0.997004498873874 ; mutant t=1/2 : <x> = 0.998499624436301 ; mutant t=0,3 : <x> = 0.998499802596186 ; écart relatif de <1-x> (mutant t=1/2) : 0.000500751 ; U(1) <cos psi> = 0.999499874874804
+PASS FIB-JOUET-BESSEL deux canaux (Bessel exact / quadrature) : max écart 9.86e-32 (<x> = I2/I1, <x^2> = (I3 + I2/b)/I1, U(1) I1/I0)
+PASS FIB-JOUET-MUTANT-BESSEL mutant t = 1/2 : quadrature = (I1 - (I0+I2)/2)/(I0 - I1) : max écart 7.05e-29
+PASS FIB-JOUET-U1-J U(1) : J = [1 - t, t] constant hors coupure (DF) : max écart 6.33e-10
+BILAN FIB-JOUET PASS

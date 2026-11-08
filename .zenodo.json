@@ -1,0 +1,37 @@
+{
+  "title": "kvu: a generator and measurement bench for lattice gauge theory (SU(2) Wilson action, single-source HIP/CUDA kernels, FP64 CPU reference)",
+  "upload_type": "software",
+  "description": "<p>kvu is a Rust command-line tool for lattice gauge theory, centred on four-dimensional SU(2) Yang-Mills theory with the Wilson action. One GPU kernel source serves two backends, HIP (AMD) and CUDA (NVIDIA), compiled at run time, next to a double-precision CPU reference. Every run writes a provenance manifest (binary hash, commit, source fingerprint, seeds, options), and configurations can be archived, verified and regenerated bit for bit.</p><p>Contents: a heat-bath and overrelaxation generator with counter-based Philox4x32-10 random numbers (FP64 reference, whose GPU outputs with the compat-prod options are bit-identical to those of the published generator su2-heatbath-gpu, and a fast FP32 mode); Dirichlet boxes; a conditional heat bath; Wilson and Polyakov loops, gradient flow and topological charge; Balaban (L_b = 3) and Swendsen (b = 2) block-spin maps and effective-coupling estimators; the Hessian of the Wilson action on a given background; a group registry with known-answer gates (SU(2), Sp(4)). Four modules added in November 2026 are instruments: verifiable compressed archives (kvu-archive/1), couplings of a truncated effective action (plaquette, rectangle, chair, twist) by pseudo-likelihood and Schwinger-Dyson equations with jackknife errors, block-face flux statistics, and 't Hooft twisted boundary conditions (CPU FP64).</p><p>It is a tool, not a physics result: it contains and claims no result on the mass gap, the continuum limit or any new constant. The test suite (cargo test) checks known answers, independent Python references, bit-identity and deliberate mutants; GPU tests are opt-in. Documentation is in French.</p><p>The code and documentation were written by AI coding agents under the direction of the author; see AI_USE.md.</p>",
+  "creators": [
+    {
+      "name": "Rémondière, Kévin",
+      "orcid": "0009-0008-2443-7166",
+      "affiliation": "Independent Researcher, Oloron-Sainte-Marie, France"
+    }
+  ],
+  "license": "apache-2.0",
+  "access_right": "open",
+  "keywords": [
+    "lattice gauge theory",
+    "SU(2)",
+    "Yang-Mills",
+    "Wilson action",
+    "Monte Carlo",
+    "heat bath",
+    "GPU",
+    "HIP",
+    "CUDA",
+    "Rust",
+    "reproducibility",
+    "provenance"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "10.5281/zenodo.23644087",
+      "relation": "isDerivedFrom",
+      "resource_type": "software",
+      "scheme": "doi"
+    }
+  ],
+  "notes": "Tested on Linux x86_64 with an AMD Radeon 8060S (gfx1151, ROCm 7.1) and an NVIDIA GeForce RTX 5060 Ti (sm_120, CUDA 13). See README.md (contents, installation, minimal examples, known limitations), CHANGELOG.md and AI_USE.md."
+}

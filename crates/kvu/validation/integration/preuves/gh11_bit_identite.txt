@@ -1,0 +1,18 @@
+# G-H11 : bit-identité longue (22000 pas) sur acemagic
+# (a) graines AMD 270928080{21,22,23} : ensemble d'origine du 27/09 = su2_hip aujourd'hui = moteur unifié seul
+6ee107ab539f07de8871ee487902b59bb6ba60a64b81f4d5aee7c0e250e54de4  /chemin/vers/projet/chantiers/vortex_tests_20260927/gpu_port/ref_amd/ens/L8_b3.5_c1/measurements.csv
+6ee107ab539f07de8871ee487902b59bb6ba60a64b81f4d5aee7c0e250e54de4  integ/gh11_check/hip_c1/measurements.csv
+6ee107ab539f07de8871ee487902b59bb6ba60a64b81f4d5aee7c0e250e54de4  integ/gh11_check/kvu_c1/measurements.csv
+028fac28694fb6edf1da73c56acb28caab22d67a59b6632b1e33b8f37af49bd9  /chemin/vers/projet/chantiers/vortex_tests_20260927/gpu_port/ref_amd/ens/L8_b3.5_c2/measurements.csv
+028fac28694fb6edf1da73c56acb28caab22d67a59b6632b1e33b8f37af49bd9  integ/gh11_check/hip_c2/measurements.csv
+028fac28694fb6edf1da73c56acb28caab22d67a59b6632b1e33b8f37af49bd9  integ/gh11_check/kvu_c2/measurements.csv
+ad95f5ecb3294fd045816247ece21ad2681fceff2bb47888221904ba571917bf  /chemin/vers/projet/chantiers/vortex_tests_20260927/gpu_port/ref_amd/ens/L8_b3.5_c3/measurements.csv
+ad95f5ecb3294fd045816247ece21ad2681fceff2bb47888221904ba571917bf  integ/gh11_check/hip_c3/measurements.csv
+ad95f5ecb3294fd045816247ece21ad2681fceff2bb47888221904ba571917bf  integ/gh11_check/kvu_c3/measurements.csv
+# (b) graines de G-H07 270927080{21,22,23} : lot unifié G-H07 = su2_hip seul
+37fb932b43e12a0a008dbe4086613912c3ca9dee34f4d34df9a423e8b8ad13cb  /chemin/vers/projet/kevinotron_store/validation_unifie/gh07/L8_hot/c004/measurements.csv
+37fb932b43e12a0a008dbe4086613912c3ca9dee34f4d34df9a423e8b8ad13cb  integ/gh11_check/hip27_27092708021/measurements.csv
+a7b5621e0188c366c63873960901a9ae17534b98e9ac0867c35f011248a98bc4  /chemin/vers/projet/kevinotron_store/validation_unifie/gh07/L8_hot/c005/measurements.csv
+a7b5621e0188c366c63873960901a9ae17534b98e9ac0867c35f011248a98bc4  integ/gh11_check/hip27_27092708022/measurements.csv
+cb24da48a6f723aba66248bb4ff087b383a4b55000ec405f1d139c2a13494ce8  /chemin/vers/projet/kevinotron_store/validation_unifie/gh07/L8_cold/c002/measurements.csv
+cb24da48a6f723aba66248bb4ff087b383a4b55000ec405f1d139c2a13494ce8  integ/gh11_check/hip27_27092708023/measurements.csv

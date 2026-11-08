@@ -1,0 +1,12 @@
+PASS FIB-BINF-J1 J(U = 1) = Q (x) 1_3 : max écart 5.5e-14 (64 liens grossiers, 5184 liens fins ; seuil 1e-12 : sommes de 10 473 termes en F64 ; le premier passage à 1e-14 a échoué à 5,5e-14, arrondi d'accumulation)
+PASS FIB-BINF-Q-S1 Q (énumération indépendante) = op_Q de geom.py (S1) en espace direct : max écart 3.6e-15
+PASS FIB-BINF-KKT-S1 variances de plaquettes par classe : espace direct (t5) = picov.Classe (Bloch, 16 moments) à 5.1e-15 près ; M_c[c,c] = 13.239314327096 contre 13.239314327096 (écart 4.0e-13)
+INFO FIB-BINF-MC-BLOCH spectre de M_c(q) aux 16 moments : q = 0 : [0.0, 0.0, 0.0, 0.0] ; q = (pi,pi,pi,pi) : [-0.0, 51.624007, 51.624007, 51.624007]
+PASS FIB-BINF-JAUGE log det(J J^T) = 42.333479311690 ; après jauge de Haar en chaque site : 42.333479311690 (écart 2.8e-14) ; covariance de Ubar 4.4e-15 ; à U = 1 : 3 log det(Q Q^T) = -359.806069590841
+PASS FIB-BINF-SANS-LINEAIRE log det JJ^T(exp(s a)), partie impaire c1 s + c3 s^3 + c5 s^5 ajustée sur s = 0,001/0,002/0,004 : c1 = 2.67e-11 (seuil 1e-6 ; bruit ~1e-9) ; c3 = -9.2369e+01 ; c5 = -3.6076e+03 ; partie paire / s^2 : 1822.5509 (s = 0,002), 1837.5266 (s = 0,01)
+PASS FIB-BINF-PAS-PAIR log det JJ^T n'est PAS pair en A (c3 = -9.237e+01, partie impaire -5.915e-06 à s = 0,004, ~1e5 x le bruit) : l'argument « inversion des liens » de Kimi (Ubar(U^-1) = Ubar(U)^-1) est faux en non abélien ; seul le terme LINÉAIRE s'annule (trace de couleur, docs §6.3)
+INFO FIB-BINF-INVERSION max |Ubar(U^-1) - Ubar(U)^-1| = 4.634e-01 (amplitude 0,3) : l'équivariance par inversion n'a pas lieu (les holonomies U(G) ne sont pas inversées, leur ordre est conservé)
+INFO FIB-BINF-QUADRATIQUE log det JJ^T - 3 log det QQ^T ~ c2 s^2 avec a ~ N(0,1) par composante : c2 = 1837.5266 pour 15552 composantes (1.182e-01 par composante fine, 9.570e+00 par composante grossière)
+PASS FIB-BINF-EQUIPARTITION lim beta <1 - P> (conditionnel, V = 1) = 0.740740740741 = 20/27 = (3/4)(1 - 3^-4) ; boucle des centres : beta <1 - 1/2 Tr W> = 2.752087136546 (libre 3.377085607294)
+INFO FIB-BINF-DUREE 46 s
+BILAN FIB-BETA-INF PASS

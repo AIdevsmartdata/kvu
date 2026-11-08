@@ -1,0 +1,84 @@
+# kvu.toml — MODÈLE de configuration des machines de kvu (SPDX-License-Identifier: Apache-2.0)
+#
+# Copier ce fichier en ~/.config/kvu/kvu.toml (ou le désigner par KEVINOTRON_CONFIG), puis l'adapter.
+# Recherche du fichier : KEVINOTRON_CONFIG > ./kvu.toml > ~/.config/kvu/kvu.toml > défauts compilés du profil `inconnue`.
+# Priorité d'une valeur : variable KEVINOTRON_* > ce fichier > défaut de `inconnue`. Format et clés : docs/MACHINES.md.
+# Chemins : « ~/ » = répertoire personnel. Texte vide = « absent » (pas d'affinité, pas de câble, etc.).
+#
+# Tel quel, ce modèle ne reconnaît AUCUNE machine : toute machine prend le profil prudent `inconnue` (ou `location` avec
+# KEVINOTRON_PROFIL=location). Les profils `acemagic` et `gamer` sont ceux des deux machines de référence de l'auteur
+# (une station AMD à GPU intégré gfx1151, un PC à GPU NVIDIA sm_120) ; leur version complète, qui sert de fixture aux tests,
+# est crates/kvu/kvu.toml. Pour utiliser l'un de ces profils sur votre machine, décommentez-le et remplacez `hotes`
+# (nom d'hôte exact), `cpu` et `gpu_arch` (une seule clé qui correspond suffit à reconnaître la machine).
+
+schema = "kvu-config/1"
+
+# --- machine non reconnue (et défauts compilés si aucun fichier n'est trouvé) : politique prudente ---------------------
+[profils.inconnue]
+backend          = "auto"
+verrou           = "/tmp/kevinotron_gpu.lock"
+attente_verrou_s = 7200
+fenetre_banc_s   = 600
+nice             = 10
+cpus             = ""
+fils_max         = 4
+mem_max          = "8G"
+ram_min_go       = 8.0
+ssd_min_go       = 20.0
+alerte           = ""
+precision        = "f64"
+store            = "~/kevinotron_store"
+file             = "~/.local/state/kevinotron/file"
+cable            = ""
+
+# --- machine louée (conteneur) : aucun nom d'hôte, aucun câble, aucun ssh, verrou local, store sous $HOME ---------------
+# Sélection : KEVINOTRON_PROFIL=location. L'architecture GPU est lue sur le périphérique (jamais écrite ici) ;
+# `arch_hip` et `arch_cuda` ne servent qu'à la forcer. Sans systemd dans un conteneur : pas de plafond mémoire (mem_max
+# vide) ; la limite du conteneur s'applique.
+[profils.location]
+backend          = "auto"
+verrou           = "/tmp/kvu_gpu.lock"
+attente_verrou_s = 7200
+fenetre_banc_s   = 600
+nice             = 10
+cpus             = ""
+fils_max         = 16
+mem_max          = ""
+ram_min_go       = 8.0
+ssd_min_go       = 20.0
+alerte           = ""
+precision        = "f64"
+store            = "~/kevinotron_store"
+file             = "~/.local/state/kevinotron/file"
+cable            = ""
+
+# --- exemple : station AMD à GPU intégré (HIP) — à adapter avant de décommenter ------------------------------------------
+# [profils.acemagic]
+# hotes            = ["nom-d-hote-de-votre-station"]
+# cpu              = []
+# gpu_arch         = ["gfx1151"]
+# backend          = "hip"
+# verrou           = "/tmp/kevinotron_gpu.lock"
+# nice             = 10
+# fils_max         = 8
+# mem_max          = "24G"
+# ram_min_go       = 25.0
+# ssd_min_go       = 100.0
+# precision        = "f32"
+# store            = "~/kevinotron_store"
+
+# --- exemple : PC à GPU NVIDIA (CUDA, binaire compilé avec --features cuda) — à adapter avant de décommenter -------------
+# [profils.gamer]
+# hotes            = ["nom-d-hote-de-votre-pc"]
+# cpu              = []
+# gpu_arch         = ["sm_120"]
+# backend          = "cuda"
+# verrou           = "/tmp/kvu_gpu.lock"
+# nice             = 5
+# cpus             = ""
+# fils_max         = 8
+# mem_max          = "12G"
+# ram_min_go       = 6.0
+# ssd_min_go       = 50.0
+# precision        = "f32"
+# store            = "~/kevinotron_store"

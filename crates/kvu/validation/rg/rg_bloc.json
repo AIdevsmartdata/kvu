@@ -1,0 +1,95 @@
+{
+  "backend": "cpu",
+  "binaire_sha256": "e80ff6a4e2943c6dca58c520ce5bf78c25e070d30df877b19ecd3d4a00dadda9",
+  "horodatage": "2026-10-25T19:53:54Z",
+  "schema": "kvu-rg-cert/1",
+  "tout_vert": true,
+  "verdicts": [
+    {
+      "detail": "6 fichiers hachés conformes au manifeste (g_nl.py 24df84b21c174adf)",
+      "id": "RG-FIXTURES",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "max|Δq| = 2.699e-15 (seuil 1e-12) sur 3 fixtures × 324 liens ; graine 7 : 7.22e-16, graine 11 : 2.70e-15, graine 13 : 3.33e-16 ; module des entrées de matrice (g_nl) 2.736e-15",
+      "id": "RG-REG-PY",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "mutant 3coin contre les références 3centre : écart minimal sur les 3 fixtures 1.733e0 (doit être ≥ 1e-3)",
+      "id": "RG-REG-PY-MUT",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "max|Δq| = 2.526e-15 (seuil 1e-14) : Ū(g·U) = g(c) Ū(U) g(c′)† sur 324 liens, graine 26102606002 ; module matrice 2.586e-15",
+      "id": "RG-JAUGE",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "384 éléments : permutations (24) max|Δq| = 1.332e-15, avec réflexion (360) 1.721e-15 (seuil 1e-14) ; module matrice 2.162e-15",
+      "id": "RG-HYPER",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "mutant 3coin : réflexions 2.677e-1 (doit être ≥ 1e-3), permutations 1.291e-15",
+      "id": "RG-HYPER-MUT",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "max|Δq| = 5.551e-16 (seuil 1e-15) : jauge pure, Ū = g(c) g(c′)†, graine 26102606003",
+      "id": "RG-PUR",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "max|Δq| = 1.110e-16 (seuil 1e-15) : exp(i a σ₃) sur les liens μ₀ ∈ 0..3, a = 0.3, attendu exp(3 i a σ₃)",
+      "id": "RG-ABEL",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "PUR : f = 0 θ max = 1.24e-15 ; ABEL : f = 0 θ max = 5.55e-17 (exigé : f = 0 et θ max ≤ 1e-12)",
+      "id": "RG-DOMAINE-PUR-ABEL",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "Haar L = 12, graine 26102606001 : f = 0.49968 (attendu 0.49986 ± 0.01), θ max = 3.135205, 10724352 boucles, 0 ambiguës",
+      "id": "RG-DOMAINE-HAAR",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "mutant angle SO(3) (2θ) : f = 0.90876 (attendu ≈ 0,909 ; doit sortir de 0.49986 ± 0.01)",
+      "id": "RG-DOMAINE-MUT",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "L12_b2.3_c1 : f = 4.396884e-1, θ max = 3.1382, 0 ambiguës, étiquette HORS_DOMAINE ; rapport validation/rg/rapports/domaine_L12_b2.3_c1.json",
+      "id": "RG-DOMAINE-L12_b2.3_c1",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "L12_b16_c1 : f = 3.765262e-4, θ max = 2.0463, 0 ambiguës, étiquette DANS_DOMAINE ; rapport validation/rg/rapports/domaine_L12_b16_c1.json",
+      "id": "RG-DOMAINE-L12_b16_c1",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "SU(2) 8⁴ β = 2,40 graine 24001 : plaq_rel = 1.084e-15 (seuil 1e-10), P_rust = 0.614279568309, P_C = 0.614279568309, plaquette de l'entrée 0.642029 ; max|Δq| des liens 1.443e-15 (INFO), c = 0.5, 1 pas",
+      "id": "RG-SWENDSEN-L8",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "grandL L12 β = 2,3 cfg_002000 : plaq_rel = 8.756e-16 (seuil 1e-10), P_rust = 0.507170280929, P_C = 0.507170280929, plaquette de l'entrée 0.602633 ; max|Δq| des liens 8.882e-16 (INFO), c = 0.5, 1 pas",
+      "id": "RG-SWENDSEN-L12",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "fixture 9⁴ graine 7 : sorties NPY (10496 octets) et manifestes (1672 octets) identiques à l'octet pour 1, 4 et 16 fils (cmp)",
+      "id": "RG-FILS-9",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "Haar L = 12 : sorties NPY (32896 octets) et manifestes (1713 octets) identiques à l'octet pour 1, 4 et 16 fils (cmp)",
+      "id": "RG-FILS-12",
+      "verdict": "PASS"
+    }
+  ],
+  "version": "0.1.0 | source_hash (kvu-source/1) : 528b540eb3e4d5ab2d8aa96342ff2967e592cac16fb24e18121d32c40fb624a9 | git_head : 5fee563eb8fb109dd7244bce253c59d1633ed853"
+}

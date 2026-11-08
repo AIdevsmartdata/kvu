@@ -1,0 +1,296 @@
+{
+ "cellules": [
+  {
+   "id": "grandL_L12_b2.3",
+   "famille": "grandL",
+   "L": 12,
+   "beta": 2.3,
+   "flot": "flot/acemagic/grandL_L12_b2.3/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "grandL_L24_b2.3",
+   "famille": "grandL",
+   "L": 24,
+   "beta": 2.3,
+   "flot": "flot/acemagic/grandL_L24_b2.3/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "grandL_L12_b2.5",
+   "famille": "grandL",
+   "L": 12,
+   "beta": 2.5,
+   "flot": "flot/acemagic/grandL_L12_b2.5/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "grandL_L24_b2.5",
+   "famille": "grandL",
+   "L": 24,
+   "beta": 2.5,
+   "flot": "flot/acemagic/grandL_L24_b2.5/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "grandL_L12_b2.8",
+   "famille": "grandL",
+   "L": 12,
+   "beta": 2.8,
+   "flot": "flot/acemagic/grandL_L12_b2.8/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "grandL_L24_b2.8",
+   "famille": "grandL",
+   "L": 24,
+   "beta": 2.8,
+   "flot": "flot/acemagic/grandL_L24_b2.8/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "grandL_L12_b4",
+   "famille": "grandL",
+   "L": 12,
+   "beta": 4.0,
+   "flot": "flot/acemagic/grandL_L12_b4/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "grandL_L24_b4",
+   "famille": "grandL",
+   "L": 24,
+   "beta": 4.0,
+   "flot": "flot/acemagic/grandL_L24_b4/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "grandL_L12_b8",
+   "famille": "grandL",
+   "L": 12,
+   "beta": 8.0,
+   "flot": "flot/acemagic/grandL_L12_b8/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "grandL_L24_b8",
+   "famille": "grandL",
+   "L": 24,
+   "beta": 8.0,
+   "flot": "flot/acemagic/grandL_L24_b8/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "grandL_L12_b16",
+   "famille": "grandL",
+   "L": 12,
+   "beta": 16.0,
+   "flot": "flot/acemagic/grandL_L12_b16/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "grandL_L24_b16",
+   "famille": "grandL",
+   "L": 24,
+   "beta": 16.0,
+   "flot": "flot/acemagic/grandL_L24_b16/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "ym4A_L24_b2.3",
+   "famille": "ym4-A",
+   "L": 24,
+   "beta": 2.3,
+   "flot": "flot/acemagic/ym4A_L24_b2.3/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "ym4_L24_b1.8",
+   "famille": "ym4",
+   "L": 24,
+   "beta": 1.8,
+   "flot": "flot/gamer/ym4_L24_b1.8/flot.json",
+   "machine": "gamer"
+  },
+  {
+   "id": "ym4_L24_b2.0",
+   "famille": "ym4",
+   "L": 24,
+   "beta": 2.0,
+   "flot": "flot/gamer/ym4_L24_b2.0/flot.json",
+   "machine": "gamer"
+  },
+  {
+   "id": "ym4_L24_b2.15",
+   "famille": "ym4",
+   "L": 24,
+   "beta": 2.15,
+   "flot": "flot/gamer/ym4_L24_b2.15/flot.json",
+   "machine": "gamer"
+  },
+  {
+   "id": "ym4_L24_b2.3",
+   "famille": "ym4",
+   "L": 24,
+   "beta": 2.3,
+   "flot": "flot/gamer/ym4_L24_b2.3/flot.json",
+   "machine": "gamer"
+  },
+  {
+   "id": "ym4_L24_b2.45",
+   "famille": "ym4",
+   "L": 24,
+   "beta": 2.45,
+   "flot": "flot/gamer/ym4_L24_b2.45/flot.json",
+   "machine": "gamer"
+  },
+  {
+   "id": "ym4_L24_b2.6",
+   "famille": "ym4",
+   "L": 24,
+   "beta": 2.6,
+   "flot": "flot/gamer/ym4_L24_b2.6/flot.json",
+   "machine": "gamer"
+  },
+  {
+   "id": "ym4_L24_b2.8",
+   "famille": "ym4",
+   "L": 24,
+   "beta": 2.8,
+   "flot": "flot/gamer/ym4_L24_b2.8/flot.json",
+   "machine": "gamer"
+  },
+  {
+   "id": "ym4_L24_b3.0",
+   "famille": "ym4",
+   "L": 24,
+   "beta": 3.0,
+   "flot": "flot/gamer/ym4_L24_b3.0/flot.json",
+   "machine": "gamer"
+  },
+  {
+   "id": "P6_L12_b3.0",
+   "famille": "P6",
+   "L": 12,
+   "beta": 3.0,
+   "flot": "flot/acemagic/P6_L12_b3.0/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "P6_L24_b2.4",
+   "famille": "P6",
+   "L": 24,
+   "beta": 2.4,
+   "flot": "flot/acemagic/P6_L24_b2.4/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "P6_L24_b2.6",
+   "famille": "P6",
+   "L": 24,
+   "beta": 2.6,
+   "flot": "flot/acemagic/P6_L24_b2.6/flot.json",
+   "machine": "acemagic"
+  },
+  {
+   "id": "P6_L24_b3.0",
+   "famille": "P6",
+   "L": 24,
+   "beta": 3.0,
+   "flot": "flot/acemagic/P6_L24_b3.0/flot.json",
+   "machine": "acemagic"
+  }
+ ],
+ "recoupements": [
+  {
+   "id": "grandL_L12_b8",
+   "a": "flot/acemagic/grandL_L12_b8/flot.json",
+   "b": "flot/gamer/grandL_L12_b8/flot.json"
+  },
+  {
+   "id": "grandL_L24_b16",
+   "a": "flot/acemagic/grandL_L24_b16/flot.json",
+   "b": "flot/gamer/grandL_L24_b16/flot.json"
+  },
+  {
+   "id": "ym4_L24_b3.0",
+   "a": "flot/gamer/ym4_L24_b3.0/flot.json",
+   "b": "flot/acemagic/ym4_L24_b3.0/flot.json"
+  }
+ ],
+ "paires_localite": [
+  {
+   "famille": "grandL",
+   "beta": 2.3,
+   "c12": "grandL_L12_b2.3",
+   "c24": "grandL_L24_b2.3"
+  },
+  {
+   "famille": "grandL",
+   "beta": 2.5,
+   "c12": "grandL_L12_b2.5",
+   "c24": "grandL_L24_b2.5"
+  },
+  {
+   "famille": "grandL",
+   "beta": 2.8,
+   "c12": "grandL_L12_b2.8",
+   "c24": "grandL_L24_b2.8"
+  },
+  {
+   "famille": "grandL",
+   "beta": 4.0,
+   "c12": "grandL_L12_b4",
+   "c24": "grandL_L24_b4"
+  },
+  {
+   "famille": "grandL",
+   "beta": 8.0,
+   "c12": "grandL_L12_b8",
+   "c24": "grandL_L24_b8"
+  },
+  {
+   "famille": "grandL",
+   "beta": 16.0,
+   "c12": "grandL_L12_b16",
+   "c24": "grandL_L24_b16"
+  },
+  {
+   "famille": "P6",
+   "beta": 3.0,
+   "c12": "P6_L12_b3.0",
+   "c24": "P6_L24_b3.0"
+  }
+ ],
+ "groupes_repliques": [
+  {
+   "beta": 2.3,
+   "cellules": [
+    "grandL_L24_b2.3",
+    "ym4_L24_b2.3",
+    "ym4A_L24_b2.3"
+   ]
+  },
+  {
+   "beta": 2.6,
+   "cellules": [
+    "ym4_L24_b2.6",
+    "P6_L24_b2.6"
+   ]
+  },
+  {
+   "beta": 2.8,
+   "cellules": [
+    "grandL_L24_b2.8",
+    "ym4_L24_b2.8"
+   ]
+  },
+  {
+   "beta": 3.0,
+   "cellules": [
+    "ym4_L24_b3.0",
+    "P6_L24_b3.0"
+   ]
+  }
+ ]
+}

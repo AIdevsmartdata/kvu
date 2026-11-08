@@ -1,0 +1,228 @@
+{
+  "schema": "kvu-groupe-cert/1",
+  "groupe": "su2",
+  "certificats": [
+    {
+      "backend": "cpu",
+      "horodatage": "2026-10-25T19:29:27Z",
+      "binaire_sha256": "522e11df1c1ad7faefe56a04f548af6ca73e23f13aa325d1eb109259630ec3e7",
+      "version": "0.1.0 | source_hash (kvu-source/1) : ebe6e73396744d34cac6afa19b2b53ced480d8a836503788fec67c10a17a84a6 | git_head : 97ec70b44219d3015a6ab43f5a82f1f8b8eab50f",
+      "tout_vert": true,
+      "skips_prescrits": [
+        "G-UNIT-F32"
+      ],
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "id": "G-ALG-1",
+          "detail": "su2 : fermeture [T^a,T^b] = i f T 0.000e0, ad-invariance 0.000e0, hermiticité et trace nulle 0.000e0 (seuil 1e-12), 3 générateurs"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-ALG-2",
+          "detail": "max|f^acd f^bcd − h∨ δ| = 0.000e0 (h∨ = 2, seuil 1e-12)"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-ALG-3",
+          "detail": "max|Tr(TT) − 0.5δ| = 0.000e0 ; T_F mesuré 0.500000000000000 ; C₂(F) = 0.750000000000000 (ΣTT ∝ 1 à 0.0e0) ; d_F C₂/d_adj = 0.500000000000000 (seuil 1e-12)"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-HAAR-1",
+          "detail": "⟨χ⟩ = -2.618e-4 ± 1.0e-3 (z = -0.26) ; ⟨|χ|²⟩ = 1.000638 ± 1.0e-3 (z = +0.64) ; n = 1000000, graine 26102605001, seuil |z| < 4"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-HAAR-2",
+          "detail": "⟨χ(U²)⟩ = -1.00015 ± 1.0e-3 (attendu -1, z = -0.15) ; n = 1000000, graine 26102605002, seuil |z| ≤ 4"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-HAAR-3",
+          "detail": "max|U†U−1| = 6.66e-16 ; max|det U−1| = 7.78e-16 ; structure 0.00e0 ; n = 1000000, graine 26102605003, seuil 1e-13"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-HAAR-3-CHAMP",
+          "detail": "départ chaud L = 8 (16384 liens), backend cpu : max|U†U−1| = 6.66e-16 ; max|det U−1| = 6.67e-16 (seuil 1e-13)"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-SC",
+          "detail": "a = 0.248579 ± 8.3e-4 (attendu 0.250202006, z = -1.96) ; β=0.1: ⟨P⟩ = 0.0249036 ± 4.0e-5 (τ = 0.50) attendu 0.0249896 z = -2.14 ; β=0.2: ⟨P⟩ = 0.0498986 ± 4.0e-5 (τ = 0.50) attendu 0.0499181 z = -0.49 ; L = 6, therm 1000, 20000 pas, simulé à 1×β, seuils |z| < 3"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-WC",
+          "detail": "c₁ = 0.74987 ± 3.6e-5 (attendu 0.75, écart -0.017%, seuil 2%) ; σ(c₁)/c₁ = 4.79e-5 (seuil 5e-3) ; c₂ = 0.159 ; β=50: y = 0.75306 ± 4.3e-5 (τ = 0.6) ; β=100: y = 0.75147 ± 4.1e-5 (τ = 0.6) ; β=200: y = 0.75065 ± 4.2e-5 (τ = 0.6) ; β=400: y = 0.75028 ± 4.1e-5 (τ = 0.6) ; L = 8, therm 2000, 20000 pas, simulé à 1×β"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-UNIT-F64",
+          "detail": "max||q|−1| = 2.220e-16 après 10000 pas (1 HB + 4 OR) ; L = 6, β = 2.3, graine 26102605301, backend cpu, seuil 1e-13"
+        },
+        {
+          "verdict": "SKIP",
+          "id": "G-UNIT-F32",
+          "detail": "propre au backend GPU (le CPU ne calcule qu'en F64) : doit être PASS sur HIP/CUDA (GATES 0.2)"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-REG-2.3",
+          "detail": "β = 2.3 : ⟨P⟩ = 0.6030043 ± 1.3e-4 (τ = 1.96, n = 10000) ; archivé 0.6029637(53e-7) ; z = +0.32 (seuil 3) ; L = 6, graine 2510023, 2000+10000 pas, backend cpu"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-REG-2.5",
+          "detail": "β = 2.5 : ⟨P⟩ = 0.6528475 ± 7.3e-5 (τ = 1.08, n = 10000) ; archivé 0.6529010(31e-7) ; z = -0.73 (seuil 3) ; L = 6, graine 2510025, 2000+10000 pas, backend cpu"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-ALG",
+          "detail": "mutant ROUGE comme attendu : générateur retiré → FAIL G-ALG-1 su2 : fermeture [T^a,T^b] = i f T 7.071e-1, ad-invariance 6.946e-1, hermiticité et trace nulle 0.000e0 (seuil 1e-12), 2 générateurs"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-HAAR2",
+          "detail": "mutant ROUGE comme attendu : QR naïf (U(2)) → FAIL G-HAAR-2 ⟨χ(U²)⟩ = +0.00096 ± 1.0e-3 (attendu -1, z = +1000.91) ; n = 1000000, graine 26102605002, seuil |z| ≤ 4"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-HAAR3",
+          "detail": "mutant ROUGE comme attendu : QR naïf (U(2)) → FAIL G-HAAR-3 max|U†U−1| = 6.66e-16 ; max|det U−1| = 2.00e0 ; structure 0.00e0 ; n = 1000000, graine 26102605003, seuil 1e-13"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-SC",
+          "detail": "mutant ROUGE comme attendu : β × 1,05 → FAIL G-SC-MUT a = 0.261195 ± 8.3e-4 (attendu 0.250202006, z = +13.30) ; β=0.1: ⟨P⟩ = 0.0261627 ± 4.0e-5 (τ = 0.50) attendu 0.0249896 z = +29.26 ; β=0.2: ⟨P⟩ = 0.0524117 ± 4.0e-5 (τ = 0.50) attendu 0.0499181 z = +62.24 ; L = 6, therm 1000, 20000 pas, simulé à 1.05×β, seuils |z| < 3"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-WC",
+          "detail": "mutant ROUGE comme attendu : β × 1,05 → FAIL G-WC-MUT c₁ = 0.71423 ± 3.4e-5 (attendu 0.75, écart -4.770%, seuil 2%) ; σ(c₁)/c₁ = 4.76e-5 (seuil 5e-3) ; c₂ = 0.141 ; β=50: y = 0.71705 ± 4.0e-5 (τ = 0.6) ; β=100: y = 0.71566 ± 4.0e-5 (τ = 0.6) ; β=200: y = 0.71490 ± 3.9e-5 (τ = 0.6) ; β=400: y = 0.71460 ± 4.0e-5 (τ = 0.6) ; L = 8, therm 2000, 20000 pas, simulé à 1.05×β"
+        },
+        {
+          "verdict": "INFO",
+          "id": "G-MUT-SC-1.002",
+          "detail": "(information, non verdict) PASS G-SC-MUT002 a = 0.250192 ± 8.3e-4 (attendu 0.250202006, z = -0.01) ; β=0.1: ⟨P⟩ = 0.0250021 ± 4.0e-5 (τ = 0.51) attendu 0.0249896 z = +0.31 ; β=0.2: ⟨P⟩ = 0.0499700 ± 4.0e-5 (τ = 0.50) attendu 0.0499181 z = +1.29 ; L = 6, therm 1000, 20000 pas, simulé à 1.002×β, seuils |z| < 3"
+        },
+        {
+          "verdict": "INFO",
+          "id": "G-MUT-WC-1.002",
+          "detail": "(information, non verdict) PASS G-WC-MUT002 c₁ = 0.74841 ± 3.6e-5 (attendu 0.75, écart -0.212%, seuil 2%) ; σ(c₁)/c₁ = 4.79e-5 (seuil 5e-3) ; c₂ = 0.158 ; β=50: y = 0.75155 ± 4.2e-5 (τ = 0.6) ; β=100: y = 0.75004 ± 4.1e-5 (τ = 0.6) ; β=200: y = 0.74917 ± 4.1e-5 (τ = 0.6) ; β=400: y = 0.74880 ± 4.2e-5 (τ = 0.6) ; L = 8, therm 2000, 20000 pas, simulé à 1.002×β"
+        }
+      ]
+    },
+    {
+      "backend": "hip",
+      "horodatage": "2026-10-25T19:32:11Z",
+      "binaire_sha256": "522e11df1c1ad7faefe56a04f548af6ca73e23f13aa325d1eb109259630ec3e7",
+      "version": "0.1.0 | source_hash (kvu-source/1) : ebe6e73396744d34cac6afa19b2b53ced480d8a836503788fec67c10a17a84a6 | git_head : 97ec70b44219d3015a6ab43f5a82f1f8b8eab50f",
+      "tout_vert": true,
+      "skips_prescrits": [],
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "id": "G-ALG-1",
+          "detail": "su2 : fermeture [T^a,T^b] = i f T 0.000e0, ad-invariance 0.000e0, hermiticité et trace nulle 0.000e0 (seuil 1e-12), 3 générateurs"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-ALG-2",
+          "detail": "max|f^acd f^bcd − h∨ δ| = 0.000e0 (h∨ = 2, seuil 1e-12)"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-ALG-3",
+          "detail": "max|Tr(TT) − 0.5δ| = 0.000e0 ; T_F mesuré 0.500000000000000 ; C₂(F) = 0.750000000000000 (ΣTT ∝ 1 à 0.0e0) ; d_F C₂/d_adj = 0.500000000000000 (seuil 1e-12)"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-HAAR-1",
+          "detail": "⟨χ⟩ = -2.618e-4 ± 1.0e-3 (z = -0.26) ; ⟨|χ|²⟩ = 1.000638 ± 1.0e-3 (z = +0.64) ; n = 1000000, graine 26102605001, seuil |z| < 4"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-HAAR-2",
+          "detail": "⟨χ(U²)⟩ = -1.00015 ± 1.0e-3 (attendu -1, z = -0.15) ; n = 1000000, graine 26102605002, seuil |z| ≤ 4"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-HAAR-3",
+          "detail": "max|U†U−1| = 6.66e-16 ; max|det U−1| = 7.78e-16 ; structure 0.00e0 ; n = 1000000, graine 26102605003, seuil 1e-13"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-HAAR-3-CHAMP",
+          "detail": "départ chaud L = 8 (16384 liens), backend hip : max|U†U−1| = 6.66e-16 ; max|det U−1| = 6.67e-16 (seuil 1e-13)"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-SC",
+          "detail": "a = 0.248501 ± 8.4e-4 (attendu 0.250202006, z = -2.03) ; β=0.1: ⟨P⟩ = 0.0249057 ± 4.1e-5 (τ = 0.51) attendu 0.0249896 z = -2.06 ; β=0.2: ⟨P⟩ = 0.0499224 ± 4.0e-5 (τ = 0.50) attendu 0.0499181 z = +0.11 ; L = 6, therm 1000, 20000 pas, simulé à 1×β, seuils |z| < 3"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-WC",
+          "detail": "c₁ = 0.74992 ± 3.6e-5 (attendu 0.75, écart -0.011%, seuil 2%) ; σ(c₁)/c₁ = 4.79e-5 (seuil 5e-3) ; c₂ = 0.156 ; β=50: y = 0.75303 ± 4.2e-5 (τ = 0.6) ; β=100: y = 0.75149 ± 4.2e-5 (τ = 0.6) ; β=200: y = 0.75067 ± 4.2e-5 (τ = 0.6) ; β=400: y = 0.75032 ± 4.2e-5 (τ = 0.6) ; L = 8, therm 2000, 20000 pas, simulé à 1×β"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-UNIT-F64",
+          "detail": "max||q|−1| = 2.220e-16 après 10000 pas (1 HB + 4 OR) ; L = 6, β = 2.3, graine 26102605301, backend hip, seuil 1e-13"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-UNIT-F32",
+          "detail": "max||q|−1| = 1.516e-7 après 10000 pas (1 HB + 4 OR) ; L = 6, β = 2.3, graine 26102605301, backend hip, seuil 2e-6"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-REG-2.3",
+          "detail": "β = 2.3 : ⟨P⟩ = 0.6029603 ± 1.2e-4 (τ = 1.88, n = 10000) ; archivé 0.6029637(53e-7) ; z = -0.03 (seuil 3) ; L = 6, graine 2510023, 2000+10000 pas, backend hip"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-REG-2.5",
+          "detail": "β = 2.5 : ⟨P⟩ = 0.6528555 ± 7.3e-5 (τ = 1.10, n = 10000) ; archivé 0.6529010(31e-7) ; z = -0.62 (seuil 3) ; L = 6, graine 2510025, 2000+10000 pas, backend hip"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-ALG",
+          "detail": "mutant ROUGE comme attendu : générateur retiré → FAIL G-ALG-1 su2 : fermeture [T^a,T^b] = i f T 7.071e-1, ad-invariance 6.946e-1, hermiticité et trace nulle 0.000e0 (seuil 1e-12), 2 générateurs"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-HAAR2",
+          "detail": "mutant ROUGE comme attendu : QR naïf (U(2)) → FAIL G-HAAR-2 ⟨χ(U²)⟩ = +0.00096 ± 1.0e-3 (attendu -1, z = +1000.91) ; n = 1000000, graine 26102605002, seuil |z| ≤ 4"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-HAAR3",
+          "detail": "mutant ROUGE comme attendu : QR naïf (U(2)) → FAIL G-HAAR-3 max|U†U−1| = 6.66e-16 ; max|det U−1| = 2.00e0 ; structure 0.00e0 ; n = 1000000, graine 26102605003, seuil 1e-13"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-SC",
+          "detail": "mutant ROUGE comme attendu : β × 1,05 → FAIL G-SC-MUT a = 0.261408 ± 8.3e-4 (attendu 0.250202006, z = +13.57) ; β=0.1: ⟨P⟩ = 0.0261666 ± 4.0e-5 (τ = 0.50) attendu 0.0249896 z = +29.40 ; β=0.2: ⟨P⟩ = 0.0523850 ± 4.0e-5 (τ = 0.50) attendu 0.0499181 z = +61.37 ; L = 6, therm 1000, 20000 pas, simulé à 1.05×β, seuils |z| < 3"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-WC",
+          "detail": "mutant ROUGE comme attendu : β × 1,05 → FAIL G-WC-MUT c₁ = 0.71419 ± 3.4e-5 (attendu 0.75, écart -4.774%, seuil 2%) ; σ(c₁)/c₁ = 4.75e-5 (seuil 5e-3) ; c₂ = 0.142 ; β=50: y = 0.71705 ± 3.9e-5 (τ = 0.6) ; β=100: y = 0.71562 ± 4.0e-5 (τ = 0.6) ; β=200: y = 0.71490 ± 3.9e-5 (τ = 0.6) ; β=400: y = 0.71456 ± 4.0e-5 (τ = 0.6) ; L = 8, therm 2000, 20000 pas, simulé à 1.05×β"
+        },
+        {
+          "verdict": "INFO",
+          "id": "G-MUT-SC-1.002",
+          "detail": "(information, non verdict) PASS G-SC-MUT002 a = 0.249806 ± 8.3e-4 (attendu 0.250202006, z = -0.48) ; β=0.1: ⟨P⟩ = 0.0249946 ± 4.0e-5 (τ = 0.50) attendu 0.0249896 z = +0.12 ; β=0.2: ⟨P⟩ = 0.0500172 ± 4.0e-5 (τ = 0.50) attendu 0.0499181 z = +2.47 ; L = 6, therm 1000, 20000 pas, simulé à 1.002×β, seuils |z| < 3"
+        },
+        {
+          "verdict": "INFO",
+          "id": "G-MUT-WC-1.002",
+          "detail": "(information, non verdict) PASS G-WC-MUT002 c₁ = 0.74844 ± 3.6e-5 (attendu 0.75, écart -0.208%, seuil 2%) ; σ(c₁)/c₁ = 4.75e-5 (seuil 5e-3) ; c₂ = 0.153 ; β=50: y = 0.75150 ± 4.1e-5 (τ = 0.6) ; β=100: y = 0.74999 ± 4.2e-5 (τ = 0.6) ; β=200: y = 0.74917 ± 4.1e-5 (τ = 0.6) ; β=400: y = 0.74884 ± 4.1e-5 (τ = 0.6) ; L = 8, therm 2000, 20000 pas, simulé à 1.002×β"
+        }
+      ]
+    }
+  ]
+}

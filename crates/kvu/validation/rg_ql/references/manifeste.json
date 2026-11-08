@@ -1,0 +1,79 @@
+{
+ "alpha_ape": 0.5,
+ "conversion_c16": "su2_hb::mat_to_quat (moyennes)",
+ "entrees": {
+  "L12_b2.3_c1_cfg_002000": {
+   "L": 12,
+   "chemin": "/chemin/vers/projet/chantiers/wilson_gpu_grandL_20260926/ensembles/production/L12_b2.3_c1/cfg_002000.npy",
+   "defaut_unitarite": 2.220446049250313e-16,
+   "sha256": "c8a70668f5935c942c2dd347875314be8af539a7639581d2679cd23a6fa2e143"
+  },
+  "s11": {
+   "L": 9,
+   "chemin": "../rg/fixtures/cfg_s11_q64.npy",
+   "defaut_unitarite": 3.3306690738754696e-16,
+   "sha256": "03966d2ccc7b8fcaaf2cbafad213e05e22de00e38a081102e4d6b100a6c1df5b"
+  },
+  "s13": {
+   "L": 9,
+   "chemin": "../rg/fixtures/cfg_s13_q64.npy",
+   "defaut_unitarite": 3.3306690738754696e-16,
+   "sha256": "48c145759a23f8fd8546370c64e8eb4d02bc0197be90acf7e5a05044bb838710"
+  },
+  "s7": {
+   "L": 9,
+   "chemin": "../rg/fixtures/cfg_s7_q64.npy",
+   "defaut_unitarite": 2.220446049250313e-16,
+   "sha256": "768b50a031d524a55d7338025cbe1ca8fbfcc69ec674a792da5e4b53f38c60e6"
+  }
+ },
+ "fichiers": {
+  "v_AGR1_L12_b2.3_c1_cfg_002000_q64.npy": "7e3cbd4d338e7aa952208d41507e79bdf91fdbf1aa4ede817159918361cee63c",
+  "v_AGR1_s11_q64.npy": "6068b6bf635f9ae9f922302631e81244446dc5e462975c4caa1cb729c1cbf780",
+  "v_AGR1_s13_q64.npy": "cc89eb019f5c92c88bfb766c312558df41b3718165d63df52306bca0324085f6",
+  "v_AGR1_s7_q64.npy": "0738418ed222ebaa57499a8e60aac00b51329c44139b77203c0f797986a80cc3",
+  "v_APE13_L12_b2.3_c1_cfg_002000_q64.npy": "2ffe806a34fcc07e75b0fd689b66f5e2f555c6a498d670564f21187e7aef2354",
+  "v_APE13_s11_q64.npy": "0c00c5d6c3146fa418616db91efe1d5e13c3e775690291434bb43ea0bca0b0d3",
+  "v_APE13_s13_q64.npy": "16c1944a58f318a16967d280a1c5f81cb637b668c738cae38a97cda016adfa5d",
+  "v_APE13_s7_q64.npy": "e1660e360d963fc31896761160e2117874f371d189ed518d7ffecfaae7646954",
+  "v_APE40_L12_b2.3_c1_cfg_002000_q64.npy": "e63325c75059bdd89f11396dce6684e8e1d3780d1feac4e2579652fc2d85fcf8",
+  "v_APE40_s11_q64.npy": "0485825236bc108c60dd88d9adf59593887373465660b2ad324dbee48db05a59",
+  "v_APE40_s13_q64.npy": "54f2eb1e07dd4b929eb99bde9a4f054e48454297fcacfaae708b3fd427ae521a",
+  "v_APE40_s7_q64.npy": "f578ae4b17dcde2829b05b1441c9b820d9dbd9aef2b1ea8b4b5f6f96e6b02928",
+  "v_APE6_L12_b2.3_c1_cfg_002000_q64.npy": "e21c98c7e21230bce998d4bbb330d0c8a0817a1dd1690faa5d2b63a529842108",
+  "v_APE6_s11_q64.npy": "2db47d1c948b399dad89b69b5242b81c59084e0cd9e47ed8698a005e8ec72736",
+  "v_APE6_s13_q64.npy": "fc86c018994cb093c049a69b4320db25835bbeb0d1b391e63de4b45089d478ee",
+  "v_APE6_s7_q64.npy": "007f2bd4fc76fdca33958353874756dbc915d887b5fae3fb127c8d1a62fd4a0f",
+  "v_DEC_L12_b2.3_c1_cfg_002000_q64.npy": "17ab0f774cbc591cd4aa773378ce6f270496fa16c46ef69187585b7932474bfc",
+  "v_DEC_s11_q64.npy": "a399cd2ea20f98ba02e7c1aa96f4ab8fbeac47b22b321205234e12caf046a615",
+  "v_DEC_s13_q64.npy": "5ffe4988bb33883aaa49e6a1687cd4fa3d295695a2cec59d76376cf132ed7af1",
+  "v_DEC_s7_q64.npy": "e2fc61958637990baa3e3197c1ef56a8332c980c8ca3f8749d6543b2b01757bf"
+ },
+ "format": "kvu-rg-ql-references/1",
+ "norme_min_projection": {
+  "v_AGR1_L12_b2.3_c1_cfg_002000_q64.npy": 0.7222282966363047,
+  "v_AGR1_s11_q64.npy": 0.7603138408033929,
+  "v_AGR1_s13_q64.npy": 0.8602271001919929,
+  "v_AGR1_s7_q64.npy": 0.7351510981197256,
+  "v_APE13_L12_b2.3_c1_cfg_002000_q64.npy": 0.3735265376250879,
+  "v_APE13_s11_q64.npy": 0.2826562251434997,
+  "v_APE13_s13_q64.npy": 0.27224648039244576,
+  "v_APE13_s7_q64.npy": 0.3252771899979667,
+  "v_APE40_L12_b2.3_c1_cfg_002000_q64.npy": 0.3735265376250879,
+  "v_APE40_s11_q64.npy": 0.2826562251434997,
+  "v_APE40_s13_q64.npy": 0.27224648039244576,
+  "v_APE40_s7_q64.npy": 0.3252771899979667,
+  "v_APE6_L12_b2.3_c1_cfg_002000_q64.npy": 0.3735265376250879,
+  "v_APE6_s11_q64.npy": 0.2826562251434997,
+  "v_APE6_s13_q64.npy": 0.27224648039244576,
+  "v_APE6_s7_q64.npy": 0.3252771899979667,
+  "v_DEC_L12_b2.3_c1_cfg_002000_q64.npy": null,
+  "v_DEC_s11_q64.npy": null,
+  "v_DEC_s13_q64.npy": null,
+  "v_DEC_s7_q64.npy": null
+ },
+ "numpy": "2.5.3",
+ "operateurs_py": "/chemin/vers/projet/chantiers/vision_20261025/calculs/BLOC2_operateurs/code/bloc2/operateurs.py",
+ "operateurs_py_sha256": "c8bf41ede9e6f010c2d16d3503511c2cdbefae8aa80f0c27f03e8c742331d515",
+ "python": "3.14.4"
+}

@@ -1,0 +1,141 @@
+{
+  "schema": "kvu-groupe-cert/1",
+  "groupe": "sp4",
+  "certificats": [
+    {
+      "backend": "cpu",
+      "horodatage": "2026-10-26T03:56:04Z",
+      "binaire_sha256": "c39509acdcc32d951f7cb1d7e36b862de708a2d93495a4e887969bfdb919d839",
+      "version": "0.1.0 | source_hash (kvu-source/1) : 920231f3a128d79c9883d087ab1405fa8133d6ef51f61f8ddc5222847e25d29c | git_head : 8808e5b5069c4b9d134ba24380a11c7db209ff08",
+      "tout_vert": true,
+      "skips_prescrits": [],
+      "verdicts": [
+        {
+          "verdict": "PASS",
+          "id": "Fiche",
+          "detail": "sp4 : d_F = 4, d_adj = 10, h∨ = 3, pseudoréel, 10 générateurs normalisés une fois (T_F gelé ½, aucune gate ne les renormalise)"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-ALG-1",
+          "detail": "sp4 : fermeture [T^a,T^b] = i f T 1.570e-16, ad-invariance 2.094e-16 (50 tirages de Haar, graine 26102616001), hermiticité et trace nulle 0.000e0 (seuil 1e-12), 10 générateurs"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-ALG-2",
+          "detail": "max|f^acd f^bcd − h∨ δ| = 8.882e-16 (h∨ = 3, f calculés depuis les T de la fiche sans renormalisation, seuil 1e-12)"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-ALG-3",
+          "detail": "max|Tr(TT) − 0.5δ| = 1.110e-16 ; T_F mesuré 0.500000000000000 ; C₂(F) = 1.250000000000000 (ΣTT ∝ 1 à 0.0e0) ; d_F C₂/d_adj = 0.500000000000000 (seuil 1e-12)"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-ALG-DIM",
+          "detail": "dim ker(H ↦ HᵀJ + JH) dans u(4) = 10 (rang 6/16, σ_min/σ_max du rang plein 7.07e-1) ; contrainte sur les 10 générateurs de la fiche 0.00e0 ; rang des générateurs 10"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-HAAR-1",
+          "detail": "z(⟨χ⟩ = 0) = -0.89 ; z(⟨|χ|²⟩ = 1) = -0.55 ; n = 1000000, graine 26102616001, seuil |z| < 4"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-HAAR-2",
+          "detail": "⟨χ(U²)⟩ = -0.99891 ± 1.4e-3 (attendu −1, z = +0.77) ; n = 1000000, graine 26102616002, seuil |z| ≤ 4"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-HAAR-3",
+          "detail": "max|U†U−1| = 7.77e-16 ; max|det U−1| = 1.33e-15 ; max|UᵀJU−J| = 6.66e-16 ; n = 1000000, graine 26102616003, seuil 1e-13"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-HAAR-3-CHAMP",
+          "detail": "départ chaud L = 8 (16384 liens), graine 26102616004 : max|U†U−1| = 6.66e-16 ; max|det U−1| = 9.16e-16 ; max|UᵀJU−J| = 5.55e-16 (seuil 1e-13)"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-SC-SERIE",
+          "detail": "série exacte à 40 termes (moments de Weyl, quadrature 128²) : c₁ = 0.062500000000000 (1/16), |c₂| = 0.0e0, |c₃| = 1.6e-17 (écart max 3.3e-16, seuil 1e-12) ; moments m₀…m₈ à 1.1e-14 de (1,0,1,0,3,0,14,0,84) ; a recalculé 0.06249999750641864471 contre a_attendu gelé 0.06249999750641898472 (écart 3.4e-16, seuil 1e-13)"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-SC",
+          "detail": "a = 0.0625978 ± 2.6e-4 (attendu 0.0624999975, z = +0.37) ; β=0.1: ⟨P⟩ = 0.00625407 ± 1.3e-5 (τ = 0.50) attendu 0.00625000 z = +0.32 ; β=0.2: ⟨P⟩ = 0.01249672 ± 1.3e-5 (τ = 0.50) attendu 0.01250000 z = -0.26 ; σ_a/a = 4.19e-3 (plafond 0.01) ; L = 6, therm 1000, 50000 pas ; N lus = 50000 ; seuils |z| < 3"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-WC",
+          "detail": "c₁ = 2.49939 ± 1.1e-4 (attendu 2.5, écart -0.024%, seuil 2%) ; σ(c₁)/c₁ = 4.31e-5 (plafond 0.005) ; c₂ = 1.956 ; β=50: y = 2.53869 ± 1.3e-4 (τ = 1.5) ; β=100: y = 2.51860 ± 1.2e-4 (τ = 1.4) ; β=200: y = 2.50907 ± 1.2e-4 (τ = 1.4) ; β=400: y = 2.50460 ± 1.3e-4 (τ = 1.6) ; L = 8, therm 2000, 20000 pas ; N lus = 20000"
+        },
+        {
+          "verdict": "INFO",
+          "id": "G-WC-SERRE",
+          "detail": "|c₁/(c₁_attendu (1 − 1/V)) − 1| = 3.708e-7 contre max(4σ(c₁)/c₁, 0,002) = 2.000e-3 (V = 8⁴ ; non un verdict)"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-UNIT",
+          "detail": "max(|U†U−1|, |UᵀJU−J|) = 6.661e-16 après 10000 pas (dont 1000 de thermalisation) ; L = 6, β = 8, graine 26102616301, ε final 0.27000, seuil 1e-13"
+        },
+        {
+          "verdict": "INFO",
+          "id": "G-UNIT-AVANT-REPROJ",
+          "detail": "défaut maximal des liens du dernier pas AVANT ré-unitarisation : 1.554e-15 (non un verdict)"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-REG",
+          "detail": "⟨P⟩ = 0.77382622 ± 3.16e-6 (jackknife 16 chaînes, N = 1000 pas par chaîne, L = 16, β = 12) ; référence sp4_plat_v3 0.77383173 ± 6.99e-6 ; t = -0.719 (seuil de Hsu 4.0942553, ν = 9) ; σ ≤ 1.5e-5 exigé ; ν_WS = 12.7 (INFO) ; la calibration ne vaut que sous le modèle déclaré (moyennes gaussiennes, variances estimées indépendantes) ; volume 16 contre 32 non corrigé ; N lus = 1000"
+        },
+        {
+          "verdict": "INFO",
+          "id": "G-REG-L16",
+          "detail": "6 plaquettes consignées à L = 16, β = 12 (sp4_plat_s9100{1,2,3}.log) : 0.773517, 0.773543, 0.773405, 0.773854, 0.774010, 0.773966 ; moyenne 0.773716 ; non un verdict"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-ALG",
+          "detail": "mutant ROUGE comme attendu : générateur d'indice 9 retiré → fermeture 5.000e-1 (seuil 1e-12), hermiticité 0.0e0"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-HAAR2",
+          "detail": "mutant ROUGE comme attendu : QR naïf (U(4)) → ⟨χ(U²)⟩ = -0.00011 ± 1.0e-3, z(FS = −1) = +999.6"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-HAAR3",
+          "detail": "mutant ROUGE comme attendu : QR naïf (U(4)) → max|UᵀJU−J| = 2.00e0, max|det−1| = 2.00e0 (seuil 1e-13)"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-SC",
+          "detail": "mutant ROUGE comme attendu : β × 1,05 → a = 0.0659372 ± 2.6e-4, z_a = +13.0 (critère |z_a| ≥ 3) ; σ_a/a = 4.22e-3"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-WC",
+          "detail": "mutant ROUGE comme attendu : β × 1,05 → c₁ = 2.38035 ± 1.0e-4, écart -4.79% (critère > 2 %) ; σ(c₁)/c₁ = 4.28e-5"
+        },
+        {
+          "verdict": "PASS",
+          "id": "G-MUT-REG",
+          "detail": "mutant ROUGE comme attendu : β × 1,05 = 12,6 → ⟨P⟩ = 0.78576556 ± 4.64e-6, t = +1422.1 (critère |t| ≥ 4.0942553)"
+        },
+        {
+          "verdict": "INFO",
+          "id": "G-MUT-SC-1.002",
+          "detail": "(information, non verdict) PASS G-MUT-SC-1.002 a = 0.0625914 ± 2.6e-4 (attendu 0.0624999975, z = +0.35) ; β=0.1: ⟨P⟩ = 0.00626087 ± 1.3e-5 (τ = 0.50) attendu 0.00625000 z = +0.86 ; β=0.2: ⟨P⟩ = 0.01252518 ± 1.3e-5 (τ = 0.50) attendu 0.01250000 z = +1.99 ; σ_a/a = 4.16e-3 (plafond 0.01) ; L = 6, therm 1000, 50000 pas ; N lus = 50000 ; seuils |z| < 3"
+        },
+        {
+          "verdict": "INFO",
+          "id": "G-MUT-WC-1.002",
+          "detail": "(information, non verdict) PASS G-MUT-WC-1.002 c₁ = 2.49450 ± 1.0e-4 (attendu 2.5, écart -0.220%, seuil 2%) ; σ(c₁)/c₁ = 4.18e-5 (plafond 0.005) ; c₂ = 1.946 ; β=50: y = 2.53358 ± 1.2e-4 (τ = 1.5) ; β=100: y = 2.51363 ± 1.2e-4 (τ = 1.5) ; β=200: y = 2.50410 ± 1.2e-4 (τ = 1.4) ; β=400: y = 2.49967 ± 1.2e-4 (τ = 1.5) ; L = 8, therm 2000, 20000 pas ; N lus = 20000"
+        }
+      ]
+    }
+  ]
+}

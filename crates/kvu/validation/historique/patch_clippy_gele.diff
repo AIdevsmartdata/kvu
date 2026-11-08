@@ -1,0 +1,41 @@
+diff --git a/crates/kvu/src/commun.rs b/crates/kvu/src/commun.rs
+index e688342..a69dec5 100644
+--- a/crates/kvu/src/commun.rs
++++ b/crates/kvu/src/commun.rs
+@@ -258,7 +258,7 @@ pub struct ChampHote {
+ impl ChampHote {
+     /// Champ froid (toutes les matrices = identité). L pair ≥ 2.
+     pub fn froid(l: usize) -> Resultat<Self> {
+-        if l < 2 || l % 2 != 0 {
++        if l < 2 || !l.is_multiple_of(2) {
+             return Err(Erreur::Config(format!("L = {l} : L pair ≥ 2 requis")));
+         }
+         let v = l * l * l * l;
+diff --git a/crates/kvu/src/heritage.rs b/crates/kvu/src/heritage.rs
+index 4c0b627..9c60125 100644
+--- a/crates/kvu/src/heritage.rs
++++ b/crates/kvu/src/heritage.rs
+@@ -8,18 +8,22 @@
+ //!
+ //! - `ffi`, `wrap`       : dlopen de libamdhip64 + libhiprtc, enveloppes RAII (M1, 10/07) ;
+ //! - `su2_hb`           : référence CPU FP64 du bain thermique SU(2) (K1, 26/09), bit-compatible
+-//!                        avec su2_sweep.hip à l'ULP des transcendantes près ;
++//!   avec su2_sweep.hip à l'ULP des transcendantes près ;
+ //! - `manifest`         : SHA-256, recettes de source_hash, répertoire de run atomique (K8).
+ 
+ // Couche HIP historique (le runtime unifié `crate::gpu` s'appuie dessus pour le backend HIP).
+ // `wrap.rs` importe `super::ffi` : les deux fichiers sont donc frères dans ce module.
+ #[path = "../../../src/hip/ffi.rs"]
++#[allow(clippy::all)]
+ pub mod ffi;
+ #[path = "../../../src/hip/wrap.rs"]
++#[allow(clippy::all)]
+ pub mod wrap;
+ 
+ #[path = "../../../src/su2_hb.rs"]
++#[allow(clippy::all)]
+ pub mod su2_hb;
+ 
+ #[path = "../../../src/manifest.rs"]
++#[allow(clippy::all)]
+ pub mod manifest;

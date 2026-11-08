@@ -1,0 +1,8 @@
+t1_dlog rc=0 durée=3s
+t2_jouet rc=0 durée=7s
+t3_chemins rc=0 durée=4s
+t4_balaban rc=0 durée=113s
+t5_u1 rc=0 durée=82s
+t6_beta_infini rc=0 durée=46s
+t7_rattle_arbitrage rc=0 durée=204s
+t8_puissance_mutant rc=0 durée=123s
