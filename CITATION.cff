@@ -19,6 +19,15 @@ authors:
     affiliation: "Independent Researcher, Oloron-Sainte-Marie, France"
 license: Apache-2.0
 version: "0.1.0"
+doi: "10.5281/zenodo.24062152"
+date-released: "2026-11-08"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.24062151"
+    description: "Concept DOI of kvu on Zenodo (all versions; resolves to the latest version)."
+  - type: doi
+    value: "10.5281/zenodo.24062152"
+    description: "Version 0.1.0 (8 November 2026)."
 repository-code: "https://github.com/AIdevsmartdata/kvu"
 keywords:
   - lattice gauge theory
