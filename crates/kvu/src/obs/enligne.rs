@@ -328,6 +328,11 @@ impl MesureEnLigne for MesureWilson {
     fn nom(&self) -> &str {
         "wilson"
     }
+    fn fichiers_en_ajout(&self, _cfg: &crate::su2::run::ConfigRun) -> Vec<crate::su2::run::FichierEnAjout> {
+        // 0.1.1 (PUB-13) : une ligne par (r, t), r = 1..R puis t = 1..T (ordre de `lignes_wilson`)
+        let cles = (1..=self.params.r_max).flat_map(|r| (1..=self.params.t_max).map(move |t| format!("{r},{t}"))).collect();
+        vec![crate::su2::run::FichierEnAjout { nom: "wilson.csv".into(), entete: "pas,r,t,W".into(), n_cles: 2, cles }]
+    }
     fn periode(&self) -> usize {
         self.periode
     }
@@ -358,6 +363,11 @@ impl MesureEnLigne for MesurePolyakovCorr {
     fn nom(&self) -> &str {
         "polyakov_corr"
     }
+    fn fichiers_en_ajout(&self, cfg: &crate::su2::run::ConfigRun) -> Vec<crate::su2::run::FichierEnAjout> {
+        // 0.1.1 (PUB-13) : une ligne par rayon r = 0..L/2 (`correlateur_polyakov`)
+        let cles = (0..=cfg.lot.l / 2).map(|r| r.to_string()).collect();
+        vec![crate::su2::run::FichierEnAjout { nom: "polyakov_corr.csv".into(), entete: "pas,r,C".into(), n_cles: 1, cles }]
+    }
     fn periode(&self) -> usize {
         self.periode
     }
@@ -387,6 +397,18 @@ struct MesureFlot {
 impl MesureEnLigne for MesureFlot {
     fn nom(&self) -> &str {
         "flot"
+    }
+    fn fichiers_en_ajout(&self, _cfg: &crate::su2::run::ConfigRun) -> Vec<crate::su2::run::FichierEnAjout> {
+        // 0.1.1 (PUB-13) : une ligne par échantillon t = k·dt du flot (mêmes k et même arithmétique que `assembler_courbe`), une seule
+        // ligne de `flot_t0.csv` par pas
+        let cles = match super::ref_cpu::nombre_de_pas(&self.params) {
+            Ok(n) => super::ref_cpu::pas_mesures(n, self.params.mesure_chaque).iter().map(|&k| g17(k as f64 * self.params.dt)).collect(),
+            Err(_) => Vec::new(),
+        };
+        vec![
+            crate::su2::run::FichierEnAjout { nom: "flot.csv".into(), entete: "pas,t,E_plaq,E_trefle,t2E,Q".into(), n_cles: 1, cles },
+            crate::su2::run::FichierEnAjout::une_ligne("flot_t0.csv", "pas,t0,w0"),
+        ]
     }
     fn periode(&self) -> usize {
         self.periode

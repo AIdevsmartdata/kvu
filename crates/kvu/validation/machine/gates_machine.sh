@@ -14,16 +14,18 @@ DEPOT=$(cd "$KVU/../.." && pwd)
 HOTE=$(cat /proc/sys/kernel/hostname)
 HOME_DIR=${HOME:-/home/utilisateur}
 
-case "$HOTE" in
+# Machine ATTENDUE explicite (le nom d'hôte réel n'est plus écrit dans le dépôt) : KVU_TEST_MACHINE_ATTENDUE=acemagic|gamer.
+# Le test MACH-1 vérifie ensuite que la détection (hôte, CPU ou GPU, selon la fixture) donne bien cette machine.
+case "${KVU_TEST_MACHINE_ATTENDUE:-}" in
   acemagic)
     MACHINE=acemagic; CARGO=cargo; JOBS=8; AFFINITE=""; SEUIL=110; FEATURES=""
     CIBLE_DEFAUT=/chemin/vers/projet/chantiers/kevinotron_unification/cibles/$(basename "$DEPOT") ;;
-  pc-nvidia-exemple)
+  gamer)
     MACHINE=gamer; CARGO=$HOME_DIR/.cargo/bin/cargo; JOBS=6; AFFINITE="12-19"; SEUIL=60; FEATURES="--features cuda"
     CIBLE_DEFAUT=$HOME_DIR/kvu_unif/cibles/$(basename "$DEPOT")
     export LD_LIBRARY_PATH=/usr/local/cuda-13.3/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ;;
   *)
-    echo "SKIP MACH-1 : hôte $HOTE inconnu, les gates ne valent rien ici"; exit 1 ;;
+    echo "SKIP MACH-1 : KVU_TEST_MACHINE_ATTENDUE absente ou inconnue (« ${KVU_TEST_MACHINE_ATTENDUE:-} » ; hôte $HOTE) : poser acemagic ou gamer ; les gates ne valent rien ici"; exit 1 ;;
 esac
 export CARGO_TARGET_DIR=${CARGO_TARGET_DIR:-$CIBLE_DEFAUT}
 

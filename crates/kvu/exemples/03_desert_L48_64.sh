@@ -22,4 +22,4 @@ VERROU="${VERROU:-/tmp/kevinotron_gpu.lock}"
 lancer "$KVU_BIN" su2 gen --L "$L" --beta 2.5 --graine 20261004 --start hot --therm "$THERM" --nmeas "$PAS" --skip 1 --nor 4 \
   --precision "$PREC" --format q64 --mesures "$MESURES" --dump-every "$DUMP" --reprise-every 500 $BACKEND \
   --outdir "$SORTIE/desert_L$L" || exit $?
-echo "# Un run interrompu se REPREND à l'octet :  $KVU_BIN su2 gen --reprendre $SORTIE/desert_L$L"
+echo "# Un run interrompu se REPREND (la spécification --mesures est rechargée de mesures_en_ligne.json ; un run créé par kvu 0.1.0 exige de repasser la MÊME --mesures) :  $KVU_BIN su2 gen --reprendre $SORTIE/desert_L$L"

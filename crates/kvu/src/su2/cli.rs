@@ -308,15 +308,31 @@ fn executer_gen(g: &ArgMatches) -> Resultat<i32> {
         None => (config_run(g, backend)?, false),
     };
     let archive = super::archive_cli::preparer_gen(g, &mut cfg, reprendre)?;
-    let mut mesures: Vec<Box<dyn MesureEnLigne>> = match texte(g, "mesures") {
+    // 0.1.1 (PUB-01) : à la reprise, une --mesures absente est RECHARGÉE de la spécification enregistrée (comme la torsion) ;
+    // une --mesures présente est comparée à celle-ci par le run, avant toute écriture.
+    let spec_mesures: Option<String> = match (texte(g, "reprendre"), texte(g, "mesures")) {
+        (Some(d), None) => run::charger_spec_mesures(Path::new(d))?.map(|e| {
+            eprintln!("su2 gen : reprise : --mesures « {} » rechargée de {}", e.spec, run::NOM_FICHIER_MESURES);
+            e.spec
+        }),
+        // une --mesures ÉQUIVALENTE à la spécification enregistrée est remplacée par celle-ci (noms des sorties inchangés) ;
+        // une --mesures différente est refusée par le run
+        (Some(d), Some(m)) => match run::charger_spec_mesures(Path::new(d))? {
+            Some(e) if run::specs_mesures_equivalentes(m, &e.spec) => Some(e.spec),
+            _ => Some(m.to_string()),
+        },
+        (_, m) => m.map(str::to_string),
+    };
+    let mut mesures: Vec<Box<dyn MesureEnLigne>> = match spec_mesures.as_deref() {
         Some(spec) => crate::obs::enligne::analyser(spec)?,
         None => Vec::new(),
     };
-    let (r, termine) = run::executer_options(app.as_ref(), &cfg, &opts, &mut mesures, reprendre, arret)?;
+    let (r, termine) =
+        run::executer_avec_mesures(app.as_ref(), &cfg, &opts, &mut mesures, spec_mesures.as_deref(), reprendre, arret)?;
     super::archive_cli::apres_gen(&cfg, archive)?;
     // WP7 : un run terminé qui portait `bloc:3` écrit son manifeste kvu-regen/1 (`parametres.mesures`).
     if termine {
-        if let Some(spec) = texte(g, "mesures").filter(|s| s.split(',').any(|e| e.trim().starts_with("bloc:"))) {
+        if let Some(spec) = spec_mesures.as_deref().filter(|s| s.split(',').any(|e| e.trim().starts_with("bloc:"))) {
             let p = crate::rg::en_ligne::ecrire_manifeste_regen(&cfg.outdir, spec)?;
             eprintln!("su2 gen : manifeste kvu-regen/1 écrit : {}", p.display());
         }

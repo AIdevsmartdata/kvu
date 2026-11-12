@@ -1,6 +1,6 @@
 [package]
 name = "kvu"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Générateur et banc de mesure pour les théories de jauge sur réseau (SU(2) Wilson 4D) : noyaux GPU à source unique HIP/CUDA, référence CPU F64, provenance, archives, action effective, flux de bloc, torsion de 't Hooft"
 authors = ["Kevin Remondiere <kevin.remondiere@gmail.com>"]

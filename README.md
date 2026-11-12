@@ -3,19 +3,22 @@
 **kvu** est un générateur et un banc de mesure pour les théories de jauge sur réseau, centré sur la théorie de Yang–Mills SU(2)
 à action de Wilson en quatre dimensions. Un seul code de noyaux GPU sert deux backends, HIP (AMD) et CUDA (NVIDIA), compilés à
 l'exécution, à côté d'une référence CPU en double précision. Chaque exécution écrit un manifeste de provenance (binaire, commit,
-empreinte des sources, graines, options), et les configurations peuvent être archivées, vérifiées et régénérées au bit près.
+empreinte des sources, graines, options), et les configurations peuvent être archivées et vérifiées ; une génération est
+déterministe (même binaire, même backend, même machine : mêmes octets), et `kvu regen` rejoue au bit près les manifestes de `su2 boite` et de
+`fibre echantillonner` (pas encore ceux de `su2 gen` : voir « Limites connues »).
 
 *In English.* kvu is a Rust command-line tool for lattice gauge theory (mainly 4D SU(2) with the Wilson action): a Monte Carlo
 generator with one GPU kernel source for HIP and CUDA plus an FP64 CPU reference, measurement tools (Wilson loops, Polyakov
 loops, gradient flow, topology, block-spin RG maps, truncated effective-action couplings, block-face fluxes, 't Hooft twisted
-boundary conditions), provenance manifests, verifiable archives and bit-exact regeneration. Documentation is in French.
+boundary conditions), provenance manifests, verifiable archives and deterministic runs (bit-exact replay by `kvu regen` for
+`su2 boite` and constrained-fibre runs; for `su2 gen`, rerun the command recorded in the manifest). Documentation is in French.
 
 > **Ce que kvu est, et ce qu'il n'est pas.** kvu est un **instrument**. Il ne contient aucun résultat physique et n'en
 > revendique aucun : ni trou de masse, ni limite du continu, ni constante nouvelle. Les modules décrits ci-dessous mesurent
 > des quantités définies précisément sur des configurations données ; leurs tests vérifient qu'ils les mesurent bien
 > (réponses connues, références indépendantes, mutants), pas ce que ces quantités signifient.
 
-Version : **0.1.0** (novembre 2026). Licence : **Apache-2.0** (`LICENSE`, `NOTICE`). Auteur : Kévin Rémondière.
+Version : **0.1.1** (novembre 2026). Licence : **Apache-2.0** (`LICENSE`, `NOTICE`). Auteur : Kévin Rémondière.
 Le code et la documentation ont été écrits par des agents de codage IA sous la direction de l'auteur (`AI_USE.md`).
 
 ## Contenu
@@ -30,7 +33,7 @@ Le code et la documentation ont été écrits par des agents de codage IA sous l
 | `kvu rg` | blocage de Bałaban L_b = 3 et témoin de Swendsen b = 2, domaine, estimateurs de couplage effectif, blocage quasi-local, et les modules M2 et M3 |
 | `kvu hess` | hessienne de l'action de Wilson sur un fond donné (H·v, λ_min généralisé par LOBPCG) |
 | `kvu groupe`, `kvu gen` | registre de groupes (SU(2), Sp(4)) avec batterie de gates à réponse connue ; générateur générique Sp(4) sur CPU |
-| `kvu store`, `kvu fetch`, `kvu regen`, `kvu queue` | store d'ensembles, rapatriement vérifié, régénération depuis un manifeste, file de jobs |
+| `kvu store`, `kvu fetch`, `kvu regen`, `kvu queue` | store d'ensembles, rapatriement vérifié, régénération depuis un manifeste (`su2 boite`, `fibre echantillonner`, manifestes historiques ; pas `su2 gen` : voir « Limites connues »), file de jobs |
 | `kvu valide`, `kvu bench` | suite de validation (gates), bancs de débit |
 
 Les quatre modules ajoutés en dernier (novembre 2026) sont des **instruments** :
@@ -123,6 +126,13 @@ supposent ses données : elles ne tournent pas telles quelles ailleurs.
   erreur de normalisation (instanton : Q = 1 à 4e-4 ; ⟨Q²⟩ après cooling conforme à la littérature) mais l'effet de
   discrétisation connu de cette définition ; la gate est déclassée, son seuil n'a pas été changé. Pour une charge entière,
   utiliser `kvu obs topo` (charge améliorée). Détail : `docs/DEFAUTS_CONNUS.md`.
+- **Régénération** : `kvu regen` rejoue au bit près les manifestes `kvu-regen/1` de `su2 boite` et de `fibre echantillonner`
+  (`DIR/manifest_regen.json`) et lit les manifestes historiques `su2_hip/1` et `su2_gen/1` (rejeu sur GPU, binaire admis). Il ne
+  rejoue PAS un run `su2 gen` : son `manifest.json` n'est pas reconnu (code 4) et le `regen_bloc3.json` de `--mesures bloc:3`
+  échoue au rejeu (code 8) ; défaut PUB-15 de `docs/DEFAUTS_CONNUS.md`. Parade, vérifiée : relancer la commande enregistrée dans
+  `manifest.json` (clé `argv`), avec le même binaire et le même backend sur la même machine, dans un dossier `--outdir` neuf et
+  sans `--arret-apres` ni `--fenetre-s`, puis comparer les sha256 des fichiers à ceux du manifeste (commandes :
+  `crates/kvu/GUIDE.md`, « Régénération des ensembles »).
 - **M2** n'estime qu'une action tronquée à quatre boucles et un pas de blocage ; **M4** est CPU F64 et étalonné à L = 4 ;
   **M3** suppose L multiple de 3. Aucun de ces modules ne borne ce qu'il ne mesure pas.
 - **Noms hérités** : les profils de machines s'appellent `acemagic` et `gamer` (les deux machines de référence), et les

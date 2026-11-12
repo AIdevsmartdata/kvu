@@ -44,6 +44,314 @@ pub trait MesureEnLigne {
     /// et écrit dans `sortie` (fichiers propres à la mesure).
     fn mesurer(&mut self, app: Option<&Appareil>, champ: Option<&ChampGpu>, hote: Option<&crate::commun::ChampHote>,
                chaine: usize, pas: u64, sortie: &std::path::Path) -> Resultat<()>;
+    /// 0.1.1 (PUB-13) : fichiers écrits EN AJOUT par la mesure dans chaque répertoire de chaîne, avec leur FORMAT déclaré (en-tête
+    /// exact, clés attendues à chaque pas). Défaut : aucun.
+    fn fichiers_en_ajout(&self, _cfg: &ConfigRun) -> Vec<FichierEnAjout> {
+        Vec::new()
+    }
+    /// 0.1.1 (PUB-13) : restauration d'un point de reprise de pas `pas_point`, AVANT tout balayage. Défaut : [`restaurer_fichiers_en_ajout`]
+    /// sur [`MesureEnLigne::fichiers_en_ajout`] (validation complète du préfixe, puis troncature durable).
+    fn restaurer(&mut self, cfg: &ConfigRun, dirs: &[PathBuf], pas_point: u64) -> Resultat<()> {
+        restaurer_fichiers_en_ajout(dirs, &self.fichiers_en_ajout(cfg), cfg, self.periode() as u64, pas_point)
+    }
+}
+
+/// 0.1.1 (PUB-13) : format déclaré d'un fichier écrit en ajout par une mesure en ligne. Première ligne = `entete` EXACT ; chaque
+/// ligne de données a autant de colonnes que l'en-tête, la première est le pas total ; à chaque pas, il y a exactement
+/// `cles.len()` lignes, dont les colonnes 2 à 1 + `n_cles` (jointes par `,`) valent `cles[0]`, `cles[1]`… dans l'ordre
+/// (`n_cles = 0` et `cles = [""]` : une seule ligne par pas).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct FichierEnAjout {
+    pub nom: String,
+    pub entete: String,
+    pub n_cles: usize,
+    pub cles: Vec<String>,
+}
+
+impl FichierEnAjout {
+    /// Fichier à une ligne par pas.
+    pub fn une_ligne(nom: &str, entete: &str) -> FichierEnAjout {
+        FichierEnAjout { nom: nom.into(), entete: entete.into(), n_cles: 0, cles: vec![String::new()] }
+    }
+}
+
+/// 0.1.1 (PUB-13) : restauration générique des fichiers en ajout d'une mesure en ligne au point de reprise `pas_point` (toutes les
+/// mesures : wilson, polyakov_corr, flot, bloc). Le préfixe conservé (lignes de pas ≤ `pas_point`) est d'abord VALIDÉ en
+/// entier contre le format déclaré : en-tête exact, nombre de colonnes, calendrier {therm + m·skip : 1 ≤ m ≤ nmeas,
+/// m % période = 0, ≤ `pas_point`}, clés et multiplicité de chaque pas (format inconnu, doublon, ligne manquante ⇒
+/// refus code 2 citant le pas fautif, AUCUNE modification). Ensuite seulement, les lignes postérieures au point (arrêt brutal)
+/// et une ligne partielle sont retirées, troncature synchronisée.
+pub fn restaurer_fichiers_en_ajout(
+    dirs: &[PathBuf],
+    fichiers: &[FichierEnAjout],
+    cfg: &ConfigRun,
+    periode: u64,
+    pas_point: u64,
+) -> Resultat<()> {
+    for d in dirs {
+        for f in fichiers {
+            restaurer_un_fichier(&d.join(&f.nom), f, cfg, periode, pas_point)?;
+        }
+    }
+    Ok(())
+}
+
+fn restaurer_un_fichier(p: &Path, f: &FichierEnAjout, cfg: &ConfigRun, periode: u64, pas_point: u64) -> Resultat<()> {
+    let (therm, skip) = (cfg.therm, cfg.skip);
+    let pas_m = move |m: u64| therm.saturating_add(m.saturating_mul(skip));
+    let premier = if periode == 0 { cfg.nmeas.saturating_add(1) } else { periode };
+    let mut attendus = (premier..=cfg.nmeas).step_by(periode.max(1) as usize).map(pas_m).take_while(|&q| q <= pas_point);
+    let contenu = match fs::read(p) {
+        Ok(c) => c,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Vec::new(),
+        Err(e) => return Err(io("lecture", p, e)),
+    };
+    let erreur = |m: String| {
+        Erreur::Config(format!(
+            "reprise : {} : préfixe des mesures en ligne invalide au point de reprise (pas {pas_point} ; calendrier, format et \
+             clés contrôlés) : {m} ; refus, fichier inchangé",
+            p.display()
+        ))
+    };
+    if contenu.is_empty() {
+        return match attendus.next() {
+            None => Ok(()),
+            Some(a) => Err(erreur(format!("fichier absent ou vide alors que le pas {a} est attendu (trou)"))),
+        };
+    }
+    let fin_entete = contenu.iter().position(|&b| b == b'\n').map(|i| i + 1).ok_or_else(|| erreur("en-tête incomplet".into()))?;
+    let entete = std::str::from_utf8(&contenu[..fin_entete - 1]).unwrap_or("");
+    if entete != f.entete {
+        return Err(erreur(format!("format inconnu : en-tête « {entete} » au lieu de « {} »", f.entete)));
+    }
+    let ncol = f.entete.split(',').count();
+    let (mut fin, mut position, mut coupe) = (fin_entete, fin_entete, false);
+    let (mut courant, mut rang) = (None::<u64>, 0usize);
+    for ligne in contenu[fin_entete..].split_inclusive(|&b| b == b'\n') {
+        position += ligne.len();
+        let complete = ligne.last() == Some(&b'\n');
+        let texte = std::str::from_utf8(ligne).unwrap_or("").trim_end_matches('\n');
+        let champs: Vec<&str> = texte.split(',').collect();
+        let pas = champs.first().and_then(|x| x.parse::<u64>().ok());
+        match pas {
+            Some(q) if complete && q <= pas_point => {
+                if coupe {
+                    return Err(erreur(format!("ligne du pas {q} après une ligne postérieure au point ou illisible")));
+                }
+                if champs.len() != ncol {
+                    return Err(erreur(format!("pas {q} : {} colonnes au lieu de {ncol}", champs.len())));
+                }
+                if courant != Some(q) {
+                    if let Some(c) = courant {
+                        if rang != f.cles.len() {
+                            return Err(erreur(format!("pas {c} : {rang} ligne(s) au lieu de {} (ligne manquante)", f.cles.len())));
+                        }
+                    }
+                    match attendus.next() {
+                        Some(a) if a == q => {}
+                        Some(a) => return Err(erreur(format!("pas {q} trouvé, pas {a} attendu (trou ou doublon)"))),
+                        None => return Err(erreur(format!("pas {q} en trop (doublon ou hors calendrier)"))),
+                    }
+                    courant = Some(q);
+                    rang = 0;
+                }
+                let cle = champs[1..=f.n_cles.min(ncol - 1)].join(",");
+                match f.cles.get(rang) {
+                    Some(attendue) if *attendue == cle => {}
+                    Some(attendue) => {
+                        return Err(erreur(format!("pas {q} : clé « {cle} » au lieu de « {attendue} » (doublon ou ligne manquante)")))
+                    }
+                    None => return Err(erreur(format!("pas {q} : ligne en trop, clé « {cle} » (doublon)"))),
+                }
+                rang += 1;
+                fin = position;
+            }
+            _ => coupe = true,
+        }
+    }
+    if let Some(c) = courant {
+        if rang != f.cles.len() {
+            return Err(erreur(format!("pas {c} : {rang} ligne(s) au lieu de {} (ligne manquante)", f.cles.len())));
+        }
+    }
+    if let Some(a) = attendus.next() {
+        return Err(erreur(format!("pas {a} attendu absent (trou)")));
+    }
+    if fin < contenu.len() {
+        let fichier = OpenOptions::new().write(true).open(p).map_err(|e| io("ouverture", p, e))?;
+        fichier.set_len(fin as u64).map_err(|e| io("troncature", p, e))?;
+        fichier.sync_all().map_err(|e| io("synchronisation", p, e))?;
+        eprintln!(
+            "su2 gen : reprise : {} octet(s) retiré(s) de {} (mesures postérieures au point de reprise, pas {pas_point})",
+            contenu.len() - fin,
+            p.display()
+        );
+    }
+    Ok(())
+}
+
+/// 0.1.1 (PUB-01) : spécification `--mesures` d'un run, enregistrée à sa création dans `<outdir>/mesures_en_ligne.json`
+/// (schéma `kvu-mesures-en-ligne/1`), écrite seulement si `--mesures` est donné (un run sans mesure en ligne est inchangé à
+/// l'octet) et inscrite au manifeste avec son empreinte. À `--reprendre`, elle est rechargée si `--mesures` manque.
+pub const NOM_FICHIER_MESURES: &str = "mesures_en_ligne.json";
+
+/// Spécification enregistrée : texte normalisé et moteur effectif (hip, cuda ou cpu).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SpecMesuresRun {
+    pub spec: String,
+    pub backend: String,
+}
+
+/// Normalise un texte `--mesures` : éléments séparés par `,`, rognés, vides retirés.
+pub fn normaliser_spec_mesures(s: &str) -> String {
+    s.split(',').map(str::trim).filter(|e| !e.is_empty()).collect::<Vec<_>>().join(",")
+}
+
+/// Empreinte sha256 du compagnon consignée dans `manifest.json` (liste `fichiers`, inscrite à la CRÉATION avant tout calcul).
+fn empreinte_consignee_spec(dir: &Path) -> Option<String> {
+    let txt = fs::read_to_string(dir.join(manifest::NOM_MANIFESTE)).ok()?;
+    let v: Value = serde_json::from_str(&txt).ok()?;
+    v["fichiers"].as_array()?.iter().find(|f| f["nom"].as_str() == Some(NOM_FICHIER_MESURES))?["sha256"].as_str().map(str::to_string)
+}
+
+/// Spécification enregistrée dans `dir`, ou `None` si le run n'en a pas (créé sans `--mesures`, ou par la 0.1.0). Le compagnon
+/// doit être celui consigné au manifeste à la création, AVANT tout rechargement : modifié, consigné mais disparu, ou présent
+/// sans être consigné ⇒ refus (code 2) ; seul « ni fichier ni entrée » est un run sans spécification enregistrée.
+pub fn charger_spec_mesures(dir: &Path) -> Resultat<Option<SpecMesuresRun>> {
+    let p = dir.join(NOM_FICHIER_MESURES);
+    let refus = |m: String| Err(Erreur::Config(format!("reprise de {} : « {NOM_FICHIER_MESURES} » {m} : refus", dir.display())));
+    match (p.exists(), empreinte_consignee_spec(dir)) {
+        (false, None) => return Ok(None),
+        (false, Some(_)) => return refus("consigné au manifeste à la création a disparu (ce n'est pas un run ancien)".into()),
+        (true, None) => return refus("présent mais non consigné au manifeste".into()),
+        (true, Some(sha)) => {
+            let actuel = sha256_fichier(&p).map_err(|e| io("sha256", &p, e))?;
+            if !actuel.eq_ignore_ascii_case(&sha) {
+                return refus(format!("a été modifié depuis la création (sha256 {actuel} au lieu de {sha} consigné)"));
+            }
+        }
+    }
+    let txt = fs::read_to_string(&p).map_err(|e| io("lecture", &p, e))?;
+    let v: Value = serde_json::from_str(&txt).map_err(|e| Erreur::Format(format!("{} illisible : {e}", p.display())))?;
+    match (v["schema"].as_str(), v["spec"].as_str(), v["backend"].as_str()) {
+        (Some("kvu-mesures-en-ligne/1"), Some(spec), Some(backend)) => {
+            Ok(Some(SpecMesuresRun { spec: spec.to_string(), backend: backend.to_string() }))
+        }
+        _ => Err(Erreur::Format(format!("{} : schéma kvu-mesures-en-ligne/1, spec et backend attendus", p.display()))),
+    }
+}
+
+/// Deux spécifications sont équivalentes si elles s'analysent en les mêmes éléments TYPÉS (`obs::enligne::decrire` :
+/// `wilson:R2xT2:01` ≡ `wilson:R2xT2:1`), l'ordre des types étant indifférent ; à défaut d'analyse, textes normalisés.
+pub fn specs_mesures_equivalentes(a: &str, b: &str) -> bool {
+    match (crate::obs::enligne::decrire(a), crate::obs::enligne::decrire(b)) {
+        (Ok(mut x), Ok(mut y)) => {
+            x.sort_by(|p, q| p.nom().cmp(q.nom()));
+            y.sort_by(|p, q| p.nom().cmp(q.nom()));
+            x == y
+        }
+        _ => normaliser_spec_mesures(a) == normaliser_spec_mesures(b),
+    }
+}
+
+/// `--mesures` de l'argv de CRÉATION du run (manifest.json) : `Ok(Some(spec))` s'il y figurait, `Ok(None)` sinon,
+/// `Err(())` si l'argv est illisible.
+fn argv_creation_mesures(dir: &Path) -> std::result::Result<Option<String>, ()> {
+    let txt = fs::read_to_string(dir.join(manifest::NOM_MANIFESTE)).map_err(|_| ())?;
+    let v: Value = serde_json::from_str(&txt).map_err(|_| ())?;
+    let argv: Vec<&str> = v["argv"].as_array().ok_or(())?.iter().map(|a| a.as_str().ok_or(())).collect::<Result<_, _>>()?;
+    for (i, a) in argv.iter().enumerate() {
+        if *a == "--mesures" {
+            // une spécification vide (`--mesures ""`) vaut « sans mesures », comme à la création
+            return argv.get(i + 1).map(|x| Some(normaliser_spec_mesures(x)).filter(|s| !s.is_empty())).ok_or(());
+        }
+        if let Some(x) = a.strip_prefix("--mesures=") {
+            return Ok(Some(normaliser_spec_mesures(x)).filter(|s| !s.is_empty()));
+        }
+    }
+    Ok(None)
+}
+
+/// Fichiers écrits par les mesures en ligne (wilson, polyakov_corr, flot, bloc), cherchés dans `dir` et ses chaînes `cNNN`.
+fn sorties_de_mesures_en_ligne(dir: &Path) -> bool {
+    const NOMS: [&str; 5] = ["wilson.csv", "polyakov_corr.csv", "flot.csv", "flot_t0.csv", "bloc3.csv"];
+    let a_des_sorties = |d: &Path| NOMS.iter().any(|n| d.join(n).exists());
+    a_des_sorties(dir)
+        || fs::read_dir(dir).is_ok_and(|it| {
+            it.filter_map(|e| e.ok()).any(|e| {
+                let n = e.file_name().to_string_lossy().into_owned();
+                n.len() == 4 && n.starts_with('c') && n[1..].bytes().all(|b| b.is_ascii_digit()) && a_des_sorties(&e.path())
+            })
+        })
+}
+
+/// Garde de reprise des mesures en ligne (PUB-01, sur le modèle de la torsion), AVANT les admissions, verrous, manifestes,
+/// troncatures et calculs ; tout refus est `Erreur::Config` (code 2).
+/// - Spécification enregistrée : la spécification demandée (rechargée par la CLI si `--mesures` manque) doit lui être
+///   ÉQUIVALENTE (éléments typés).
+/// - Rien d'enregistré (run créé sans `--mesures`, ou par la 0.1.0, où une reprise sans `--mesures` perdait les mesures en
+///   silence) : l'argv de création du manifeste fait foi. S'il portait `--mesures X`, la reprise exige `--mesures X` (absente ou
+///   différente : refus, avec la commande à relancer). S'il n'en portait pas, ajouter des mesures est refusé, sauf si le
+///   répertoire contient déjà des sorties de mesures en ligne : la `--mesures` explicite est alors exigée. Argv illisible :
+///   `--mesures` explicite exigée.
+fn verifier_spec_mesures_reprise(dir: &Path, demandee: Option<&str>) -> Resultat<()> {
+    let refus = |m: String| Err(Erreur::Config(format!("reprise de {} : {m}", dir.display())));
+    if let Some(e) = charger_spec_mesures(dir)? {
+        if !demandee.is_some_and(|d| specs_mesures_equivalentes(d, &e.spec)) {
+            return refus(format!(
+                "--mesures « {} » diffère de la spécification du run « {} » ({NOM_FICHIER_MESURES}) : refus ; reprendre sans \
+                 --mesures (elle est rechargée) ou avec la même",
+                demandee.unwrap_or(""),
+                e.spec
+            ));
+        }
+        return Ok(());
+    }
+    let relancer = |x: &str| format!("su2 gen --reprendre {} --mesures {x}", dir.display());
+    match (argv_creation_mesures(dir), demandee) {
+        (Ok(Some(x)), Some(d)) if specs_mesures_equivalentes(d, &x) => Ok(()),
+        (Ok(Some(x)), d) => refus(format!(
+            "run créé (binaire antérieur, sans {NOM_FICHIER_MESURES}) avec --mesures « {x} » ; reprise avec « {} » : refus \
+             (les mesures en ligne seraient perdues ou mêlées) ; relancer : {}",
+            d.unwrap_or("(aucune)"),
+            relancer(&x)
+        )),
+        (Ok(None), None) if !sorties_de_mesures_en_ligne(dir) => Ok(()),
+        (Ok(None), Some(d)) if !sorties_de_mesures_en_ligne(dir) => {
+            refus(format!("run créé sans --mesures ; --mesures « {d} » à la reprise est refusé"))
+        }
+        (_, Some(_)) => Ok(()),
+        (_, None) => refus(format!(
+            "spécification des mesures en ligne inconnue (pas de {NOM_FICHIER_MESURES}, argv de création illisible ou sans \
+             --mesures alors que des sorties de mesures existent) : refus ; relancer avec la --mesures de création : {}",
+            relancer("<spécification de création>")
+        )),
+    }
+}
+
+/// Écriture atomique ET durable (fichier puis répertoire synchronisés), toute erreur de synchronisation propagée.
+fn ecrire_durable(p: &Path, octets: &[u8]) -> Resultat<()> {
+    let tmp = p.with_extension("json.part");
+    {
+        let mut f = File::create(&tmp).map_err(|e| io("création", &tmp, e))?;
+        f.write_all(octets).map_err(|e| io("écriture", &tmp, e))?;
+        f.sync_all().map_err(|e| io("synchronisation", &tmp, e))?;
+    }
+    fs::rename(&tmp, p).map_err(|e| io("renommage", p, e))?;
+    let dir = p.parent().ok_or_else(|| Erreur::Config(format!("{} sans répertoire parent", p.display())))?;
+    File::open(dir).and_then(|f| f.sync_all()).map_err(|e| io("synchronisation du répertoire", dir, e))
+}
+
+/// Inscrit `mesures_en_ligne.json` (s'il existe) au manifeste du run (à la création, et de nouveau à chaque reprise : la
+/// clôture d'un run repris réécrit la liste des fichiers).
+fn inscrire_spec_mesures(m: &mut ManifesteRun, dir: &Path) -> Resultat<()> {
+    let p = dir.join(NOM_FICHIER_MESURES);
+    if !p.exists() {
+        return Ok(());
+    }
+    let sha = sha256_fichier(&p).map_err(|e| io("sha256", &p, e))?;
+    let octets = fs::metadata(&p).map_err(|e| io("stat", &p, e))?.len();
+    m.fichier(&p, &sha, octets)
 }
 
 /// Paramètres d'un run de production (CLI `su2 gen`).
@@ -407,7 +715,10 @@ impl ManifesteRun {
         let out = serde_json::to_vec_pretty(&j).map_err(|e| Erreur::Format(e.to_string()))?;
         manifest::ecrire_atomique(&p, &out).map_err(|e| io("écriture", &p, e))?;
         if reussi {
-            manifest::ecrire_atomique(&self.dir.join(manifest::NOM_COMPLETE), b"toutes les mesures et configurations demandees sont ecrites\n")
+            // 0.1.1 (PUB-16) : même contenu qu'à la clôture d'un run neuf (heritage::manifest::RepertoireRun), relu par
+            // `kvu store verifier` (manifest_sha256=) ; une phrase fixe faisait échouer la vérification de tout run repris.
+            let c = format!("rc=0\nmanifest_sha256={}\n", manifest::sha256_hex(&out));
+            manifest::ecrire_atomique(&self.dir.join(manifest::NOM_COMPLETE), c.as_bytes())
                 .map_err(|e| io("écriture", &self.dir.join(manifest::NOM_COMPLETE), e))?;
         }
         Ok(())
@@ -594,13 +905,20 @@ pub fn executer(app: Option<&Appareil>, cfg: &ConfigRun, mesures: &mut [Box<dyn 
 /// `--arret-apres`. Rend (rapport, terminé).
 pub fn executer_jusqua(app: Option<&Appareil>, cfg: &ConfigRun, mesures: &mut [Box<dyn MesureEnLigne>], reprendre: bool,
                        arret_apres: Option<u64>) -> Resultat<(RapportRun, bool)> {
-    executer_avec_verrou(app, cfg, mesures, reprendre, arret_apres, None, None, &OptionsRun::default())
+    executer_avec_verrou(app, cfg, mesures, reprendre, arret_apres, None, None, &OptionsRun::default(), None)
 }
 
 /// Nouveau point d'entrée avec options (M4) : permet de passer une torsion.
 pub fn executer_options(app: Option<&Appareil>, cfg: &ConfigRun, opts: &OptionsRun, mesures: &mut [Box<dyn MesureEnLigne>],
                         reprendre: bool, arret_apres: Option<u64>) -> Resultat<(RapportRun, bool)> {
-    executer_avec_verrou(app, cfg, mesures, reprendre, arret_apres, None, None, opts)
+    executer_avec_verrou(app, cfg, mesures, reprendre, arret_apres, None, None, opts, None)
+}
+
+/// Comme [`executer_options`], avec le texte `--mesures` qui a construit `mesures` (0.1.1, PUB-01) : enregistré à la création
+/// (`mesures_en_ligne.json`), comparé à la reprise AVANT toute écriture (refus code 2 s'il diffère).
+pub fn executer_avec_mesures(app: Option<&Appareil>, cfg: &ConfigRun, opts: &OptionsRun, mesures: &mut [Box<dyn MesureEnLigne>],
+                             spec: Option<&str>, reprendre: bool, arret_apres: Option<u64>) -> Resultat<(RapportRun, bool)> {
+    executer_avec_verrou(app, cfg, mesures, reprendre, arret_apres, None, None, opts, spec)
 }
 
 /// Run complet sous un verrou GPU DÉJÀ tenu par l'appelant dans ce processus (`kevinotron bench` mesure le temps
@@ -608,7 +926,7 @@ pub fn executer_options(app: Option<&Appareil>, cfg: &ConfigRun, opts: &OptionsR
 /// premier jusqu'à expiration.
 pub fn executer_sous_verrou(app: Option<&Appareil>, cfg: &ConfigRun, mesures: &mut [Box<dyn MesureEnLigne>],
                             garde: &GardeVerrou) -> Resultat<RapportRun> {
-    executer_avec_verrou(app, cfg, mesures, false, None, Some(garde), None, &OptionsRun::default()).map(|(r, _)| r)
+    executer_avec_verrou(app, cfg, mesures, false, None, Some(garde), None, &OptionsRun::default(), None).map(|(r, _)| r)
 }
 
 /// Nouveau run périodique instrumenté. D couvre l'appel interne jusqu'à son retour,
@@ -630,7 +948,7 @@ pub fn executer_profile(app: Option<&Appareil>, cfg: &ConfigRun, mesures: &mut [
     }
     let mut profil = ProfilRun { chaines: cfg.lot.chaines.len(), nor: cfg.lot.nor, ..ProfilRun::default() };
     let debut = Instant::now();
-    let (rapport, termine) = executer_avec_verrou(app, cfg, mesures, false, arret_apres, externe, Some(&mut profil), &OptionsRun::default())?;
+    let (rapport, termine) = executer_avec_verrou(app, cfg, mesures, false, arret_apres, externe, Some(&mut profil), &OptionsRun::default(), None)?;
     profil.duree_totale_ns = u64::try_from(debut.elapsed().as_nanos())
         .map_err(|_| Erreur::Config("profilage : durée totale trop grande".into()))?;
     profil.termine = termine;
@@ -642,7 +960,7 @@ pub fn executer_profile(app: Option<&Appareil>, cfg: &ConfigRun, mesures: &mut [
 #[allow(clippy::too_many_arguments)]
 fn executer_avec_verrou(app: Option<&Appareil>, cfg: &ConfigRun, mesures: &mut [Box<dyn MesureEnLigne>], reprendre: bool,
                         arret_apres: Option<u64>, externe: Option<&GardeVerrou>, profilage: Option<&mut ProfilRun>,
-                        opts: &OptionsRun) -> Resultat<(RapportRun, bool)> {
+                        opts: &OptionsRun, spec_mesures: Option<&str>) -> Resultat<(RapportRun, bool)> {
     // M4 : tous les points d'entrée, y compris ceux sans OptionsRun, passent ici.
     // Lire et comparer avant les admissions, verrous, manifestes et troncatures de CSV.
     if reprendre {
@@ -672,6 +990,16 @@ fn executer_avec_verrou(app: Option<&Appareil>, cfg: &ConfigRun, mesures: &mut [
         if app.is_some() {
             return Err(Erreur::Config("torsion de 't Hooft : les noyaux GPU ne portent pas la torsion (backend CPU requis)".into()));
         }
+    }
+    // 0.1.1 (PUB-02) : `executer_bord` n'appelle aucune mesure en ligne : un run à bord avec --mesures se clôturait sans mesurer.
+    if cfg.bord.is_some() && !mesures.is_empty() {
+        return Err(Erreur::Config("--mesures n'est pas branché sur --bord (aucune mesure en ligne n'y serait faite) : refus".into()));
+    }
+    // 0.1.1 (PUB-01) : spécification des mesures en ligne, vérifiée à la reprise AVANT toute écriture
+    let spec_mesures = spec_mesures.map(normaliser_spec_mesures).filter(|s| !s.is_empty());
+    let backend_mesures = app.map_or("cpu", |a| a.backend().nom());
+    if reprendre {
+        verifier_spec_mesures_reprise(&cfg.outdir, spec_mesures.as_deref())?;
     }
     // Admission mémoire AVANT le verrou et toute écriture (rc 5) : sur une APU les tampons GPU sont pris sur la RAM.
     let gpu_unifie = app.is_some_and(|a| crate::machine::detection::arch_memoire_unifiee(&a.arch()));
@@ -713,6 +1041,7 @@ fn executer_avec_verrou(app: Option<&Appareil>, cfg: &ConfigRun, mesures: &mut [
     let man = if reprendre {
         let mut m = ManifesteRun::reprendre(&cfg.outdir)?;
         m.verrou(verrou)?;
+        inscrire_spec_mesures(&mut m, &cfg.outdir)?;
         if !opts.torsion.est_triviale() {
             // Complète aussi les conventions d'un run tordu créé avant r3.
             m.champ("polyakov", conventions_polyakov_torsion())?;
@@ -731,6 +1060,13 @@ fn executer_avec_verrou(app: Option<&Appareil>, cfg: &ConfigRun, mesures: &mut [
             if d != &cfg.outdir {
                 fs::create_dir_all(d).map_err(|e| io("création", d, e))?;
             }
+        }
+        if let Some(spec) = &spec_mesures {
+            let p = cfg.outdir.join(NOM_FICHIER_MESURES);
+            let doc = json!({"schema": "kvu-mesures-en-ligne/1", "spec": spec, "backend": backend_mesures});
+            let texte = serde_json::to_vec_pretty(&doc).map_err(|e| Erreur::Format(e.to_string()))?;
+            ecrire_durable(&p, &texte)?;
+            inscrire_spec_mesures(&mut m, &cfg.outdir)?;
         }
         m.verrou(verrou)?;
         m.compil(&n.provenance())?;
@@ -894,6 +1230,13 @@ fn ouvrir_csv(dir: &Path, reprise: Option<(usize, usize)>) -> Resultat<Csv> {
             let mut c = Csv { therm: creer(&p_therm)?, mes: creer(&p_mes)?, p_therm, p_mes };
             ecrire_ligne(&mut c.therm, &c.p_therm, ENTETE_THERM)?;
             ecrire_ligne(&mut c.mes, &c.p_mes, ENTETE_MES)?;
+            // 0.1.1 (PUB-14) : en-têtes vidés et synchronisés (fichiers, puis répertoire) dès la création ; sinon un arrêt
+            // brutal pendant la thermalisation laisse measurements.csv vide et la reprise le refuse (en-tête attendu).
+            for (w, p) in [(&mut c.therm, &c.p_therm), (&mut c.mes, &c.p_mes)] {
+                w.flush().map_err(|e| io("écriture", p, e))?;
+                w.get_ref().sync_all().map_err(|e| io("synchronisation", p, e))?;
+            }
+            File::open(dir).and_then(|f| f.sync_all()).map_err(|e| io("synchronisation du répertoire", dir, e))?;
             Ok(c)
         }
         Some((lignes_therm, lignes_mes)) => {
@@ -994,6 +1337,10 @@ fn boucle_standard(ctx: &mut CtxRun, mesures: &mut [Box<dyn MesureEnLigne>]) -> 
     let mut csv: Vec<Csv> = Vec::new();
     if ctx.reprendre {
         let e: EtatReprise = reprise::lire(&cfg.outdir, ctx.n.as_mut())?;
+        // 0.1.1 (PUB-13) : fichiers des mesures en ligne ramenés au point de reprise (troncature, calendrier) AVANT tout balayage
+        for mes in mesures.iter_mut() {
+            mes.restaurer(cfg, &ctx.dirs, e.pas_faits)?;
+        }
         pas = e.pas_faits;
         ctx.pas_au_depart = pas;
         mes_ecrites = e.mesures_faites;

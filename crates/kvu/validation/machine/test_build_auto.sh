@@ -38,6 +38,15 @@ attendre "--sale-ok franchit la garde" 7 "Go libres" env KEVINOTRON_SSD_MIN_GO=1
 attendre "sortie dans chantiers/" 2 "production" $LIB CARGO_TARGET_DIR="$CIBLE" KEVINOTRON_BIN_DIR=/chemin/vers/projet/chantiers/wilson_gpu_grandL_20260926/bin bash "$BA" --machine acemagic --crate kvu
 attendre "sortie su2_cuda" 2 "production" $LIB CARGO_TARGET_DIR="$CIBLE" KEVINOTRON_BIN_DIR="$HOME/ym4_calcul/su2_cuda/bin" bash "$BA" --machine gamer --crate kvu
 attendre "cible de production" 2 "production" $LIB CARGO_TARGET_DIR=/chemin/vers/projet/kevinotron/target bash "$BA" --machine acemagic --crate kvu
+# Le motif de production ne dépend pas du préfixe : chemin neutre, préfixe profond, autre préfixe.
+attendre "cible de production (préfixe profond)" 2 "production" $LIB CARGO_TARGET_DIR=/chemin/profond/vers/un/projet/kevinotron/target bash "$BA" --machine acemagic --crate kvu
+attendre "cible de production (autre préfixe)" 2 "production" $LIB CARGO_TARGET_DIR=/autre/prefixe/kevinotron/target_x bash "$BA" --machine gamer --crate kvu
+# MUTANT : sans le motif `*/kevinotron/target*` la cible de production n'est plus refusée pour « production » (la porte doit rougir).
+sed 's#|\*/kevinotron/target\*|#|#' "$SCRIPT" > "$T/depot/scripts/mutant.sh"
+if grep -q 'kevinotron/target' "$T/depot/scripts/mutant.sh"; then echo "FAIL BUILD-AUTO-REFUS : mutant mal construit"; ECHECS=$((ECHECS + 1)); fi
+# (sans --dry-run, qui sortirait avant les gardes ; seuil SSD inaccessible : le mutant s'arrête sur le SSD, code 7, sans rien compiler)
+if env CARGO_TARGET_DIR=/chemin/profond/vers/un/projet/kevinotron/target KEVINOTRON_SSD_MIN_GO=1000000 bash "$T/depot/scripts/mutant.sh" --machine acemagic --crate kvu 2>&1 | grep -q "production"; then
+  echo "FAIL BUILD-AUTO-REFUS : le mutant (motif retiré) est refusé quand même : la porte ne mord pas"; ECHECS=$((ECHECS + 1)); fi
 attendre "cible = HOME" 2 "trop large" $LIB CARGO_TARGET_DIR="$HOME" bash "$BA" --machine acemagic --crate kvu
 attendre "cible = dépôt" 2 "trop large" $LIB CARGO_TARGET_DIR="$T/depot" bash "$BA" --machine acemagic --crate kvu
 attendre "option inconnue" 2 "option inconnue" bash "$BA" --nimporte

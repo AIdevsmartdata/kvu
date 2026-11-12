@@ -9,7 +9,7 @@
 
 use kvu::commun::Machine;
 use kvu::machine::cli::{etat_json, principal_machine};
-use kvu::machine::detection::{detecter_rapide, ProfilMachine, HOTE_GAMER};
+use kvu::machine::detection::{detecter_rapide, ProfilMachine};
 use kvu::machine::file::*;
 use kvu::machine::politique::{politique, politique_avec, Politique};
 use kvu::machine::verrou::VerrouGpu;
@@ -202,14 +202,14 @@ fn doctor(env: &[(&str, String)]) -> Result<(i32, Value), String> {
 #[ignore = "GPU"]
 fn gate_mach_1() {
     gate("MACH-1", || {
-        let hote = std::fs::read_to_string("/proc/sys/kernel/hostname")
-            .unwrap_or_default()
-            .trim()
-            .to_string();
-        let (machine, backend, arch, autre) = match hote.as_str() {
+        // Machine ATTENDUE explicite : KVU_TEST_MACHINE_ATTENDUE=acemagic|gamer (plus de nom d'hôte réel dans le dépôt).
+        // Absente : SKIP annoncé ; posée : la détection doit donner cette machine (sinon la gate échoue).
+        let attendue = std::env::var("KVU_TEST_MACHINE_ATTENDUE").unwrap_or_default();
+        let (machine, backend, arch, autre) = match attendue.as_str() {
             "acemagic" => ("acemagic", "hip", "gfx1151", "cuda"),
-            h if h == HOTE_GAMER => ("gamer", "cuda", "sm_120", "hip"),
-            _ => return Ok(format!("SKIP hôte {hote} inconnu : MACH-1 ne vaut rien ici")),
+            "gamer" => ("gamer", "cuda", "sm_120", "hip"),
+            "" => return Ok("SKIP KVU_TEST_MACHINE_ATTENDUE absente : MACH-1 ne vaut rien ici".to_string()),
+            a => return Err(format!("KVU_TEST_MACHINE_ATTENDUE={a} : attendu acemagic ou gamer")),
         };
         // 1. doctor --json, aucune surcharge.
         let (rc, v) = doctor(&[])?;

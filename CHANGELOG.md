@@ -4,6 +4,47 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ; ve
 Tant que la version majeure est 0, l'interface (options, formats de manifeste, variables d'environnement) peut changer
 d'une version mineure à l'autre ; chaque changement est noté ici.
 
+## [0.1.1] — 2026-11 (correctifs de reprise et de documentation)
+
+Aucun changement de numérique : les sorties d'un run sans `--mesures`, `measurements.csv`, `therm.csv` et les dumps sont
+identiques à la 0.1.0. Détail des défauts : `docs/DEFAUTS_CONNUS.md` §3 ; vérification de ses anciens runs : `docs/NOTE_0.1.1.md`.
+
+### Corrigé
+
+- **`su2 gen --reprendre` et les mesures en ligne** (PUB-01, PUB-13) : la spécification `--mesures` est enregistrée à la création
+  du run dans `mesures_en_ligne.json` (fichier NOUVEAU, pour les runs lancés avec `--mesures`) et rechargée à la reprise ; une
+  `--mesures` différente est refusée (code 2) ; les fichiers des mesures en ligne sont ramenés au point de reprise (plus de lignes
+  en double après un arrêt brutal). Avant toute troncature, le préfixe CONSERVÉ de chaque fichier (les lignes jusqu'au point de
+  reprise) est validé : en-tête, colonnes, calendrier des pas, clés et nombre de lignes par pas ; un préfixe malformé, incomplet
+  ou déjà doublonné fait refuser la reprise (code 2) sans modifier le fichier ; sinon le fichier est ramené au point de reprise. Un run créé par la 0.1.0 avec des mesures n'a pas `mesures_en_ligne.json` : il faut repasser la même `--mesures`.
+- **Arrêt brutal du processus pendant la thermalisation** (PUB-14) : les en-têtes de `therm.csv` et `measurements.csv` (avec
+  `--bord` : `therm_blocs.csv` et `blocs.csv`) sont écrits et synchronisés (fichiers, puis répertoire) dès leur création ; après
+  un `kill -9` en thermalisation, la 0.1.0 laissait un CSV vide et refusait la reprise (code 4). La reprise repart du dernier point
+  de reprise valide ; avant le premier point de reprise, il n'y a rien à reprendre ; une coupure de courant relève de PUB-05.
+  Aucun octet de sortie ne change. Tests à vrai `kill -9` (`tests/su2_reprise_mesures.rs`,
+  `pub14_kill9_en_thermalisation_reprise_acceptee`, `pub14_bord_kill9_en_thermalisation_reprise_acceptee`).
+- **`COMPLETE` d'un run repris** (PUB-16) : `rc=0` et `manifest_sha256=<sha256 du manifeste>`, comme un run neuf, au lieu d'une
+  phrase fixe ; un run repris puis terminé passe `kvu store verifier` (la 0.1.0 le déclarait rouge, code 8).
+- **`scripts/verifier_mesures_en_ligne.py`** (NOUVEAU, lecture seule) : contrôle les fichiers de mesure d'anciens runs
+  (`docs/NOTE_0.1.1.md`).
+- **`su2 gen --bord --mesures …`** (PUB-02) : refusé (code 2) ; la 0.1.0 clôturait en COMPLETE sans mesure.
+- **`scripts/build_auto.sh`** (PUB-04) : la garde de la cible de production ne dépend plus du préfixe.
+- **Tests machine** (PUB-09) : `KVU_TEST_MACHINE_ATTENDUE=acemagic|gamer` ; `docs/MACHINES.md` précise l'ordre de recherche du `kvu.toml`.
+
+### Changements de comportement
+
+- Refus avec le code 2 là où la 0.1.0 clôturait en silence (`--bord` avec `--mesures` ; reprise avec une spécification différente).
+- Nouveau fichier `mesures_en_ligne.json` dans le répertoire d'un run avec `--mesures`.
+- `COMPLETE` d'un run repris : `rc=0` + `manifest_sha256=…` (PUB-16).
+
+### Documenté, non corrigé
+
+PUB-03, 05, 06, 07, 08, 10, 11, 12, 15, 18, 19 et la variable d'essai `KVU_INJECTION_FAUTE_GPU` : `docs/DEFAUTS_CONNUS.md` §3.
+PUB-18 et PUB-19 sont deux limites aux marges de la chaîne de Markov, hors de tout usage connu : plus de 2³² balayages dans un
+même run (le compteur du générateur aléatoire repasse à zéro) ; β extrêmement petit en F64 (le bain thermique ne tire plus rien).
+PUB-15 : `kvu regen` ne rejoue pas un run `su2 gen` (ni son `regen_bloc3.json`) ; le README et le GUIDE ne le promettent plus
+et donnent la parade (relancer l'`argv` du manifeste, comparer les sha256).
+
 ## [0.1.0] — 2026-11 (première version publique)
 
 Premier instantané public du dépôt de travail (`main` 9362d77 du 2 novembre 2026, plus les changements de publication

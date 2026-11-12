@@ -18,9 +18,8 @@ authors:
     orcid: "https://orcid.org/0009-0008-2443-7166"
     affiliation: "Independent Researcher, Oloron-Sainte-Marie, France"
 license: Apache-2.0
-version: "0.1.0"
-doi: "10.5281/zenodo.24062152"
-date-released: "2026-11-08"
+version: "0.1.1"
+date-released: "2026-11-12"
 identifiers:
   - type: doi
     value: "10.5281/zenodo.24062151"

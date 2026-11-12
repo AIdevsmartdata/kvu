@@ -235,6 +235,15 @@ fn ouvrir_fichiers(dirs: &[PathBuf], nom: &str, l: usize, lignes_reprise: Option
             None => {
                 let mut f = creer(&p)?;
                 ecrire_ligne(&mut f, &p, &entete_blocs(l))?;
+                // 0.1.1 (PUB-14, --bord) : en-tête vidé et synchronisé (fichier, puis répertoire) dès la création, comme
+                // run::ouvrir_csv ; sinon un arrêt brutal avant le premier bloc laisse le CSV vide et la reprise le refuse.
+                f.flush().map_err(|e| io("écriture", &p, e))?;
+                f.get_ref()
+                    .sync_all()
+                    .map_err(|e| io("synchronisation", &p, e))?;
+                fs::File::open(d)
+                    .and_then(|r| r.sync_all())
+                    .map_err(|e| io("synchronisation du répertoire", d, e))?;
                 w.push(f);
             }
             Some(n) => {

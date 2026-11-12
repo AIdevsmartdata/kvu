@@ -25,6 +25,15 @@ Un fichier malformé arrête la commande avec le code **2** et un message `fichi
 > `KEVINOTRON_CONFIG`). Sans fichier, la machine principale est traitée comme une machine inconnue (garde SSD 20 Go au lieu de 100 Go,
 > et, sur le second poste, ni verrou propre ni affinité) : `kvu doctor` l'écrit explicitement (« profil inconnue : aucun kvu.toml
 > trouvé »).
+>
+> Machines de l'auteur (acemagic, gamer) : le `kvu.toml` de la racine est un MODÈLE neutre qui ne reconnaît aucune machine ; leurs
+> profils complets sont la fixture `crates/kvu/kvu.toml`. ATTENTION à l'ordre de recherche : depuis la racine du dépôt, le modèle
+> `./kvu.toml` est PRIORITAIRE sur `~/.config/kvu/kvu.toml` ; copier la fixture dans `~/.config` ne suffit donc que pour un lancement
+> hors de la racine. Depuis la racine, poser explicitement `KEVINOTRON_CONFIG=<dépôt>/crates/kvu/kvu.toml` (ou lancer depuis
+> `crates/kvu/`). Les chemins neutralisés de la fixture (`/chemin/vers/projet/...`, `/home/utilisateur/...`, `pc-nvidia-exemple`,
+> `192.0.2.x`) sont à adapter à la machine avant usage. Tests et gates qui supposent une machine précise (MACH-1,
+> `detection_reelle_sur_cette_machine`) lisent la machine attendue dans `KVU_TEST_MACHINE_ATTENDUE=acemagic|gamer` ; sans elle, ils
+> se sautent en l'annonçant (SKIP).
 
 ## 2. Format
 

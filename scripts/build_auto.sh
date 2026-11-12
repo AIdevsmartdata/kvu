@@ -118,7 +118,7 @@ interdit() {
   case "$1" in
     # sorties et cibles propres au programme d'unification (dépôt kvu) : autorisées (le reste de chantiers/ est de la production)
     */chantiers/kevinotron_unification/bin/*|*/chantiers/kevinotron_unification/cibles/*|*/chantiers/kevinotron_unification/arbres/*) return 1 ;;
-    */chantiers/*|*/ym4_calcul/su2_cuda*|*/kev/target*|/chemin/vers/projet/kevinotron/target*|*/kevinotron_dev/bin|*/kevinotron_dev/bin/*) return 0 ;;
+    */chantiers/*|*/ym4_calcul/su2_cuda*|*/kev/target*|*/kevinotron/target*|*/kevinotron_dev/bin|*/kevinotron_dev/bin/*) return 0 ;;
   esac
   return 1
 }

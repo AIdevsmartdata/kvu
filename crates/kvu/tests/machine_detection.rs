@@ -643,13 +643,17 @@ fn detecter_rapide_sans_gpu() {
 fn detection_reelle_sur_cette_machine() {
     let p = detecter();
     println!("profil : {p:#?}");
-    let attendu = match p.hote.as_str() {
+    // Machine ATTENDUE explicite (aucun nom d'hôte réel dans le dépôt) : KVU_TEST_MACHINE_ATTENDUE=acemagic|gamer.
+    // Sans elle le test se saute en le DISANT ; avec elle il échoue si la détection (fixture : hôte, CPU ou GPU) diffère.
+    let attendue = std::env::var("KVU_TEST_MACHINE_ATTENDUE").unwrap_or_default();
+    let attendu = match attendue.as_str() {
         "acemagic" => Some(("acemagic", "hip", "gfx1151")),
-        HOTE_GAMER => Some(("gamer", "cuda", "sm_120")),
-        _ => None,
+        "gamer" => Some(("gamer", "cuda", "sm_120")),
+        "" => None,
+        autre => panic!("KVU_TEST_MACHINE_ATTENDUE={autre} : attendu acemagic ou gamer"),
     };
     let Some((machine, backend, arch)) = attendu else {
-        println!("SKIP DETECTION-REELLE : hôte {} inconnu", p.hote);
+        println!("SKIP DETECTION-REELLE : KVU_TEST_MACHINE_ATTENDUE absente (hôte {}) : ce test ne vaut rien ici", p.hote);
         return;
     };
     let ok_machine = p.machine.nom() == machine;

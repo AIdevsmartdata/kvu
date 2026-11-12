@@ -69,7 +69,7 @@ Le CPU ne calcule qu'en **F64** (référence) ; la précision **F32** exige un G
 | `obs wilson\|polyakov\|flot` | boucles de Wilson, corrélateur de Polyakov, flot de Wilson (E, t₀, w₀, Q) |
 | `store du\|gc\|verifier\|lister\|exporter` | place disque, éclaircissement (simulation par défaut), vérification |
 | `store classer` | **simulation** : classe A/B/C la régénérabilité de chaque chaîne des ensembles (aucune écriture) |
-| `regen M.json` | rejoue une chaîne depuis son manifeste (`su2_hip/1`, `su2_gen/1`, `kvu-regen/1`) et compare les sha256 fichier par fichier |
+| `regen M.json` | rejoue une chaîne depuis son manifeste (`kvu-regen/1` de `su2 boite` et `fibre echantillonner` ; historiques `su2_hip/1`, `su2_gen/1`) et compare les sha256 fichier par fichier ; ne rejoue pas un run `su2 gen` (§ Régénération des ensembles) |
 | `groupe liste\|gates\|certificat\|derive\|plan\|chaine` | registre des groupes de jauge (SU(2), Sp(4)) et batterie de gates à réponse connue (G-ALG, G-HAAR, G-SC, G-WC, G-UNIT, G-REG, mutants), certificat G-CERT ; voir `docs/CONVENTIONS.md` |
 | `gen --groupe sp4` | générateur d'ensembles d'un groupe générique (Sp(4), CPU) : Metropolis + sur-relaxation, refuse un groupe sans certificat ; `su2 gen` reste le chemin SU(2) bit-identique à (A) |
 | `rg bloc\|swendsen\|domaine\|gates` | module RG par blocs : configuration grossière (L/3)⁴ par la moyenne non linéaire de Bałaban L_b = 3 (SU(2), CPU), témoin de Swendsen b = 2, rapport de domaine, gates RG-* |
@@ -106,7 +106,9 @@ extrapolation L = 54 → 18, rapportés, jamais une gate) ; avec `--sortie D` il
 backends ; `comparer --sans-theta --id ENLIGNE-1` ne compare que les quaternions. Script de rejeu : `validation/rg/gates_rg_gpu.sh`.
 **Mesure en ligne.** `su2 gen … --mesures bloc:3:<période>` calcule, à chaque mesure, la configuration grossière (L/3)⁴ sur le GPU (ou le CPU) et écrit dans le répertoire de la
 chaîne `bloc3_cfg_<pas>.npy` (q64), `bloc3.csv` (pas, côté, n boucles, fraction hors domaine, θ max, ambiguës, plaquette grossière, sha256) et `bloc3_hist.csv` (histogramme de θ) ; aucun
-dump fin n'est requis (L multiple de 3, champ résident F64). Un run terminé écrit aussi `regen_bloc3.json` (`kvu-regen/1`, `parametres.mesures`, classe C : classement A/B laissé à `regen`).
+dump fin n'est requis (L multiple de 3, champ résident F64). Un run terminé écrit aussi `regen_bloc3.json` (`kvu-regen/1`, `parametres.mesures`, classe C : classement A/B laissé à `regen`) ; en 0.1.1,
+`kvu regen` ne sait pas encore le rejouer (la commande enregistrée garde `--outdir` : FAIL REGEN, code 8 ; PUB-15) : rejouer le run par son `argv`
+(§ Régénération des ensembles).
 Un run sans `--mesures bloc:3` est inchangé à l'octet.
 
 ### hess (Hessienne de l'action de Wilson SU(2) sur fonds réels, WP13)
@@ -171,7 +173,15 @@ kvu su2 gen --L 16 --beta 2.3[,2.8…] --graine S[,S2…] [--chaines K] [--grain
 - **Options numériques** : `ref-k1` (défaut F64) = su2_gen K1, `-ffp-contract=off` ; `compat-prod` = les binaires de production su2_hip
   (hipcc) et su2_cuda (nvcc) ; `rapide` (défaut F32). Les noms historiques `--seed` et `--bc-seed` sont acceptés.
 - **Reprise à l'octet** : `--reprise-every N` écrit des points de reprise atomiques ; `su2 gen --reprendre DIR` continue, dans un
-  nouveau processus, et donne les mêmes octets qu'un run ininterrompu (gate REPRISE-1).
+  nouveau processus, avec la même torsion et les mêmes mesures en ligne (rechargées de `torsion.json` et `mesures_en_ligne.json` ;
+  une option différente est refusée, code 2 ; les fichiers des mesures en ligne sont ramenés au point de reprise), et donne les
+  mêmes octets qu'un run ininterrompu (gate REPRISE-1). Un run créé par la 0.1.0 AVEC des mesures n'a pas
+  `mesures_en_ligne.json` : pour le reprendre, repasser la même `--mesures` (sinon refus, code 2, avec la commande à relancer) ; un
+  run sans mesures se reprend comme avant. `--bord` n'accepte pas `--mesures` (code 2). Les en-têtes des CSV (`therm.csv`,
+  `measurements.csv` ; avec `--bord`, `therm_blocs.csv` et `blocs.csv`) sont sur le disque dès leur création : après un arrêt du
+  PROCESSUS (kill -9, plantage), y compris pendant la thermalisation, `--reprendre` repart du dernier point de reprise valide
+  (0.1.1, PUB-14 ; parade pour la 0.1.0 : `docs/DEFAUTS_CONNUS.md`). Avant le premier point de reprise, il n'y a rien à reprendre :
+  relancer le run. Une coupure de COURANT peut perdre des lignes vidées mais non synchronisées (PUB-05, limite connue).
 - **Mesures en ligne** : `--mesures wilson:R8xT8:10,flot:0.01:3:20` mesure pendant la génération (type:paramètres:période) : aux
   grands L on ne stocke plus les configurations.
 
@@ -353,6 +363,45 @@ kvu regen M.json --sortie DIR [--comparer ORIG] [--ancres anchors.sha256] [--pre
 kvu regen M.json --adapter-seulement --vers M_regen.json [--hacher]   # traduit en kvu-regen/1 sans rejouer
 kvu regen --adapter-ensemble ENSEMBLE --vers DIR                      # un manifeste kvu-regen/1 par chaîne
 kvu store classer --chemin ENSEMBLE [--chemin …] [--preuve-gbit PREUVES] [--detail] [--json]
+```
+
+- **Ce que `kvu regen` rejoue (0.1.1, vérifié par exécution sur CPU)** : les manifestes `kvu-regen/1` de `su2 boite` et de
+  `fibre echantillonner` (`DIR/manifest_regen.json` : `PASS REGEN`, fichiers identiques à l'octet). Il lit aussi, par adaptateur,
+  les manifestes historiques `su2_hip/1` et `su2_gen/1` (rejeu sur GPU avec un binaire admis, non rejoué pour cette version). Il ne
+  rejoue PAS un run `su2 gen` : `DIR/manifest.json` n'est pas reconnu (code 4) et `DIR/regen_bloc3.json` (`--mesures bloc:3`)
+  échoue (`FAIL REGEN`, code 8 : la commande enregistrée garde `--outdir`, que `regen` ajoute une seconde fois) ; défaut PUB-15 de
+  `docs/DEFAUTS_CONNUS.md`.
+- **Parade pour `su2 gen` (vérifiée)** : un run est déterministe ; relancer la commande enregistrée dans son manifeste (clé `argv`),
+  avec le même binaire `kvu` (clé `binaire`) et le même backend sur la même machine, dans un dossier neuf (`--outdir`) et sans
+  `--arret-apres` ni `--fenetre-s` (un run repris garde l'`argv` de sa création), puis comparer aux sha256 consignés. Le script
+  ci-dessous traite les deux syntaxes (`--outdir RUN` et `--outdir=RUN`, de même pour `--arret-apres` et `--fenetre-s`) et ne lance
+  `kvu` qu'après une transformation réussie (sinon il s'arrête, code 1, sans rien lancer ; il refuse de même un `argv` de reprise,
+  `--reprendre`, et une de ces options placée en fin d'`argv` sans sa valeur). `RUN` est le run d'origine, `NEUF` un
+  dossier qui n'existe pas ; la seconde commande n'affiche que des `OK` (code 0) si tout est identique :
+
+```bash
+python3 - RUN NEUF <<'FIN'
+import json, os, sys
+run, neuf = sys.argv[1], sys.argv[2]
+a = json.load(open(run + "/manifest.json"))["argv"][1:]
+b, n, i = [], 0, 0
+while i < len(a):
+    nom, colle = a[i].split("=", 1)[0], "=" in a[i]
+    if nom == "--reprendre":
+        sys.exit("argv d'une reprise (--reprendre) : rien n'est lancé")
+    if nom in ("--arret-apres", "--fenetre-s", "--outdir"):
+        if not colle and i + 1 >= len(a):
+            sys.exit(nom + " sans valeur : rien n'est lancé")
+        if nom == "--outdir":
+            b, n = b + ["--outdir", neuf], n + 1
+        i += 1 if colle else 2
+    else:
+        b, i = b + [a[i]], i + 1
+if n != 1 or os.path.exists(neuf):
+    sys.exit("transformation impossible (--outdir absent ou répété, ou NEUF existe) : rien n'est lancé")
+os.execvp("kvu", ["kvu"] + b)
+FIN
+python3 -c 'import json,sys;[print(f["sha256"]+"  "+sys.argv[2]+"/"+f["nom"]) for f in json.load(open(sys.argv[1]+"/manifest.json"))["fichiers"]]' RUN NEUF | sha256sum -c
 ```
 
 - Manifeste `kvu-regen/1` (schéma : `schemas/kvu-regen-1.schema.json`, validateur `scripts/regen_valider.py`) : binaire, source,
