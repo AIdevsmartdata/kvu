@@ -164,5 +164,5 @@ kvu v0.1 makes no physics claim: it provides instruments.
 
 - Générateur SU(2) d'origine (le F64 `compat-prod` de kvu en reproduit les sorties au bit) : **su2-heatbath-gpu**, DOI
   [10.5281/zenodo.23644087](https://doi.org/10.5281/zenodo.23644087).
-- Pour citer kvu : `CITATION.cff` ; Zenodo : version 0.1.0 [10.5281/zenodo.24062152](https://doi.org/10.5281/zenodo.24062152), toutes versions [10.5281/zenodo.24062151](https://doi.org/10.5281/zenodo.24062151).
+- Pour citer kvu : `CITATION.cff` ; Zenodo : version 0.1.1 [10.5281/zenodo.24151227](https://doi.org/10.5281/zenodo.24151227), version 0.1.0 [10.5281/zenodo.24062152](https://doi.org/10.5281/zenodo.24062152), toutes versions [10.5281/zenodo.24062151](https://doi.org/10.5281/zenodo.24062151).
 - Licence Apache-2.0 ; dépendances et leurs licences : `LICENCES_TIERCES.md`.
