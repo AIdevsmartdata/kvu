@@ -734,7 +734,7 @@ fn lire_champ_npy(p: &Path) -> Result<Vec<f64>, String> {
 
 /// G-BIT-K1 (acemagic) : contre `su2_gen --hip` historique, bâti depuis main et lancé par gates_su2.sh.
 #[test]
-#[ignore = "GPU"]
+#[ignore = "GPU : comparaison à des références de l'auteur (KVU_REF_K1), absentes de l'archive ; aucune promesse d'identité au bit dans la 0.5.1 (voir README)"]
 fn g_bit_k1() {
     let Some(app) = appareil_ou_skip("G-BIT-K1") else { return };
     let Some(refs) = std::env::var("KVU_REF_K1").ok().filter(|v| !v.is_empty()) else {
@@ -832,7 +832,7 @@ fn decisions_divergentes(app: &Appareil, l: usize, graine: u64) -> Result<usize,
 }
 
 #[test]
-#[ignore = "GPU"]
+#[ignore = "GPU : comparaison à des références de production de l'auteur, absentes de l'archive ; aucune promesse d'identité au bit dans la 0.5.1 (voir README)"]
 fn g_bit_hip_prod() {
     let Some(app) = appareil_ou_skip("G-BIT-HIP-PROD") else { return };
     if app.backend() != BackendKind::Hip {
@@ -845,7 +845,7 @@ fn g_bit_hip_prod() {
 }
 
 #[test]
-#[ignore = "GPU"]
+#[ignore = "GPU : comparaison à des références de l'auteur, absentes de l'archive ; aucune promesse d'identité au bit dans la 0.5.1 (voir README)"]
 fn g_bit_cuda() {
     let Some(app) = appareil_ou_skip("G-BIT-CUDA") else { return };
     if app.backend() != BackendKind::Cuda {
@@ -879,7 +879,7 @@ fn g_bit_cuda() {
 
 /// G-BIT-BORD (gamer) : arguments de tests_code.sh ; cmp de blocs.csv et therm_blocs.csv UNIQUEMENT.
 #[test]
-#[ignore = "GPU"]
+#[ignore = "GPU : comparaison à des références produites par CUDA sur une machine de l'auteur ; aucune promesse d'identité au bit dans la 0.5.1 (voir README)"]
 fn g_bit_bord() {
     let Some(app) = appareil_ou_skip("G-BIT-BORD") else { return };
     if app.backend() != BackendKind::Cuda {

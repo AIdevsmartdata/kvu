@@ -843,8 +843,7 @@ fn t7_refus_cli() {
         (vec!["gen", "--backend", "cpu", "--L", "4", "--torsion", "04", "--outdir"], "torsion 04"),
         (vec!["gen", "--backend", "cpu", "--L", "4", "--torsion", "01,10", "--outdir"], "doublon"),
         (vec!["gen", "--backend", "cpu", "--L", "4", "--torsion", "", "--outdir"], "torsion vide"),
-        (vec!["gen", "--backend", "hip", "--L", "4", "--torsion", "01", "--outdir"], "backend hip"),
-        (vec!["gen", "--backend", "cuda", "--L", "4", "--torsion", "01", "--outdir"], "backend cuda"),
+        // B10 (11/11, accord du chef d'orchestre) : --backend hip|cuda acceptés avec une torsion (chemin C1 GPU) ; « auto » reste refusé.
         (vec!["gen", "--backend", "auto", "--L", "4", "--torsion", "01", "--outdir"], "backend auto"),
         (vec!["gen", "--backend", "cpu", "--precision", "f32", "--L", "4", "--torsion", "01", "--outdir"], "précision f32"),
         (vec!["gen", "--backend", "cpu", "--L", "4", "--torsion", "01", "--bord", "--bc", "cold", "--outdir"], "bord"),
@@ -892,8 +891,7 @@ fn t7_refus_cli() {
         vec!["--backend", "cpu", "--precision", "f32"],
         vec!["--backend", "cpu", "--bord", "--bc", "cold"],
         vec!["--backend", "cpu", "--mesures", "wilson:R2xT2:5"],
-        vec!["--backend", "hip"],
-        vec!["--backend", "cuda"],
+        // B10 : reprise --backend hip|cuda acceptée (chemin C1 GPU) ; « auto » reste refusé.
         vec!["--backend", "auto"],
         vec!["--backend", "cpu", "--torsion", "aucune"],
     ] {

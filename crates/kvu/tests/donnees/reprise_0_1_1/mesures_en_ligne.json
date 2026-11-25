@@ -1,0 +1,5 @@
+{
+  "backend": "cpu",
+  "schema": "kvu-mesures-en-ligne/1",
+  "spec": "wilson:R2xT2:1"
+}

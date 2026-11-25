@@ -3,6 +3,7 @@
 //! RG-SWENDSEN-L12) sont rejouées par `kvu rg gates --grandl …` ; ici elles rendent SKIP, ce qui n'est pas vert et n'est pas vérifié.
 
 use kvu::rg::gates::{self, Contexte};
+use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 
 #[path = "donnees/hermetique/support.rs"]
@@ -85,6 +86,8 @@ fn fixture_alteree_est_rejetee() {
     let mut b = std::fs::read(&f).unwrap();
     let n = b.len();
     b[n - 9] ^= 0x10; // un bit de poids faible d'une composante
+    // `fs::copy` recopie les droits de la source : dans un arbre de sources en lecture seule, la copie n'est pas inscriptible.
+    std::fs::set_permissions(&f, std::fs::Permissions::from_mode(0o644)).unwrap();
     std::fs::write(&f, &b).unwrap();
     let mut ctx = contexte(&["RG-FIXTURES"]);
     ctx.fixtures = tmp.clone();

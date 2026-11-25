@@ -173,6 +173,8 @@ fn g_h02_inventaire_intact_puis_altere() {
     let f = racine.join("crates/kvu/reference/su2_hip/su2_hip.cpp");
     let mut t = fs::read(&f).unwrap();
     t.push(b'\n');
+    // La copie hérite des droits de la source : dans un arbre de sources en lecture seule, elle n'est pas inscriptible.
+    fs::set_permissions(&f, fs::Permissions::from_mode(0o644)).unwrap();
     fs::write(&f, t).unwrap();
     let (v, _) = b.gate("G-H02.sh", bin, &[]);
     assert!(

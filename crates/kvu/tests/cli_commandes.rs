@@ -19,7 +19,7 @@ fn err(o: &Output) -> String {
 }
 
 const SOUS_COMMANDES: &[&str] = &[
-    "doctor", "etat", "queue", "su2", "cond", "fibre", "obs", "store", "fetch", "valide", "bench",
+    "doctor", "etat", "queue", "su2", "cond", "fibre", "obs", "store", "fetch", "valide", "bench", "experience",
 ];
 
 #[test]

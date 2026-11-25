@@ -9,6 +9,7 @@
 //! | `polyakov_corr:<période>` | ajoute à `<sortie>/polyakov_corr.csv` (`pas,r,C`), r = 0..L/2 |
 //! | `flot:<dt>:<tmax>:<période>[:cible=0.3][:chaque=N]` | ajoute à `<sortie>/flot.csv` (`pas,t,E_plaq,E_trefle,t2E,Q`) et `flot_t0.csv` (`pas,t0,w0`) |
 //! | `bloc:3:<période>` | bloc de Bałaban L_b = 3 (WP7, `rg::en_ligne`) : écrit `bloc3_cfg_<pas>.npy` (q64) et ajoute à `bloc3.csv`, `bloc3_hist.csv` |
+//! | `corr:<lissages>:<période>` | corrélateur de `rg correlateur --rmax 0` (B08, `rg::corr_enligne`), lissages `brut+flot/0.02/50` : ajoute à `correlateur_enligne.csv`, écrit `correlateur.json` à la clôture |
 //!
 //! `<période>` est en pas de production (0 = jamais). `toutes` moyenne sur les 12 orientations
 //! (sinon T selon la direction 3). `cible=` fixe à la fois la cible de t²E (t₀) et celle de W (w₀) ;
@@ -37,6 +38,7 @@ pub enum ElementMesure {
     PolyakovCorr { dir_temps: usize, periode: usize },
     Flot { params: ParamsFlot, periode: usize },
     Bloc { periode: usize },
+    Corr { spec: crate::rg::corr_enligne::SpecCorr, periode: usize },
 }
 
 impl ElementMesure {
@@ -47,6 +49,7 @@ impl ElementMesure {
             ElementMesure::PolyakovCorr { .. } => "polyakov_corr",
             ElementMesure::Flot { .. } => "flot",
             ElementMesure::Bloc { .. } => "bloc",
+            ElementMesure::Corr { .. } => "corr",
         }
     }
 }
@@ -162,6 +165,10 @@ fn analyser_element(element: &str) -> Resultat<ElementMesure> {
         "bloc" => Ok(ElementMesure::Bloc {
             periode: crate::rg::en_ligne::analyser_element(&champs, element)?,
         }),
+        "corr" => {
+            let (spec, periode) = crate::rg::corr_enligne::analyser_element(&champs, element)?;
+            Ok(ElementMesure::Corr { spec, periode })
+        }
         autre => Err(erreur_spec(element, &format!("type « {autre} » inconnu"))),
     }
 }
@@ -215,6 +222,9 @@ pub fn analyser_avec(spec: &str, garde: Option<GardeSsd>) -> Resultat<Vec<Box<dy
                     module: None,
                 }),
                 ElementMesure::Bloc { periode } => Box::new(crate::rg::en_ligne::MesureBloc::nouvelle(periode, garde.clone())),
+                ElementMesure::Corr { spec, periode } => {
+                    Box::new(crate::rg::corr_enligne::MesureCorr::nouvelle(spec, periode, garde.clone()))
+                }
             }
         })
         .collect())
@@ -329,7 +339,7 @@ impl MesureEnLigne for MesureWilson {
         "wilson"
     }
     fn fichiers_en_ajout(&self, _cfg: &crate::su2::run::ConfigRun) -> Vec<crate::su2::run::FichierEnAjout> {
-        // 0.1.1 (PUB-13) : une ligne par (r, t), r = 1..R puis t = 1..T (ordre de `lignes_wilson`)
+        // c08d : une ligne par (r, t), r = 1..R puis t = 1..T (ordre de `lignes_wilson`)
         let cles = (1..=self.params.r_max).flat_map(|r| (1..=self.params.t_max).map(move |t| format!("{r},{t}"))).collect();
         vec![crate::su2::run::FichierEnAjout { nom: "wilson.csv".into(), entete: "pas,r,t,W".into(), n_cles: 2, cles }]
     }
@@ -364,7 +374,7 @@ impl MesureEnLigne for MesurePolyakovCorr {
         "polyakov_corr"
     }
     fn fichiers_en_ajout(&self, cfg: &crate::su2::run::ConfigRun) -> Vec<crate::su2::run::FichierEnAjout> {
-        // 0.1.1 (PUB-13) : une ligne par rayon r = 0..L/2 (`correlateur_polyakov`)
+        // c08d : une ligne par rayon r = 0..L/2 (`correlateur_polyakov`)
         let cles = (0..=cfg.lot.l / 2).map(|r| r.to_string()).collect();
         vec![crate::su2::run::FichierEnAjout { nom: "polyakov_corr.csv".into(), entete: "pas,r,C".into(), n_cles: 1, cles }]
     }
@@ -399,7 +409,7 @@ impl MesureEnLigne for MesureFlot {
         "flot"
     }
     fn fichiers_en_ajout(&self, _cfg: &crate::su2::run::ConfigRun) -> Vec<crate::su2::run::FichierEnAjout> {
-        // 0.1.1 (PUB-13) : une ligne par échantillon t = k·dt du flot (mêmes k et même arithmétique que `assembler_courbe`), une seule
+        // c08d : une ligne par échantillon t = k·dt du flot (mêmes k et même arithmétique que `assembler_courbe`), une seule
         // ligne de `flot_t0.csv` par pas
         let cles = match super::ref_cpu::nombre_de_pas(&self.params) {
             Ok(n) => super::ref_cpu::pas_mesures(n, self.params.mesure_chaque).iter().map(|&k| g17(k as f64 * self.params.dt)).collect(),

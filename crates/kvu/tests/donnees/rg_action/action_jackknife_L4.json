@@ -1,0 +1,200 @@
+{
+  "beta_sd_un_couplage": {
+    "domaine": [
+      0,
+      50
+    ],
+    "erreur": null,
+    "note": "témoin de Wilson limité à [0,50] ; null si racine ou résidu invalide",
+    "residu": null,
+    "valeur": null
+  },
+  "boucles": {
+    "P": {
+      "longueur": 4,
+      "par_lien": 6,
+      "par_site": 6,
+      "poids_r4": 18.0
+    }
+  },
+  "chaines": [
+    {
+      "derniere": "cfg_000008.npy",
+      "n_configs": 8,
+      "nom": "c1",
+      "p_moyenne": -0.0005690210702853529,
+      "premiere": "cfg_000001.npy"
+    },
+    {
+      "derniere": "cfg_000008.npy",
+      "n_configs": 8,
+      "nom": "c2",
+      "p_moyenne": -0.00930851605424865,
+      "premiere": "cfg_000001.npy"
+    },
+    {
+      "derniere": "cfg_000008.npy",
+      "n_configs": 8,
+      "nom": "c3",
+      "p_moyenne": -0.0010702541215652725,
+      "premiere": "cfg_000001.npy"
+    },
+    {
+      "derniere": "cfg_000008.npy",
+      "n_configs": 8,
+      "nom": "c4",
+      "p_moyenne": 0.003994880931088863,
+      "premiere": "cfg_000001.npy"
+    }
+  ],
+  "ecart_pl_sd": {
+    "P": {
+      "erreur": 0.00001877126952508964,
+      "replicats": [
+        0.000021433596169153496,
+        -9.56260669173186e-7,
+        -7.767540188077099e-6,
+        6.240667171458075e-6
+      ],
+      "valeur": 4.0260612542072916e-6
+    }
+  },
+  "ensemble": "<ENSEMBLE>",
+  "estimateurs": [
+    "pl",
+    "sd"
+  ],
+  "famille": [
+    "P"
+  ],
+  "filtre": null,
+  "format": "kvu-rg-action/1",
+  "hors_famille": false,
+  "jackknife": {
+    "groupes": 4,
+    "mode": "chaines"
+  },
+  "l_entree": 4,
+  "l_estimation": 4,
+  "n_chaines": 4,
+  "n_configs": 32,
+  "n_liens": 32768,
+  "note": "mesure de schéma : couplages d'une action tronquée par identités exactes ; aucune lecture physique",
+  "operateur": {
+    "nom": "aucun"
+  },
+  "pas": 0,
+  "pl": {
+    "conditionnement": 1.0,
+    "correlations": [
+      [
+        1.0
+      ]
+    ],
+    "couplages": {
+      "P": {
+        "erreur": 0.011067088055693517,
+        "replicats": [
+          -0.008514403767057078,
+          0.003149551672328918,
+          -0.007856667866544499,
+          -0.014568197122410847
+        ],
+        "valeur": -0.006957620730743697
+      }
+    },
+    "critere_pr": {
+      "inferieur_au_seuil": true,
+      "note": "ignore C et T",
+      "seuil": 0.2222222222222222,
+      "valeur": {
+        "erreur": 0.007028287045512905,
+        "replicats": [
+          0.008514403767057078,
+          0.003149551672328918,
+          0.007856667866544499,
+          0.014568197122410847
+        ],
+        "valeur": 0.006957620730743697
+      }
+    },
+    "etat": "ok",
+    "iterations": 12,
+    "message": null,
+    "norme_gradient": 5.684341886080802e-14,
+    "r4": {
+      "alpha4": 0.03130929328834663,
+      "inferieur_a_4": true,
+      "norme": {
+        "erreur": 0.1265091668192323,
+        "replicats": [
+          0.1532592678070274,
+          0.05669193010192052,
+          0.14142002159780098,
+          0.2622275482033952
+        ],
+        "valeur": 0.12523717315338653
+      },
+      "note": "mesure de schéma (trou de type Dobrushin), pas une preuve"
+    },
+    "valeurs_propres_information": [
+      49117.04515055945
+    ]
+  },
+  "sd": {
+    "conditionnement": 1.0,
+    "correlations": [
+      [
+        0.9999999999999999
+      ]
+    ],
+    "couplages": {
+      "P": {
+        "erreur": 0.011072777269146626,
+        "replicats": [
+          -0.008535837363226231,
+          0.003150507932998091,
+          -0.007848900326356422,
+          -0.014574437789582305
+        ],
+        "valeur": -0.006961646791997904
+      }
+    },
+    "critere_pr": {
+      "inferieur_au_seuil": true,
+      "note": "ignore C et T",
+      "seuil": 0.2222222222222222,
+      "valeur": {
+        "erreur": 0.007032321842214585,
+        "replicats": [
+          0.008535837363226231,
+          0.003150507932998091,
+          0.007848900326356422,
+          0.014574437789582305
+        ],
+        "valeur": 0.006961646791997904
+      }
+    },
+    "etat": "ok",
+    "message": null,
+    "r4": {
+      "alpha4": 0.03132741056399057,
+      "inferieur_a_4": true,
+      "norme": {
+        "erreur": 0.1265817931598625,
+        "replicats": [
+          0.15364507253807216,
+          0.05670914279396564,
+          0.1412802058744156,
+          0.2623398802124815
+        ],
+        "valeur": 0.12530964225596228
+      },
+      "note": "mesure de schéma (trou de type Dobrushin), pas une preuve"
+    },
+    "valeurs_propres_m": [
+      147270.95097508375
+    ]
+  },
+  "version": "<VERSION>"
+}

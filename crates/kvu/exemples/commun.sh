@@ -14,7 +14,12 @@ if [ "$EXEMPLE_MODE" = petit ]; then
   EXEMPLE_BASE="${EXEMPLE_BASE:-$HOME/kvu_unif/scratch}"
   mkdir -p "$EXEMPLE_BASE"
   SORTIE="${EXEMPLE_SORTIE:-$(mktemp -d "$EXEMPLE_BASE/kvu_exemple.XXXXXX")}"
-  [ -z "${EXEMPLE_SORTIE:-}" ] && trap 'rm -rf "$SORTIE"' EXIT
+  # `store du --projeter` (exemple 03) exige une racine de store existante : un store jetable si aucun n'est désigné
+  if [ -z "${KEVINOTRON_STORE:-}" ]; then export KEVINOTRON_STORE="$SORTIE/store"; mkdir -p "$KEVINOTRON_STORE"; fi
+  # nettoyage du dossier jetable ; un script peut définir `exemple_nettoyage` (appelée d'abord) sans remplacer ce piège
+  if [ -z "${EXEMPLE_SORTIE:-}" ]; then
+    trap 'declare -F exemple_nettoyage >/dev/null && exemple_nettoyage; rm -rf "$SORTIE"' EXIT
+  fi
 else
   SORTIE="${EXEMPLE_SORTIE:-$HOME/kevinotron_store/exemples}"
 fi

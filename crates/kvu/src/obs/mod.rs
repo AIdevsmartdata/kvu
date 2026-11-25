@@ -9,10 +9,14 @@
 //! - [`enligne`]  mesures pendant la génération (`--mesures`) ;
 //! - [`cli`]      sous-commande `obs wilson | polyakov | flot`.
 //! - [`topo_cli`] mesures `obs topo` et validations `obs topo-gates`.
+//! - [`champs`], [`champs_cli`] champs par site pour le scanner (`obs champs`, module scanner du 11/11/2026).
 //!
 //! Dépendances : T2 (runtime GPU), T3 (`ChampGpu`, `MesureEnLigne`), T8 (NPY, garde SSD) et T1 (détection de la
 //! machine, verrou GPU), tous fusionnés dans `unifie/integ` (les replis `STUB-Tn` du développement sont retirés).
 
+pub mod champs;
+pub mod champs_cli;
+pub mod champs_cotes;
 pub mod cli;
 pub mod enligne;
 pub mod flot;

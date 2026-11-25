@@ -24,6 +24,11 @@ exige un dépôt propre (le binaire doit correspondre à un commit), exporte `KE
 puis écrit `<binaire>.sha256` et `<binaire>.commit` à côté du binaire ; `--lto` donne la build finale (LTO fat, plus lente).
 Configuration des machines : `kvu.toml` (modèle à la racine du dépôt) et `docs/MACHINES.md`.
 
+Pour taper `kvu` au lieu du chemin complet, depuis la racine du dépôt : `export PATH="$PWD/target/release:$PATH"`. Les scripts
+`scripts/build_auto.sh` ne servent qu'aux machines de l'auteur ; un utilisateur extérieur n'utilise que `cargo build`. Sans accès au
+réseau, `cargo` ne peut pas télécharger les dépendances (`--offline` si elles sont déjà en cache). Premier contrôle : `kvu --version`
+puis `kvu doctor` (§2).
+
 ## 2. Choix du backend
 
 La détection est automatique et se lit avec `kvu doctor` (profils de la fixture `crates/kvu/kvu.toml` ; sans profil qui
@@ -34,6 +39,11 @@ corresponde, une machine est `inconnue`) :
 | acemagic | hôte, CPU « AMD RYZEN AI MAX+ 395 » ou gfx1151 | HIP (gfx1151) | `/tmp/kevinotron_gpu.lock` | 100 Go |
 | gamer | hôte, CPU « i5-14600KF » ou sm_120 | CUDA (sm_120) | `/tmp/gamer_gpu.lock` (sur le gamer) | 50 Go |
 | autre | — | premier GPU utilisable, sinon CPU | `/tmp/kevinotron_gpu.lock` | 20 Go |
+
+Sans fichier `kvu.toml` (modèle à la racine du dépôt, à copier dans `~/.config/kvu/kvu.toml`, voir `docs/MACHINES.md`), `kvu doctor`
+écrit `Machine : inconnue (hôte …)` : c'est normal et sans gravité, la politique prudente s'applique (garde SSD 20 Go, RAM minimale
+8 Go) ; le GPU est détecté quand même (ligne `GPU :`). `GPU : aucun` signifie « calcul CPU » : les chemins F64 fonctionnent (plus lentement) ; le F32 (`--precision f32`) exige un GPU
+(sur le CPU : « précision f32 : un GPU est requis », code 2). `kvu doctor --test` compile et exécute un noyau d'essai sur le GPU retenu (ligne `Essai GPU : … "ok":true`).
 
 Surcharges d'environnement : `KEVINOTRON_BACKEND=auto|hip|cuda|cpu`, `KEVINOTRON_MACHINE=acemagic|gamer|inconnue`,
 `KEVINOTRON_SSD_MIN_GO`, `KEVINOTRON_RAM_MIN_GO` (RAM minimale d'admission des jobs de la file), `KEVINOTRON_STORE`, `KEVINOTRON_FILE`, `KEVINOTRON_CACHE_DIR`, `KEVINOTRON_VERROU=ignorer`
@@ -62,6 +72,7 @@ Le CPU ne calcule qu'en **F64** (référence) ; la précision **F32** exige un G
 | `queue add\|list\|run\|annuler` | file de jobs de la machine (voir §7) |
 | `su2 gen` | générateur SU(2) : lots de chaînes, F64 de référence ou F32 rapide, bord gelé R2-3, reprise, mesures en ligne |
 | `su2 test-hb ALPHA N` | test du tirage de x₀ (ligne `TESTHB` de su2_hip) ; `su2 selftest` : vecteurs Philox |
+| `su2 tube smin\|apparie`, `su2 gen --cotes` | [EXPÉRIMENTAL] tube tordu : tore anisotrope tordu, CPU F64, non reprenable (`docs/v0.2/notes/tube.md`) |
 | `cond chaine` | bain conditionnel « fin sachant grossier » (mode `ref_rng` ou `rapide`) |
 | `fibre echantillonner` | Échantillonnage de fibre SU(2), pénalité ou RATTLE, et jouets |
 | `cond facteur3` | fibre dure de DEC de facteur 3 et noyau de réponse de la moyenne conditionnelle (T3-D) : `repliques`, `effectifs`, `tube-classe`, `tube-f`, `tube-hist` ; voir `docs/COND_FACTEUR3.md` |
@@ -75,8 +86,11 @@ Le CPU ne calcule qu'en **F64** (référence) ; la précision **F32** exige un G
 | `rg bloc\|swendsen\|domaine\|gates` | module RG par blocs : configuration grossière (L/3)⁴ par la moyenne non linéaire de Bałaban L_b = 3 (SU(2), CPU), témoin de Swendsen b = 2, rapport de domaine, gates RG-* |
 | `rg flot\|etalonner\|flot-gates` | estimateurs de couplage effectif (SD à un lien, appariement de plaquette, MCRG à deux opérateurs), courbes d'étalonnage de Wilson au volume grossier, gates RG-SD / RG-PLAQ / RG-N3 / RG-TAU |
 | `fetch gamer:<chemin\|store/ID> [DEST]` | rapatriement par le câble 2,5 Gbit/s, sha256 vérifiés |
+| `experience init\|ajouter-prereg\|ajouter-run\|porte\|verdict\|proposer\|verifier\|fiche\|carnet` | préenregistrement, runs, portes et carnet d'une expérience (§13) |
 | `valide [--rapide\|--complet\|--gate NOM] [--json]` | suite de validation (§9) |
 | `bench su2\|cond\|fibre\|obs` | bancs sous verrou (§10) |
+| `experience init\|ajouter-prereg\|ajouter-run\|porte\|verdict\|proposer\|verifier\|fiche\|carnet` | manifeste d'expérience préenregistrée `EXPERIENCE.json` (schéma `kvu-experience/1`) : pièces hachées (PREREG, runs, portes), contrôles V1 à V11 par `verifier` (lecture seule ; code 8 si un contrôle est ROUGE), fiche et export vers le carnet ; ne lance aucun calcul (`docs/v0.2/notes/experience.md`) |
+| `intrication portes\|balayage\|courbe\|doublement\|debit` | [EXPÉRIMENTAL] entropie de Rényi-2 par répliques (SU(2) Wilson 4D, CPU F64) : portes (a)-(f), balayage en α, courbe ΔS₂(l), doublement 2 log Z(T) − log Z(2T) ; voir `docs/v0.2/notes/intrication.md` |
 
 ### rg (module RG par blocs, WP6 ; GPU et mesure en ligne, WP7)
 
@@ -106,7 +120,7 @@ extrapolation L = 54 → 18, rapportés, jamais une gate) ; avec `--sortie D` il
 backends ; `comparer --sans-theta --id ENLIGNE-1` ne compare que les quaternions. Script de rejeu : `validation/rg/gates_rg_gpu.sh`.
 **Mesure en ligne.** `su2 gen … --mesures bloc:3:<période>` calcule, à chaque mesure, la configuration grossière (L/3)⁴ sur le GPU (ou le CPU) et écrit dans le répertoire de la
 chaîne `bloc3_cfg_<pas>.npy` (q64), `bloc3.csv` (pas, côté, n boucles, fraction hors domaine, θ max, ambiguës, plaquette grossière, sha256) et `bloc3_hist.csv` (histogramme de θ) ; aucun
-dump fin n'est requis (L multiple de 3, champ résident F64). Un run terminé écrit aussi `regen_bloc3.json` (`kvu-regen/1`, `parametres.mesures`, classe C : classement A/B laissé à `regen`) ; en 0.1.1,
+dump fin n'est requis (L multiple de 3, champ résident F64). Un run terminé écrit aussi `regen_bloc3.json` (`kvu-regen/1`, `parametres.mesures`, classe C : classement A/B laissé à `regen`) ; en 0.1.1 comme en 0.5.0,
 `kvu regen` ne sait pas encore le rejouer (la commande enregistrée garde `--outdir` : FAIL REGEN, code 8 ; PUB-15) : rejouer le run par son `argv`
 (§ Régénération des ensembles).
 Un run sans `--mesures bloc:3` est inchangé à l'octet.
@@ -167,23 +181,80 @@ kvu su2 gen --L 16 --beta 2.3[,2.8…] --graine S[,S2…] [--chaines K] [--grain
         [--bord --bc cold|hot|eq --bc-graine G --jauge G --pre N --bloc N] --outdir DIR | --reprendre DIR
 ```
 
+- **Valeurs par défaut** (seul le répertoire de sortie est obligatoire : un oubli de `--beta`, `--start`… n'est PAS signalé) :
+  `--L 8`, `--beta 2.3`, `--graine 1`, `--start hot`, `--therm 1000`, `--nmeas 100`, `--skip 1`, `--nor 4`, `--backend auto`,
+  `--precision f64`. Les paramètres effectivement retenus sont écrits dans `config_run.json`. `--L` doit être pair ; le répertoire
+  de sortie (`--outdir`) doit être NEUF (sinon : `REFUS D'ÉCRASER`).
 - **Lots** : `--beta` et `--graine` prennent des listes (une valeur par chaîne) ; `--graine S --graine-pas P` donne `S + i·P`. Un lot
   partage L, la précision et le départ (`--start` est unique par lancement). La chaîne `c` d'un lot donne **les mêmes octets** que la
   même chaîne lancée seule (gate LOT-1).
 - **Options numériques** : `ref-k1` (défaut F64) = su2_gen K1, `-ffp-contract=off` ; `compat-prod` = les binaires de production su2_hip
   (hipcc) et su2_cuda (nvcc) ; `rapide` (défaut F32). Les noms historiques `--seed` et `--bc-seed` sont acceptés.
-- **Reprise à l'octet** : `--reprise-every N` écrit des points de reprise atomiques ; `su2 gen --reprendre DIR` continue, dans un
-  nouveau processus, avec la même torsion et les mêmes mesures en ligne (rechargées de `torsion.json` et `mesures_en_ligne.json` ;
-  une option différente est refusée, code 2 ; les fichiers des mesures en ligne sont ramenés au point de reprise), et donne les
-  mêmes octets qu'un run ininterrompu (gate REPRISE-1). Un run créé par la 0.1.0 AVEC des mesures n'a pas
-  `mesures_en_ligne.json` : pour le reprendre, repasser la même `--mesures` (sinon refus, code 2, avec la commande à relancer) ; un
-  run sans mesures se reprend comme avant. `--bord` n'accepte pas `--mesures` (code 2). Les en-têtes des CSV (`therm.csv`,
-  `measurements.csv` ; avec `--bord`, `therm_blocs.csv` et `blocs.csv`) sont sur le disque dès leur création : après un arrêt du
-  PROCESSUS (kill -9, plantage), y compris pendant la thermalisation, `--reprendre` repart du dernier point de reprise valide
-  (0.1.1, PUB-14 ; parade pour la 0.1.0 : `docs/DEFAUTS_CONNUS.md`). Avant le premier point de reprise, il n'y a rien à reprendre :
-  relancer le run. Une coupure de COURANT peut perdre des lignes vidées mais non synchronisées (PUB-05, limite connue).
-- **Mesures en ligne** : `--mesures wilson:R8xT8:10,flot:0.01:3:20` mesure pendant la génération (type:paramètres:période) : aux
-  grands L on ne stocke plus les configurations.
+- **Reprise à l'octet** : `--reprise-every N` écrit des points de reprise atomiques (sans lui, un run interrompu ne se reprend pas) ;
+  un run est TERMINÉ si et seulement si le fichier `COMPLETE` existe dans son dossier. Après un arrêt brutal du processus (SIGKILL, `kill -9`),
+  `su2 gen --reprendre DIR` continue, dans un nouveau processus, avec la même torsion et les mêmes mesures en ligne (rechargées de
+  `torsion.json` et `mesures_en_ligne.json` : ne PAS redonner `--mesures` ; une option différente est refusée, code 2 ; les fichiers
+  des mesures en ligne sont ramenés au point de reprise ; les lignes postérieures sont retirées, message `octet(s) retiré(s)`, puis
+  recalculées), et donne les mêmes octets qu'un run ininterrompu (gate REPRISE-1). `--bord` n'accepte pas `--mesures` (code 2).
+  Redonner `--backend` (le même que celui du run) à la reprise : sans lui, le backend est choisi automatiquement et peut différer,
+  ce qui est refusé (code 2). Reprendre un run déjà `COMPLETE` est refusé ; un dossier inexistant aussi (message d'E/S brut,
+  code 4). Exemple complet rejouable : `exemples/05_mesure_enligne_reprise.sh` (§11 : il interrompt PROPREMENT le run par `--arret-apres`, le reprend et le compare à l'octet ; les arrêts brutaux sont éprouvés par les tests du dépôt). Aucune garantie n'est donnée
+  pour une coupure de courant ou de disque : seul l'arrêt brutal du processus est essayé.
+
+- **Mesures en ligne** : `--mesures SPEC1,SPEC2,…` mesure pendant la génération (type:paramètres:période) : aux grands L on ne
+  stocke plus les configurations. Un seul élément par type. Grammaire : `wilson:R<r>xT<t>[:toutes]:<période>` (boucles R×T),
+  `polyakov_corr:<période>`, `flot:<dt>:<tmax>:<période>[:cible=0.3][:cible_t2e=X][:cible_w=X][:chaque=N]`, `bloc:3:<période>`
+  (L multiple de 3, voir le § rg) et `corr:<lissages>:<période>` (corrélateur de la densité d'action et tranches du 0++ ;
+  lissages séparés par `+` : `brut`, `flot/<eps>/<n>`, par exemple `corr:brut+flot/0.02/50:1` ; mêmes données que
+  `kvu rg correlateur --rmax 0` : le champ `corr` est vide et `c0` vaut 0 par convention). La période est comptée en INDICES DE
+  MESURE : on mesure aux indices m ≥ 1 multiples de la période, soit tous les période×`--skip` pas de génération (essayé :
+  `--skip 5 --mesures wilson:R1xT1:2` mesure aux pas 15, 25, 35 avec `--therm 5`). Période 0 : jamais, admis pour
+  `wilson`, `polyakov_corr`, `flot` et `bloc` (aucune mesure ni fichier de mesure ; seul `bloc:3:0` écrit encore `regen_bloc3.json` à la clôture, pour la provenance), refusé pour `corr` (entier ≥ 1 attendu).
+  Exemple : `--mesures corr:brut+flot/0.02/50:1,wilson:R2xT2:1`.
+
+**Fichiers d'un run avec mesures en ligne** (dans le dossier `--outdir` d'une chaîne seule). Un lot de K > 1 chaînes met dans chaque `cNNN/` les sorties PAR CHAÎNE (`measurements.csv`, `therm.csv`, `wilson.csv`, …) ; `config_run.json`, `mesures_en_ligne.json`, `reprise.json`, `reprise.champs`, `manifest.json` et `COMPLETE` sont COMMUNS et restent à la racine (essayé avec `--beta 2.3,2.5 --graine 1,2`) :
+
+| fichier | contenu | haché au manifeste |
+|---|---|---|
+| `measurements.csv` | `measurement_index,total_steps,phase,plaquette,P0,P1,P2,P3` : `plaquette` = plaquette moyenne (6 plans, tous les sites) ; `P0…P3` = boucle de Polyakov moyenne (partie réelle, demi-trace) le long des directions 0 à 3, PAS des plaquettes par plan ; `phase` = `initial` (indice 0) ou `sample` | oui |
+| `therm.csv` | `step,plaquette,P0,P1,P2,P3` : mêmes grandeurs pendant la thermalisation (sans colonne `phase`) | oui |
+| `wilson.csv` | `pas,r,t,W` : une ligne par mesure et par (r ≤ R, t ≤ T) (`wilson:…`) | oui |
+| `correlateur_enligne.csv` | `pas,lissage,dir_temps,moy_d,moy_g,c0,moy_pp,O_0…O_{L-1},D_0…D_{L-1}` : une ligne par mesure et par lissage (`corr:…`) ; `pas` = pas TOTAL (thermalisation comprise) | oui |
+| `correlateur.json` | mêmes données au schéma `kvu-rg-correlateur/1` (clés `chaines`, `lissages`, `rmax`=0, `schema`, `mutant` ; par configuration `mesures.<lissage>.{O_t,D_t,moy_d,moy_g,c0,moy_pp,corr}`), écrit à la fin d'un run terminé | oui |
+| `mesures_en_ligne.json` | la spécification `--mesures` et le moteur retenus (rechargés par `--reprendre`) | oui |
+| `flot.csv`, `flot_t0.csv`, `polyakov_corr.csv`, `bloc3*.csv`, `bloc3_cfg_*.npy` | sorties des autres mesures en ligne (`flot` : `pas,t,E_plaq,E_trefle,t2E,Q` et `pas,t0,w0` ; `polyakov_corr` : `pas,r,C`) | `.csv`, `.npy` : oui |
+| `config_run.json` | les paramètres du run, valeurs par défaut comprises | NON |
+| `reprise.json`, `reprise.champs` | dernier point de reprise (`pas_faits`, `mesures_faites`, …) | NON |
+| `manifest.json`, `COMPLETE` | provenance (§6) ; `COMPLETE` est écrit en dernier ; sur un run NEUF il contient le sha256 du manifeste | — |
+
+`kvu store verifier` ne contrôle que les fichiers hachés : modifier `config_run.json` ou un point de reprise n'est pas détecté.
+
+**Tirer un nombre avec son erreur.** kvu n'a pas (encore) de commande d'analyse statistique : les CSV se lisent avec n'importe quel
+outil. Les mesures successives d'une chaîne sont corrélées : écarter la thermalisation puis estimer l'erreur par blocs (jackknife).
+L'extrait suivant (Python standard) ILLUSTRE la mécanique ; il n'estime pas l'autocorrélation et n'établit aucune conclusion
+physique. Sur un run `--L 12 --beta 2.3 --therm 20 --nmeas 300 --nor 1` il a rendu plaquette = 0,6024 ± 0,0002 et
+W(2,2) = 0,1804 ± 0,0004 avec 50 mesures écartées : stationnarité et plateau en `nb` NON contrôlés, à vérifier avant tout usage.
+
+```python
+import csv, math, collections
+def jackknife(x, nb=10):                      # moyenne et erreur sur nb blocs contigus, 2 <= nb <= len(x)
+    if not 2 <= nb <= len(x):
+        raise ValueError("nb doit vérifier 2 <= nb <= len(x)")
+    n = len(x) // nb * nb; x = x[:n]; m = n // nb
+    tot = sum(x); loo = [(tot - sum(x[i*m:(i+1)*m])) / (n - m) for i in range(nb)]
+    mu = sum(loo) / nb
+    return tot / n, math.sqrt((nb - 1) / nb * sum((v - mu) ** 2 for v in loo))
+plaq = [float(r["plaquette"]) for r in csv.DictReader(open("RUN/measurements.csv")) if r["phase"] == "sample"]
+print("plaquette = %.5f +- %.5f" % jackknife(plaq[50:]))          # 50 premières mesures écartées
+w = collections.defaultdict(list)
+for r in csv.DictReader(open("RUN/wilson.csv")):
+    w[(int(r["r"]), int(r["t"]))].append(float(r["W"]))
+print("W(2,2) = %.5f +- %.5f" % jackknife(w[(2, 2)][50:]))
+```
+
+Refaire le calcul pour plusieurs `nb` : l'erreur ne croît pas forcément de façon monotone avec la taille des blocs ; on cherche un plateau
+quand les blocs dépassent le temps d'autocorrélation. Pour le corrélateur, `correlateur.json` donne par lissage les listes `O_t` et `D_t`
+(L valeurs par mesure) : moyenne et erreur se calculent de la même façon, composante par composante.
 
 ### su2 boite (boîtes de Dirichlet à bord fixé)
 
@@ -256,6 +327,20 @@ Le certificat recopie ces lignes et liste les `FAIL` et `SKIP` dans `non_vert` ;
 `cond chaine --mode ref_rng` rejoue à l'hôte les tirages numpy de cb.py (PCG64 + ziggurat) : à 1e-12 de cb.py par balayage, c'est la
 loi de référence imposée par G-LOI(a). `--mode rapide` (Philox sur GPU) a la même loi, pas les mêmes tirages.
 
+#### obs champs (champs par site pour le scanner, 11/11/2026)
+
+```bash
+kvu obs champs --cfg X.npy --out DIR [--t-flot 0.5 | --n-pas 50] [--dt 0.01] [--beta 2.3] [--dir-temps 3] [--f64] [--porte-jauge] [--graine-jauge 1] [--sans-portes]
+```
+
+Écrit, pour UNE configuration, les champs par site `action_brute`, `action_flot`, `energie_trefle_flot`, `charge_flot`, `polyakov`
+(4 directions), `plaq_negatives_brute`, `plaq_negatives_flot` en NPY f32 (f64 avec `--f64`) dans un répertoire NEUF, avec le
+manifeste commun `manifest.json` (champs `geometrie` et `kvu_champs`, format `kvu-champs/1`). Une configuration tordue ou non
+périodique (torsion.json, bord, masque déclarés à côté) est refusée avant tout calcul. Calcul CPU (référence `obs::ref_cpu`, FP64). Les portes de somme (chaque champ redonne l'observable globale de kvu à
+1e-10 près), de localité et, avec `--porte-jauge`, d'invariance de jauge sont jouées et consignées : rc 1 si une porte est rouge.
+Format, définitions exactes et portes : `docs/SCANNER_CHAMPS.md`. L'indicateur `plaq_negatives_*` est le signe de la trace des
+plaquettes, pas une projection de centre.
+
 ## 4. Codes de sortie (stables)
 
 | code | sens |
@@ -320,6 +405,7 @@ invalide donne le code 2 sans exécuter la commande (une faute de frappe ne dés
 | `manifest.json`, `COMPLETE` | provenance (§6) ; `COMPLETE` est écrit en dernier, et seulement si rc = 0 |
 | `F.npy`, `D.npy`, `blk.npy`, `controles.json` | sorties de `cond chaine` (`F (nmes,54)`, `D (nD,54,54)`, `blk (nmes,6,(L/2)^4)` float32) |
 | `wilson.npy`, `flot.csv`, `flot.json` | sorties de `obs` |
+| `wilson.csv`, `correlateur_enligne.csv`, `correlateur.json`, `mesures_en_ligne.json` | mesures en ligne de `su2 gen --mesures` : voir « Fichiers d'un run avec mesures en ligne » (§ su2 gen) |
 
 Un lot de K > 1 chaînes écrit `manifest.json` et `COMPLETE` à la racine du lot et un sous-répertoire `c000/ … c{K-1}/` par chaîne
 (`therm.csv`, `measurements.csv`, dumps). Taille d'une configuration : c16 = 256·L⁴ octets (L = 32 : 268 Mo ; L = 64 : 4,3 Go), q64 la
@@ -358,50 +444,23 @@ kvu fetch gamer:store/ID                                                 # un en
 
 ### Régénération des ensembles (`regen`, `store classer`)
 
+**Limite à connaître.** `kvu regen` ne lit que les manifestes `su2_hip/1` et `su2_gen/1` (générateurs historiques) et `kvu-regen/1`
+(écrit par `su2 boite` et, pour les blocs, `regen_bloc3.json`). Le `manifest.json` (`kevinotron-unifie/1`) d'un `kvu su2 gen` ordinaire
+n'est PAS reconnu : `kvu regen RUN/manifest.json` répond `manifeste non reconnu (ni su2_hip/1 ni su2_gen/1 ni kvu-regen/1)`, code 4.
+Sans `KVU_SCRATCH`, `kvu regen` exige de toute façon `--sortie DIR` (dossier NEUF) et rend 2 avant même de lire le manifeste ; pour voir
+le diagnostic ci-dessus, donner `--sortie` : `kvu regen RUN/manifest.json --sortie NEUF`.
+Pour rejouer à la main un tel run : se placer dans le dossier `cwd` du manifeste, relancer la commande de `argv` en REMPLAÇANT la valeur de
+`--outdir` par un dossier neuf (relancer `argv` littéralement échoue : `REFUS D'ÉCRASER`), avec le même binaire et le même backend
+effectif (champ `backend` du manifeste) : REMPLACER la valeur de `--backend` si `argv` en contient une (`--backend auto` devient `--backend cpu` ; en doubler l'option est refusé, « usage invalide »), l'ajouter seulement si `argv` n'en contenait pas (essayé dans les deux cas : sorties identiques), puis comparer les fichiers (`cmp`) (essayé :
+les quatre CSV d'un run `corr`+`wilson` en CPU sont identiques à l'octet). `kvu store verifier` vérifie les sha256 d'un ensemble déjà
+écrit ; il lui faut la racine d'un store (`--store DIR` ou `KEVINOTRON_STORE=DIR`, DIR = dossier PARENT du run) puis le nom du run :
+`kvu store verifier --store . mon_run`.
+
 ```bash
 kvu regen M.json --sortie DIR [--comparer ORIG] [--ancres anchors.sha256] [--preuve-gbit PREUVES] [--delai 600]
 kvu regen M.json --adapter-seulement --vers M_regen.json [--hacher]   # traduit en kvu-regen/1 sans rejouer
 kvu regen --adapter-ensemble ENSEMBLE --vers DIR                      # un manifeste kvu-regen/1 par chaîne
 kvu store classer --chemin ENSEMBLE [--chemin …] [--preuve-gbit PREUVES] [--detail] [--json]
-```
-
-- **Ce que `kvu regen` rejoue (0.1.1, vérifié par exécution sur CPU)** : les manifestes `kvu-regen/1` de `su2 boite` et de
-  `fibre echantillonner` (`DIR/manifest_regen.json` : `PASS REGEN`, fichiers identiques à l'octet). Il lit aussi, par adaptateur,
-  les manifestes historiques `su2_hip/1` et `su2_gen/1` (rejeu sur GPU avec un binaire admis, non rejoué pour cette version). Il ne
-  rejoue PAS un run `su2 gen` : `DIR/manifest.json` n'est pas reconnu (code 4) et `DIR/regen_bloc3.json` (`--mesures bloc:3`)
-  échoue (`FAIL REGEN`, code 8 : la commande enregistrée garde `--outdir`, que `regen` ajoute une seconde fois) ; défaut PUB-15 de
-  `docs/DEFAUTS_CONNUS.md`.
-- **Parade pour `su2 gen` (vérifiée)** : un run est déterministe ; relancer la commande enregistrée dans son manifeste (clé `argv`),
-  avec le même binaire `kvu` (clé `binaire`) et le même backend sur la même machine, dans un dossier neuf (`--outdir`) et sans
-  `--arret-apres` ni `--fenetre-s` (un run repris garde l'`argv` de sa création), puis comparer aux sha256 consignés. Le script
-  ci-dessous traite les deux syntaxes (`--outdir RUN` et `--outdir=RUN`, de même pour `--arret-apres` et `--fenetre-s`) et ne lance
-  `kvu` qu'après une transformation réussie (sinon il s'arrête, code 1, sans rien lancer ; il refuse de même un `argv` de reprise,
-  `--reprendre`, et une de ces options placée en fin d'`argv` sans sa valeur). `RUN` est le run d'origine, `NEUF` un
-  dossier qui n'existe pas ; la seconde commande n'affiche que des `OK` (code 0) si tout est identique :
-
-```bash
-python3 - RUN NEUF <<'FIN'
-import json, os, sys
-run, neuf = sys.argv[1], sys.argv[2]
-a = json.load(open(run + "/manifest.json"))["argv"][1:]
-b, n, i = [], 0, 0
-while i < len(a):
-    nom, colle = a[i].split("=", 1)[0], "=" in a[i]
-    if nom == "--reprendre":
-        sys.exit("argv d'une reprise (--reprendre) : rien n'est lancé")
-    if nom in ("--arret-apres", "--fenetre-s", "--outdir"):
-        if not colle and i + 1 >= len(a):
-            sys.exit(nom + " sans valeur : rien n'est lancé")
-        if nom == "--outdir":
-            b, n = b + ["--outdir", neuf], n + 1
-        i += 1 if colle else 2
-    else:
-        b, i = b + [a[i]], i + 1
-if n != 1 or os.path.exists(neuf):
-    sys.exit("transformation impossible (--outdir absent ou répété, ou NEUF existe) : rien n'est lancé")
-os.execvp("kvu", ["kvu"] + b)
-FIN
-python3 -c 'import json,sys;[print(f["sha256"]+"  "+sys.argv[2]+"/"+f["nom"]) for f in json.load(open(sys.argv[1]+"/manifest.json"))["fichiers"]]' RUN NEUF | sha256sum -c
 ```
 
 - Manifeste `kvu-regen/1` (schéma : `schemas/kvu-regen-1.schema.json`, validateur `scripts/regen_valider.py`) : binaire, source,
@@ -478,6 +537,12 @@ estimations, `petit` les exécute à L ≤ 8 sur le CPU dans un répertoire jeta
 | `02_saturation_v3.sh` | génération de V (`su2 gen`, F64) puis `cond chaine --mode ref_rng` ; lecture de `F.npy`/`D.npy` pour torsion.py |
 | `03_desert_L48_64.sh` | L = 64 en F32, dumps q64, `--mesures`, projection SSD (`store du --projeter`) et durées estimées |
 | `04_balayage_beta.sh` | 16 valeurs de β en un seul lot |
+| `05_mesure_enligne_reprise.sh` | **le premier calcul à essayer** : mesures en ligne (`corr`, `wilson`), interruption propre à un point de reprise, reprise, comparaison à l'octet avec un run d'une traite |
+
+Lancement d'un exemple (quelques secondes) :
+`EXEMPLE_MODE=petit EXEMPLE_SORTIE=$PWD/essai KVU_BIN=$PWD/target/release/kvu crates/kvu/exemples/05_mesure_enligne_reprise.sh`
+(depuis la racine du dépôt ; `essai` doit être neuf ; sans `EXEMPLE_SORTIE`, le mode `petit` écrit sous `$HOME/kvu_unif/scratch` et efface tout à
+la fin). L'exemple ne tue aucun processus : il demande un arrêt PROPRE (`--arret-apres`). La garde SSD refuse l'écriture si la place libre moins la taille écrite est inférieure au seuil (§6 ; 20 Go sur une machine inconnue).
 
 ## 12. Pièges connus
 
@@ -629,3 +694,23 @@ Sans `--echantillon`, les 324 liens du bloc sont utilisés. Le JSON
 euclidienne de largeur 0,5, avec l'erreur estimée ; `--detail` ajoute toutes les
 paires. Il ne dépend pas du nombre de fils. Une sortie existante est refusée.
 Les opérateurs hors famille exigent `--hors-famille`, comme `rg bloc`.
+
+## 13. `kvu experience` : tracer une expérience
+
+`kvu experience` range dans un dossier un préenregistrement (PREREG, gelé avant les calculs), les manifestes des runs, les portes et le
+verdict, et vérifie que le tout est cohérent. Il ne lance AUCUN calcul. Séquence minimale (dans un dossier contenant `PREREG.md` et
+`runs/r0.manifest.json`, copie du `manifest.json` d'un run COMMENCÉ après le gel du PREREG, c'est-à-dire après la création de `PREREG.md`, qui ne doit plus être
+modifié ensuite) :
+
+```text
+kvu experience init --racine . --id demo --titre "Plaquette" --question "La plaquette est-elle dans [0,1] ?" --prereg PREREG.md
+kvu experience ajouter-run --racine . --machine principale --prereg P0 runs/r0.manifest.json
+kvu experience porte G0 --racine . --enonce "plaquette dans [0,1]" --seuil 1 --valeur 0.6 --statut vert --source PREREG.md
+kvu experience verdict --racine . --statut compatible --provisoire --texte "Compatible." --chiffre 'seuil=1@PREREG.md:1:[lecture]' --reserve "mini-calcul"
+kvu experience verifier --racine .       # une ligne « OK Vn » par contrôle ; code 8 dès qu'un contrôle est ROUGE
+kvu experience fiche --racine .          # écrit EXPERIENCE.md (rien n'est affiché)
+```
+
+`init` écrit `EXPERIENCE.json` ; l'heure de gel du PREREG est la date de modification du fichier (`--gele-le` la déclare autrement, avec un
+avertissement V4). `verifier` rend ROUGE (code 8) si le PREREG est modifié après `init` (V2 : sha256 différent) ou si un run a commencé avant le
+gel (V4 : « run r0 avant PREREG P0 : écart … secondes »). Détail des champs, des contrôles V1…V11 et du carnet : `docs/v0.2/notes/experience.md`.

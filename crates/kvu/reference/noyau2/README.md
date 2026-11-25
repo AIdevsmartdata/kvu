@@ -124,7 +124,7 @@ Lecture honnête :
 ## CUDA : non fait (décision argumentée)
 - Le mode exact (`ref_rng`) ne peut pas aller sur GPU : il consomme la séquence numpy de la référence.
 - RTX 5060 Ti : FP64 à ~1/64 du FP32. Un balayage coûte ~500 flops FP64 par lien (agrafes) + la boucle de rejet (log, sqrt) : le gain
-  attendu sur une chaîne, face à un cœur CPU numba, est au mieux ×10-20, pour un GPU partagé (verrou commun avec maison3d et la branche C).
+  attendu sur une chaîne, face à un cœur CPU numba, est au mieux ×10-20, pour un GPU partagé (verrou commun avec d'autres usages de la carte et la branche C).
 - Les lots C-b sont des chaînes INDÉPENDANTES : 8 cœurs E × 1 fil × (×6-9) = le débit utile. Le GPU ne se justifierait que pour de
   longues chaînes à L ≥ 32 ; à reconsidérer si un chantier en demande (le noyau `_hb_rapide` + agrafes se porte tel quel en CUDA).
 - Ce soir : gamer injoignable (voir plus haut) et GPU d'acemagic interdit (visionneuse 3D).

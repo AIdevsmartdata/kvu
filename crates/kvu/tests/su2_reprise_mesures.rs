@@ -1,7 +1,9 @@
 //! Reprise des mesures en ligne de `su2 gen` après un arrêt brutal (c08c, 11/11/2026).
-//! Suite autonome, applicable à la version publique 0.1.1 : Wilson, Polyakov, flot et bloc.
-//! Tous les tests sont sur CPU et appartiennent à la suite normale.
+//! Suite autonome de reprise : Wilson, Polyakov, flot et bloc.
+//! Les tests CPU appartiennent à la suite normale ; le test GPU est `#[ignore = "GPU"]`.
+//! Un test GPU demandé échoue si le GPU manque ; l'exécuter sous le verrou de la machine.
 
+use kvu::gpu::Appareil;
 use serde_json::Value;
 use std::fs;
 use std::io::Write;
@@ -119,6 +121,14 @@ fn backend_gpu() -> &'static str {
         Ok("cuda") => "cuda",
         _ if cfg!(feature = "cuda") => "cuda",
         _ => "hip",
+    }
+}
+
+fn exiger_gpu() -> Appareil {
+    match kvu::su2::cli::ouvrir_backend(backend_gpu()) {
+        Ok(Some(app)) => app,
+        Ok(None) => panic!("FAIL : test GPU demandé, aucun GPU"),
+        Err(e) => panic!("FAIL : test GPU demandé, aucun GPU : {e}"),
     }
 }
 
@@ -441,8 +451,351 @@ fn specification_equivalente_acceptee() {
     fs::remove_dir_all(&d).expect("suppression du répertoire temporaire");
 }
 
+#[test]
+#[ignore = "GPU"]
+fn run_ancien_moteur_change_refuse() {
+    drop(exiger_gpu());
+    let d = dossier("run_ancien_moteur");
+    let b = d.join("chaine");
+    interrompre("cpu", 4, &b, SPEC_WILSON);
+    exiger_compagnon_consigne(&b);
+    fs::remove_file(b.join(NOM_FICHIER_MESURES)).expect("suppression du compagnon du run ancien");
+    let chemin = b.join("manifest.json");
+    let mut man = lire_json(&chemin);
+    assert_eq!(man["backend"], "cpu", "moteur de création CPU attendu");
+    let fichiers = man["fichiers"]
+        .as_array_mut()
+        .expect("fichiers du manifeste");
+    let avant = fichiers.len();
+    fichiers.retain(|f| f["nom"].as_str() != Some(NOM_FICHIER_MESURES));
+    assert_eq!(avant, fichiers.len() + 1, "entrée du compagnon non retirée");
+    fs::write(
+        &chemin,
+        serde_json::to_vec_pretty(&man).expect("sérialisation du manifeste"),
+    )
+    .expect("écriture du manifeste ancien, argv et backend conservés");
+    let avant = etat_csv(&b);
+    refus(
+        &reprendre(backend_gpu(), &b, &["--mesures", SPEC_WILSON]),
+        "moteur",
+    );
+    assert_eq!(
+        etat_csv(&b),
+        avant,
+        "CSV modifiés malgré le changement de moteur"
+    );
+    assert!(
+        !b.join("COMPLETE").exists(),
+        "COMPLETE malgré le changement de moteur"
+    );
+    reussi(&reprendre("cpu", &b, &["--mesures", SPEC_WILSON]));
+    assert!(
+        b.join("COMPLETE").exists(),
+        "COMPLETE de la reprise CPU absent"
+    );
+    println!(
+        "\nPASS RUN-ANCIEN-MOTEUR : 1 refus GPU code 2, 3 CSV inchangés, 1 reprise CPU code 0"
+    );
+    fs::remove_dir_all(&d).expect("suppression du répertoire temporaire");
+}
+
 // ---------------------------------------------------------------------------------------------
-// 0.1.1 : garde de reprise (PUB-01) et refus --bord (PUB-02), en version wilson
+// c08d : format déclaré et préfixe validé AVANT toute troncature (V1, V2)
+// ---------------------------------------------------------------------------------------------
+
+/// Lignes de données du pas `pas` d'un CSV (premier champ).
+fn lignes_du_pas(texte: &str, pas: u64) -> Vec<String> {
+    texte
+        .lines()
+        .skip(1)
+        .filter(|l| l.split(',').next() == Some(pas.to_string().as_str()))
+        .map(str::to_string)
+        .collect()
+}
+
+#[test]
+fn v1_format_inconnu_refuse_sans_modifier() {
+    let d = dossier("v1_format");
+    let b = d.join("chaine");
+    interrompre("cpu", 4, &b, "wilson:R2xT2:1");
+    // contre-exemple de la troisième relecture : autre format, l'identifiant d'abord
+    let mut texte = String::from("id,pas,r,t,W\n");
+    for (id, pas, r, t) in [
+        (8, 8, 1, 1),
+        (10, 8, 1, 2),
+        (12, 8, 2, 1),
+        (14, 8, 2, 2),
+        (16, 10, 1, 1),
+        (18, 10, 1, 2),
+        (20, 10, 2, 1),
+        (22, 10, 2, 2),
+    ] {
+        texte.push_str(&format!("{id},{pas},{r},{t},0.5\n"));
+    }
+    fs::write(b.join("wilson.csv"), &texte).unwrap();
+    refus(&reprendre("cpu", &b, &[]), "format inconnu");
+    assert_eq!(
+        octets(&b.join("wilson.csv")),
+        texte.as_bytes(),
+        "fichier modifié malgré le refus"
+    );
+    println!("\nPASS V1 : format id,pas,r,t,W refusé (code 2), 0 octet modifié");
+    fs::remove_dir_all(&d).unwrap();
+}
+
+#[test]
+fn v2_prefixe_doublonne_refuse_sans_modifier() {
+    let d = dossier("v2_doublon");
+    let b = d.join("chaine");
+    interrompre("cpu", 4, &b, "wilson:R2xT2:1");
+    // run 0.1.0 abîmé (PUB-13) puis repris proprement : le groupe du pas 10, AU point de reprise, est doublé
+    let chemin = b.join("wilson.csv");
+    let mut texte = String::from_utf8(octets(&chemin)).unwrap();
+    let groupe = lignes_du_pas(&texte, 10);
+    assert_eq!(groupe.len(), 4);
+    for l in &groupe {
+        texte.push_str(l);
+        texte.push('\n');
+    }
+    fs::write(&chemin, &texte).unwrap();
+    refus(&reprendre("cpu", &b, &[]), "pas 10");
+    assert_eq!(
+        octets(&chemin),
+        texte.as_bytes(),
+        "fichier modifié malgré le refus"
+    );
+    println!("\nPASS V2-DOUBLON : 4 lignes du pas 10 doublées, refus code 2 citant le pas 10, 0 octet modifié");
+    fs::remove_dir_all(&d).unwrap();
+}
+
+#[test]
+fn v2_ligne_manquante_refusee_sans_modifier() {
+    let d = dossier("v2_manquante");
+    let b = d.join("chaine");
+    interrompre("cpu", 4, &b, "wilson:R2xT2:1");
+    let chemin = b.join("wilson.csv");
+    let texte = String::from_utf8(octets(&chemin)).unwrap();
+    let a_retirer = lignes_du_pas(&texte, 8)[2].clone();
+    let ampute: String = texte
+        .lines()
+        .filter(|l| *l != a_retirer)
+        .map(|l| format!("{l}\n"))
+        .collect();
+    fs::write(&chemin, &ampute).unwrap();
+    refus(&reprendre("cpu", &b, &[]), "pas 8");
+    assert_eq!(
+        octets(&chemin),
+        ampute.as_bytes(),
+        "fichier modifié malgré le refus"
+    );
+    println!("\nPASS V2-MANQUANTE : une ligne du pas 8 retirée, refus code 2 citant le pas 8, 0 octet modifié");
+    fs::remove_dir_all(&d).unwrap();
+}
+
+// ------------------------------------------------------------------------------------------
+// PUB-14 : VRAI arrêt brutal (kill -9) pendant la thermalisation, puis reprise
+// ------------------------------------------------------------------------------------------
+
+/// Garde d'un processus fils : sur tout chemin (réussite ou échec du test), le fils encore vivant est tué par SON PID
+/// (`Child::kill`, SIGKILL) puis récolté. Le test ne tue jamais rien d'autre que ce fils.
+struct GardeFils(Option<std::process::Child>);
+
+impl Drop for GardeFils {
+    fn drop(&mut self) {
+        if let Some(mut fils) = self.0.take() {
+            let _ = fils.kill();
+            let _ = fils.wait();
+        }
+    }
+}
+
+const THERM_LONGUE: u64 = 200_000;
+const ENTETE_MESURES: &str = "measurement_index,total_steps,phase,plaquette,P0,P1,P2,P3\n";
+
+/// Run CPU L = 4 à thermalisation longue (environ une minute et demie) et points de reprise fréquents.
+fn args_therm_longue(sortie: &Path) -> Vec<String> {
+    let mut a: Vec<String> = [
+        "su2",
+        "gen",
+        "--backend",
+        "cpu",
+        "--L",
+        "4",
+        "--beta",
+        "2.3",
+        "--graine",
+        "4242",
+        "--therm",
+        &THERM_LONGUE.to_string(),
+        "--nmeas",
+        "10",
+        "--skip",
+        "1",
+        "--dump-every",
+        "0",
+        "--format",
+        "q64",
+        "--reprise-every",
+        "50",
+        "--outdir",
+    ]
+    .iter()
+    .map(|s| s.to_string())
+    .collect();
+    a.push(sortie.to_str().expect("chemin UTF-8 de sortie").to_string());
+    a
+}
+
+#[test]
+fn pub14_kill9_en_thermalisation_reprise_acceptee() {
+    use std::os::unix::process::ExitStatusExt;
+    use std::process::Stdio;
+    use std::time::{Duration, Instant};
+    let d = dossier("pub14");
+    let tue = d.join("tue");
+    let journal = fs::File::create(d.join("tue.err")).expect("journal du run tué");
+    let mut garde = GardeFils(Some(
+        Command::new(env!("CARGO_BIN_EXE_kvu"))
+            .args(args_therm_longue(&tue))
+            .env("RAYON_NUM_THREADS", "2")
+            .env("KEVINOTRON_BACKEND", backend_gpu())
+            .stdout(Stdio::null())
+            .stderr(journal)
+            .spawn()
+            .expect("lancement du run à tuer"),
+    ));
+    let fils = garde.0.as_mut().expect("fils lancé");
+    let debut = Instant::now();
+    loop {
+        if let Some(st) = fils.try_wait().expect("état du fils") {
+            panic!(
+                "ARRÊT BRUTAL NON OBTENU : le run s'est terminé ({st}) avant le premier point de reprise ; journal : {}",
+                fs::read_to_string(d.join("tue.err")).unwrap_or_default()
+            );
+        }
+        if fs::metadata(tue.join("reprise.json")).is_ok_and(|m| m.len() > 0) {
+            break;
+        }
+        assert!(
+            debut.elapsed() < Duration::from_secs(60),
+            "délai dépassé : aucun point de reprise en 60 s"
+        );
+        std::thread::sleep(Duration::from_millis(2));
+    }
+    fils.kill().expect("kill -9 du fils (par son PID)");
+    let st = fils.wait().expect("récolte du fils tué");
+    garde.0 = None;
+    assert_eq!(
+        st.signal(),
+        Some(9),
+        "ARRÊT BRUTAL NON OBTENU : le fils n'est pas mort de SIGKILL ({st})"
+    );
+    let etat = lire_json(&tue.join("reprise.json"));
+    let pf = etat["pas_faits"].as_u64().expect("pas_faits");
+    assert!(
+        pf > 0 && pf < THERM_LONGUE && etat["mesures_faites"].as_u64() == Some(0),
+        "l'arrêt n'est pas tombé en thermalisation : reprise.json = {etat}"
+    );
+    assert!(!tue.join("COMPLETE").exists(), "COMPLETE après un kill -9");
+    // PUB-14 : l'en-tête de measurements.csv doit être sur le disque dès la création du run.
+    assert_eq!(
+        String::from_utf8_lossy(&octets(&tue.join("measurements.csv"))),
+        ENTETE_MESURES,
+        "measurements.csv après kill -9 en thermalisation (pas {pf}) : en-tête seul attendu (PUB-14)"
+    );
+    // la reprise s'arrête 100 pas après le dernier point sauvegardé : toujours en thermalisation
+    assert!(pf + 100 < THERM_LONGUE, "pas d'arrêt hors thermalisation : point {pf}");
+    let a = (pf + 100).to_string();
+    reussi(&reprendre("cpu", &tue, &["--arret-apres", &a]));
+    let reference = d.join("ref");
+    let mut args = args_therm_longue(&reference);
+    args.extend(["--arret-apres".to_string(), a.clone()]);
+    reussi(&kvu(&args.iter().map(String::as_str).collect::<Vec<_>>()));
+    for nom in ["therm.csv", "measurements.csv"] {
+        assert_eq!(
+            octets(&reference.join(nom)),
+            octets(&tue.join(nom)),
+            "{nom} : run tué en thermalisation (dernier point sauvegardé : pas {pf}) puis repris jusqu'au pas {a} ≠ run arrêté proprement au pas {a}"
+        );
+    }
+    assert_eq!(
+        lire_json(&tue.join("reprise.json"))["pas_faits"],
+        lire_json(&reference.join("reprise.json"))["pas_faits"]
+    );
+    println!(
+        "\nPASS PUB-14 : kill -9 (SIGKILL) en thermalisation (dernier point sauvegardé : pas {pf}), measurements.csv = en-tête seul, reprise rc 0, \
+         therm.csv et measurements.csv identiques à l'octet au run arrêté proprement au pas {a}"
+    );
+    fs::remove_dir_all(&d).expect("suppression du répertoire temporaire");
+}
+
+// ------------------------------------------------------------------------------------------
+// PUB-16 : un run REPRIS passe `kvu store verifier` (COMPLETE au format d'un run neuf)
+// ------------------------------------------------------------------------------------------
+
+fn store_verifier(store: &Path, dir: &Path) -> Output {
+    kvu(&[
+        "store",
+        "--store",
+        store.to_str().expect("chemin UTF-8 du store"),
+        "verifier",
+        dir.to_str().expect("chemin UTF-8 du run"),
+    ])
+}
+
+fn pub16_repris_verifiable(porte: &str, extra: &[&str]) {
+    let d = dossier(porte);
+    let b = d.join("chaine");
+    let mut args = vec!["--reprise-every", "2", "--arret-apres", "10"];
+    args.extend_from_slice(extra);
+    reussi(&gen("cpu", 4, 6, 6, 2, &b, &args));
+    assert!(!b.join("COMPLETE").exists(), "COMPLETE avant la reprise");
+    reussi(&reprendre("cpu", &b, extra));
+    let complete = String::from_utf8(octets(&b.join("COMPLETE"))).expect("COMPLETE UTF-8");
+    let sha = kvu::heritage::manifest::sha256_hex(&octets(&b.join("manifest.json")));
+    assert_eq!(
+        complete,
+        format!("rc=0\nmanifest_sha256={sha}\n"),
+        "COMPLETE d'un run repris : format d'un run neuf attendu (PUB-16)"
+    );
+    let v = store_verifier(&d, &b);
+    reussi(&v);
+    let texte = String::from_utf8_lossy(&v.stdout);
+    assert!(
+        texte.contains(": OK,"),
+        "verdict de store verifier : {texte}"
+    );
+    // la porte a des dents : un manifeste altéré après la clôture rend la vérification rouge (code 8)
+    let mut f = fs::OpenOptions::new()
+        .append(true)
+        .open(b.join("manifest.json"))
+        .expect("ouverture du manifeste");
+    f.write_all(b" ").expect("altération du manifeste");
+    drop(f);
+    assert_eq!(
+        store_verifier(&d, &b).status.code(),
+        Some(8),
+        "manifeste altéré non détecté"
+    );
+    println!(
+        "\nPASS {porte} : run arrêté au pas 10 puis repris, COMPLETE = rc=0 + manifest_sha256, store verifier OK ; \
+         manifeste altéré : code 8"
+    );
+    fs::remove_dir_all(&d).expect("suppression du répertoire temporaire");
+}
+
+#[test]
+fn pub16_run_repris_passe_store_verifier() {
+    pub16_repris_verifiable("pub16_sans_mesures", &[]);
+}
+
+#[test]
+fn pub16_run_repris_avec_mesures_passe_store_verifier() {
+    pub16_repris_verifiable("pub16_wilson", &["--mesures", SPEC_WILSON]);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Garde de reprise (PUB-01) et refus --bord (PUB-02), en version wilson
 // ---------------------------------------------------------------------------------------------
 
 const SPEC_W: &str = "wilson:R2xT2:1";
@@ -635,303 +988,12 @@ fn mesures_vide_vaut_sans_mesures() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 0.1.1 (PUB-13) : format déclaré et préfixe validé AVANT toute troncature (V1, V2)
-// ---------------------------------------------------------------------------------------------
-
-/// Lignes de données du pas `pas` d'un CSV (premier champ).
-fn lignes_du_pas(texte: &str, pas: u64) -> Vec<String> {
-    texte
-        .lines()
-        .skip(1)
-        .filter(|l| l.split(',').next() == Some(pas.to_string().as_str()))
-        .map(str::to_string)
-        .collect()
-}
-
-#[test]
-fn v1_format_inconnu_refuse_sans_modifier() {
-    let d = dossier("v1_format");
-    let b = d.join("chaine");
-    interrompre("cpu", 4, &b, "wilson:R2xT2:1");
-    // contre-exemple de la troisième relecture : autre format, l'identifiant d'abord
-    let mut texte = String::from("id,pas,r,t,W\n");
-    for (id, pas, r, t) in [
-        (8, 8, 1, 1),
-        (10, 8, 1, 2),
-        (12, 8, 2, 1),
-        (14, 8, 2, 2),
-        (16, 10, 1, 1),
-        (18, 10, 1, 2),
-        (20, 10, 2, 1),
-        (22, 10, 2, 2),
-    ] {
-        texte.push_str(&format!("{id},{pas},{r},{t},0.5\n"));
-    }
-    fs::write(b.join("wilson.csv"), &texte).unwrap();
-    refus(&reprendre("cpu", &b, &[]), "format inconnu");
-    assert_eq!(
-        octets(&b.join("wilson.csv")),
-        texte.as_bytes(),
-        "fichier modifié malgré le refus"
-    );
-    println!("\nPASS V1 : format id,pas,r,t,W refusé (code 2), 0 octet modifié");
-    fs::remove_dir_all(&d).unwrap();
-}
-
-#[test]
-fn v2_prefixe_doublonne_refuse_sans_modifier() {
-    let d = dossier("v2_doublon");
-    let b = d.join("chaine");
-    interrompre("cpu", 4, &b, "wilson:R2xT2:1");
-    // run 0.1.0 abîmé (PUB-13) puis repris proprement : le groupe du pas 10, AU point de reprise, est doublé
-    let chemin = b.join("wilson.csv");
-    let mut texte = String::from_utf8(octets(&chemin)).unwrap();
-    let groupe = lignes_du_pas(&texte, 10);
-    assert_eq!(groupe.len(), 4);
-    for l in &groupe {
-        texte.push_str(l);
-        texte.push('\n');
-    }
-    fs::write(&chemin, &texte).unwrap();
-    refus(&reprendre("cpu", &b, &[]), "pas 10");
-    assert_eq!(
-        octets(&chemin),
-        texte.as_bytes(),
-        "fichier modifié malgré le refus"
-    );
-    println!("\nPASS V2-DOUBLON : 4 lignes du pas 10 doublées, refus code 2 citant le pas 10, 0 octet modifié");
-    fs::remove_dir_all(&d).unwrap();
-}
-
-#[test]
-fn v2_ligne_manquante_refusee_sans_modifier() {
-    let d = dossier("v2_manquante");
-    let b = d.join("chaine");
-    interrompre("cpu", 4, &b, "wilson:R2xT2:1");
-    let chemin = b.join("wilson.csv");
-    let texte = String::from_utf8(octets(&chemin)).unwrap();
-    let a_retirer = lignes_du_pas(&texte, 8)[2].clone();
-    let ampute: String = texte
-        .lines()
-        .filter(|l| *l != a_retirer)
-        .map(|l| format!("{l}\n"))
-        .collect();
-    fs::write(&chemin, &ampute).unwrap();
-    refus(&reprendre("cpu", &b, &[]), "pas 8");
-    assert_eq!(
-        octets(&chemin),
-        ampute.as_bytes(),
-        "fichier modifié malgré le refus"
-    );
-    println!("\nPASS V2-MANQUANTE : une ligne du pas 8 retirée, refus code 2 citant le pas 8, 0 octet modifié");
-    fs::remove_dir_all(&d).unwrap();
-}
 
 // ------------------------------------------------------------------------------------------
-// PUB-14 (0.1.1) : VRAI arrêt brutal (kill -9) pendant la thermalisation, puis reprise
+// PUB-14, chemin --bord : therm_blocs.csv et blocs.csv (su2/bord.rs::ouvrir_fichiers)
 // ------------------------------------------------------------------------------------------
 
-/// Garde d'un processus fils : sur tout chemin (réussite ou échec du test), le fils encore vivant est tué par SON PID
-/// (`Child::kill`, SIGKILL) puis récolté. Le test ne tue jamais rien d'autre que ce fils.
-struct GardeFils(Option<std::process::Child>);
-
-impl Drop for GardeFils {
-    fn drop(&mut self) {
-        if let Some(mut fils) = self.0.take() {
-            let _ = fils.kill();
-            let _ = fils.wait();
-        }
-    }
-}
-
-const THERM_LONGUE: u64 = 200_000;
-const ENTETE_MESURES: &str = "measurement_index,total_steps,phase,plaquette,P0,P1,P2,P3\n";
-
-/// Run CPU L = 4 à thermalisation longue (environ une minute et demie) et points de reprise fréquents.
-fn args_therm_longue(sortie: &Path) -> Vec<String> {
-    let mut a: Vec<String> = [
-        "su2",
-        "gen",
-        "--backend",
-        "cpu",
-        "--L",
-        "4",
-        "--beta",
-        "2.3",
-        "--graine",
-        "4242",
-        "--therm",
-        &THERM_LONGUE.to_string(),
-        "--nmeas",
-        "10",
-        "--skip",
-        "1",
-        "--dump-every",
-        "0",
-        "--format",
-        "q64",
-        "--reprise-every",
-        "50",
-        "--outdir",
-    ]
-    .iter()
-    .map(|s| s.to_string())
-    .collect();
-    a.push(sortie.to_str().expect("chemin UTF-8 de sortie").to_string());
-    a
-}
-
-#[test]
-fn pub14_kill9_en_thermalisation_reprise_acceptee() {
-    use std::os::unix::process::ExitStatusExt;
-    use std::process::Stdio;
-    use std::time::{Duration, Instant};
-    let d = dossier("pub14");
-    let tue = d.join("tue");
-    let journal = fs::File::create(d.join("tue.err")).expect("journal du run tué");
-    let mut garde = GardeFils(Some(
-        Command::new(env!("CARGO_BIN_EXE_kvu"))
-            .args(args_therm_longue(&tue))
-            .env("RAYON_NUM_THREADS", "2")
-            .env("KEVINOTRON_BACKEND", backend_gpu())
-            .stdout(Stdio::null())
-            .stderr(journal)
-            .spawn()
-            .expect("lancement du run à tuer"),
-    ));
-    let fils = garde.0.as_mut().expect("fils lancé");
-    let debut = Instant::now();
-    loop {
-        if let Some(st) = fils.try_wait().expect("état du fils") {
-            panic!(
-                "ARRÊT BRUTAL NON OBTENU : le run s'est terminé ({st}) avant le premier point de reprise ; journal : {}",
-                fs::read_to_string(d.join("tue.err")).unwrap_or_default()
-            );
-        }
-        if fs::metadata(tue.join("reprise.json")).is_ok_and(|m| m.len() > 0) {
-            break;
-        }
-        assert!(
-            debut.elapsed() < Duration::from_secs(60),
-            "délai dépassé : aucun point de reprise en 60 s"
-        );
-        std::thread::sleep(Duration::from_millis(2));
-    }
-    fils.kill().expect("kill -9 du fils (par son PID)");
-    let st = fils.wait().expect("récolte du fils tué");
-    garde.0 = None;
-    assert_eq!(
-        st.signal(),
-        Some(9),
-        "ARRÊT BRUTAL NON OBTENU : le fils n'est pas mort de SIGKILL ({st})"
-    );
-    let etat = lire_json(&tue.join("reprise.json"));
-    let pf = etat["pas_faits"].as_u64().expect("pas_faits");
-    assert!(
-        pf > 0 && pf < THERM_LONGUE && etat["mesures_faites"].as_u64() == Some(0),
-        "l'arrêt n'est pas tombé en thermalisation : reprise.json = {etat}"
-    );
-    assert!(!tue.join("COMPLETE").exists(), "COMPLETE après un kill -9");
-    // PUB-14 : l'en-tête de measurements.csv doit être sur le disque dès la création du run.
-    assert_eq!(
-        String::from_utf8_lossy(&octets(&tue.join("measurements.csv"))),
-        ENTETE_MESURES,
-        "measurements.csv après kill -9 en thermalisation (pas {pf}) : en-tête seul attendu (PUB-14)"
-    );
-    let a = (pf + 100).to_string();
-    reussi(&reprendre("cpu", &tue, &["--arret-apres", &a]));
-    let reference = d.join("ref");
-    let mut args = args_therm_longue(&reference);
-    args.extend(["--arret-apres".to_string(), a.clone()]);
-    reussi(&kvu(&args.iter().map(String::as_str).collect::<Vec<_>>()));
-    for nom in ["therm.csv", "measurements.csv"] {
-        assert_eq!(
-            octets(&reference.join(nom)),
-            octets(&tue.join(nom)),
-            "{nom} : run tué en thermalisation (pas {pf}) puis repris jusqu'au pas {a} ≠ run arrêté proprement au pas {a}"
-        );
-    }
-    assert_eq!(
-        lire_json(&tue.join("reprise.json"))["pas_faits"],
-        lire_json(&reference.join("reprise.json"))["pas_faits"]
-    );
-    println!(
-        "\nPASS PUB-14 : kill -9 (SIGKILL) au pas {pf} de la thermalisation, measurements.csv = en-tête seul, reprise rc 0, \
-         therm.csv et measurements.csv identiques à l'octet au run arrêté proprement au pas {a}"
-    );
-    fs::remove_dir_all(&d).expect("suppression du répertoire temporaire");
-}
-
-// ------------------------------------------------------------------------------------------
-// PUB-16 (0.1.1) : un run REPRIS passe `kvu store verifier` (COMPLETE au format d'un run neuf)
-// ------------------------------------------------------------------------------------------
-
-fn store_verifier(store: &Path, dir: &Path) -> Output {
-    kvu(&[
-        "store",
-        "--store",
-        store.to_str().expect("chemin UTF-8 du store"),
-        "verifier",
-        dir.to_str().expect("chemin UTF-8 du run"),
-    ])
-}
-
-fn pub16_repris_verifiable(porte: &str, extra: &[&str]) {
-    let d = dossier(porte);
-    let b = d.join("chaine");
-    let mut args = vec!["--reprise-every", "2", "--arret-apres", "10"];
-    args.extend_from_slice(extra);
-    reussi(&gen("cpu", 4, 6, 6, 2, &b, &args));
-    assert!(!b.join("COMPLETE").exists(), "COMPLETE avant la reprise");
-    reussi(&reprendre("cpu", &b, extra));
-    let complete = String::from_utf8(octets(&b.join("COMPLETE"))).expect("COMPLETE UTF-8");
-    let sha = kvu::heritage::manifest::sha256_hex(&octets(&b.join("manifest.json")));
-    assert_eq!(
-        complete,
-        format!("rc=0\nmanifest_sha256={sha}\n"),
-        "COMPLETE d'un run repris : format d'un run neuf attendu (PUB-16)"
-    );
-    let v = store_verifier(&d, &b);
-    reussi(&v);
-    let texte = String::from_utf8_lossy(&v.stdout);
-    assert!(
-        texte.contains(": OK,"),
-        "verdict de store verifier : {texte}"
-    );
-    // la porte a des dents : un manifeste altéré après la clôture rend la vérification rouge (code 8)
-    let mut f = fs::OpenOptions::new()
-        .append(true)
-        .open(b.join("manifest.json"))
-        .expect("ouverture du manifeste");
-    f.write_all(b" ").expect("altération du manifeste");
-    drop(f);
-    assert_eq!(
-        store_verifier(&d, &b).status.code(),
-        Some(8),
-        "manifeste altéré non détecté"
-    );
-    println!(
-        "\nPASS {porte} : run arrêté au pas 10 puis repris, COMPLETE = rc=0 + manifest_sha256, store verifier OK ; \
-         manifeste altéré : code 8"
-    );
-    fs::remove_dir_all(&d).expect("suppression du répertoire temporaire");
-}
-
-#[test]
-fn pub16_run_repris_passe_store_verifier() {
-    pub16_repris_verifiable("pub16_sans_mesures", &[]);
-}
-
-#[test]
-fn pub16_run_repris_avec_mesures_passe_store_verifier() {
-    pub16_repris_verifiable("pub16_wilson", &["--mesures", SPEC_WILSON]);
-}
-
-// ------------------------------------------------------------------------------------------
-// PUB-14 (0.1.1), chemin --bord : therm_blocs.csv et blocs.csv (su2/bord.rs::ouvrir_fichiers)
-// ------------------------------------------------------------------------------------------
-
-/// Contre-exemple de la relecture pub-0.1.1-b : bord gelé, pas de pré-thermalisation, bloc de 1, un point à chaque pas.
+/// Contre-exemple d'une relecture antérieure : bord gelé, pas de pré-thermalisation, bloc de 1, un point à chaque pas.
 fn args_bord_long(sortie: &Path) -> Vec<String> {
     let mut a: Vec<String> = [
         "su2",
@@ -1027,6 +1089,7 @@ fn pub14_bord_kill9_en_thermalisation_reprise_acceptee() {
         octets(&tue.join("therm_blocs.csv")).ends_with(b"\n"),
         "therm_blocs.csv sans en-tête complet après kill -9"
     );
+    assert!(pf + 20 < THERM_LONGUE, "pas d'arrêt hors thermalisation : point {pf}");
     let a = (pf + 20).to_string();
     reussi(&reprendre("cpu", &tue, &["--arret-apres", &a]));
     let reference = d.join("ref");
@@ -1037,12 +1100,40 @@ fn pub14_bord_kill9_en_thermalisation_reprise_acceptee() {
         assert_eq!(
             octets(&reference.join(nom)),
             octets(&tue.join(nom)),
-            "{nom} : run --bord tué au pas {pf} puis repris jusqu'au pas {a} ≠ run arrêté proprement au pas {a}"
+            "{nom} : run --bord tué (dernier point sauvegardé : pas {pf}) puis repris jusqu'au pas {a} ≠ run arrêté proprement au pas {a}"
         );
     }
     println!(
-        "\nPASS PUB-14-BORD : kill -9 (SIGKILL) au pas {pf} (--bord, thermalisation), blocs.csv = en-tête seul, reprise rc 0, \
+        "\nPASS PUB-14-BORD : kill -9 (SIGKILL) en thermalisation (--bord ; dernier point sauvegardé : pas {pf}), blocs.csv = en-tête seul, reprise rc 0, \
          therm_blocs.csv et blocs.csv identiques à l'octet au run arrêté proprement au pas {a}"
     );
+    fs::remove_dir_all(&d).expect("suppression du répertoire temporaire");
+}
+
+// ------------------------------------------------------------------------------------------
+// Clôture interrompue (relecture B3) : manifeste « termine » publié, COMPLETE absent
+// ------------------------------------------------------------------------------------------
+
+/// SIMULATION par suppression du marqueur après une clôture réussie (pas un arrêt injecté à la frontière des deux publications).
+/// Un arrêt entre la publication du manifeste final et celle de `COMPLETE` laisse un run reprenable : `--reprendre` refait la fin,
+/// rend les mêmes CSV à l'octet, et `COMPLETE` redevient `rc=0` + `manifest_sha256=` (cohérent avec `rc` du manifeste).
+#[test]
+fn cloture_interrompue_entre_manifeste_et_complete_est_reprenable() {
+    let d = dossier("cloture_interrompue");
+    let b = d.join("chaine");
+    reussi(&gen("cpu", 4, 6, 6, 2, &b, &["--reprise-every", "2", "--mesures", SPEC_WILSON]));
+    let avant: Vec<_> = ["therm.csv", "measurements.csv", "wilson.csv"].iter().map(|f| octets(&b.join(f))).collect();
+    fs::remove_file(b.join("COMPLETE")).expect("suppression de COMPLETE (arrêt simulé entre manifeste et marqueur)");
+    reussi(&reprendre("cpu", &b, &[]));
+    for (f, a) in ["therm.csv", "measurements.csv", "wilson.csv"].iter().zip(&avant) {
+        assert_eq!(&octets(&b.join(f)), a, "{f} modifié par la reprise d'une clôture interrompue");
+    }
+    let m = lire_json(&b.join("manifest.json"));
+    assert_eq!(m["statut"], "termine");
+    assert_eq!(m["rc"].as_i64(), Some(0));
+    let c = String::from_utf8(octets(&b.join("COMPLETE"))).unwrap();
+    let sha = kvu::heritage::manifest::sha256_hex(&octets(&b.join("manifest.json")));
+    assert_eq!(c, format!("rc=0\nmanifest_sha256={sha}\n"), "COMPLETE doit porter le SHA-256 du manifeste");
+    reussi(&store_verifier(&d, &b));
     fs::remove_dir_all(&d).expect("suppression du répertoire temporaire");
 }

@@ -29,6 +29,8 @@ pub struct Cpu64 {
     app_masque: AppMasque,
     /// Torsion de 't Hooft (triviale par défaut).
     torsion: Torsion,
+    /// Réseau anisotrope (ξ₀, direction 3 = temps). 1.0 par défaut : chemins historiques inchangés.
+    xi0: f64,
     hist: Vec<f64>,
     hcap: usize,
     tranches: Vec<f64>,
@@ -54,11 +56,21 @@ impl Cpu64 {
             masque: None,
             app_masque: AppMasque::Tout,
             torsion: Torsion::triviale(),
+            xi0: 1.0,
             hist: Vec::new(),
             hcap: 0,
             tranches: Vec::new(),
             tcap: 0,
         })
+    }
+
+    /// Fixe ξ₀ (réseau anisotrope, agrafes pondérées ; 1.0 = isotrope, chemins historiques). ξ₀ fini > 0.
+    pub fn fixer_xi0(&mut self, xi0: f64) -> Resultat<()> {
+        if !(xi0.is_finite() && xi0 > 0.0) {
+            return Err(Erreur::Config("ξ₀ fini > 0 requis".into()));
+        }
+        self.xi0 = xi0;
+        Ok(())
     }
 
     /// Un sweep de bain thermique qui rend, par chaîne, les essais par lien (diagnostic `diag_ntry` du GPU) :
@@ -75,16 +87,17 @@ impl Cpu64 {
         let gel = self.gel;
         let masque = if self.app_masque.bain() { self.masque.as_deref() } else { None };
         let torsion = self.torsion;
+        let xi0 = self.xi0;
         let mut diag = diag;
         for (c, sc) in self.chaines.iter_mut().enumerate() {
             let beta = self.cfg.chaines[c].beta;
             let d = diag.as_deref_mut().map(|d| &mut d[c * v4..(c + 1) * v4]);
             // sans gel, ni masque, ni torsion : chemin historique (octets de la référence K1) ;
             // sinon la réécriture avec liens sautés et agrafe tordue.
-            if gel == Gel::Aucun && masque.is_none() && torsion.est_triviale() {
+            if gel == Gel::Aucun && masque.is_none() && torsion.est_triviale() && xi0 == 1.0 {
                 sc.sweep_hb(beta, d);
             } else {
-                hb_gel(sc, beta, gel, masque, &torsion, d);
+                hb_gel(sc, beta, gel, masque, &torsion, xi0, d);
             }
         }
     }
@@ -92,28 +105,28 @@ impl Cpu64 {
     /// Sweep de bain thermique par la réécriture (même sans gel) : sert à prouver qu'elle égale `CpuSu2`.
     pub fn sweep_hb_reecrit(&mut self, gel: Gel) {
         for (c, sc) in self.chaines.iter_mut().enumerate() {
-            hb_gel(sc, self.cfg.chaines[c].beta, gel, None, &Torsion::triviale(), None);
+            hb_gel(sc, self.cfg.chaines[c].beta, gel, None, &Torsion::triviale(), 1.0, None);
         }
     }
 
     /// Sweep d'overrelaxation par la réécriture (même sans gel).
     pub fn sweep_or_reecrit(&mut self, gel: Gel) {
         for sc in self.chaines.iter_mut() {
-            or_gel(sc, gel, None, &Torsion::triviale());
+            or_gel(sc, gel, None, &Torsion::triviale(), 1.0);
         }
     }
 
     /// Sweep de bain thermique réécrit avec la torsion `t` (toujours, même triviale).
     pub fn sweep_hb_tordu(&mut self, t: &Torsion) {
         for (c, sc) in self.chaines.iter_mut().enumerate() {
-            hb_gel(sc, self.cfg.chaines[c].beta, Gel::Aucun, None, t, None);
+            hb_gel(sc, self.cfg.chaines[c].beta, Gel::Aucun, None, t, 1.0, None);
         }
     }
 
     /// Sweep d'overrelaxation réécrit avec la torsion `t` (toujours, même triviale).
     pub fn sweep_or_tordu(&mut self, t: &Torsion) {
         for sc in self.chaines.iter_mut() {
-            or_gel(sc, Gel::Aucun, None, t);
+            or_gel(sc, Gel::Aucun, None, t, 1.0);
         }
     }
 
@@ -179,7 +192,7 @@ struct Maj {
 
 // M4 (intégrateur) : la torsion s'ajoute aux sept paramètres du chemin réécrit ; un regroupement changerait les appels existants.
 #[allow(clippy::too_many_arguments)]
-fn hb_lien(sc: &CpuSu2, beta: f64, gel: Gel, masque: Option<&[u8]>, torsion: &Torsion, mu: usize, parity: usize, t: usize) -> Option<Maj> {
+fn hb_lien(sc: &CpuSu2, beta: f64, gel: Gel, masque: Option<&[u8]>, torsion: &Torsion, xi0: f64, mu: usize, parity: usize, t: usize) -> Option<Maj> {
     let g: &Geo = &sc.geo;
     let (s, x) = g.site_of(t, parity);
     if lien_gele(gel, mu, x[0]) {
@@ -189,7 +202,7 @@ fn hb_lien(sc: &CpuSu2, beta: f64, gel: Gel, masque: Option<&[u8]>, torsion: &To
     if masque.is_some_and(|m| m[li] != 0) {
         return None; // lien gelé par le masque (boîte à bord fixé)
     }
-    let a = torsion::agrafe_tordue(&sc.u, g, mu, s, &x, torsion);
+    let a = if xi0 == 1.0 { torsion::agrafe_tordue(&sc.u, g, mu, s, &x, torsion) } else { torsion::agrafe_aniso(&sc.u, g, mu, s, &x, torsion, xi0) };
     let k = su2_hb::qnorm(a);
     let mut draw: u32 = 0;
     let sid = sc.sweep_id;
@@ -221,11 +234,11 @@ fn hb_lien(sc: &CpuSu2, beta: f64, gel: Gel, masque: Option<&[u8]>, torsion: &To
 
 /// Un sweep de bain thermique d'une chaîne, liens gelés sautés, agrafe tordue (4 mu × 2 parités, lecture puis écriture :
 /// le calcul en deux phases est exactement le calcul en place du damier).
-fn hb_gel(sc: &mut CpuSu2, beta: f64, gel: Gel, masque: Option<&[u8]>, torsion: &Torsion, mut diag: Option<&mut [u32]>) {
+fn hb_gel(sc: &mut CpuSu2, beta: f64, gel: Gel, masque: Option<&[u8]>, torsion: &Torsion, xi0: f64, mut diag: Option<&mut [u32]>) {
     let half = sc.geo.v / 2;
     for mu in 0..4 {
         for p in 0..2 {
-            let ups: Vec<Option<Maj>> = (0..half).into_par_iter().map(|t| hb_lien(sc, beta, gel, masque, torsion, mu, p, t)).collect();
+            let ups: Vec<Option<Maj>> = (0..half).into_par_iter().map(|t| hb_lien(sc, beta, gel, masque, torsion, xi0, mu, p, t)).collect();
             for up in ups.into_iter().flatten() {
                 sc.n_tries += up.ntry;
                 sc.n_cap += up.cap;
@@ -243,7 +256,7 @@ fn hb_gel(sc: &mut CpuSu2, beta: f64, gel: Gel, masque: Option<&[u8]>, torsion: 
 }
 
 /// Un sweep d'overrelaxation d'une chaîne, liens gelés sautés, agrafe tordue.
-fn or_gel(sc: &mut CpuSu2, gel: Gel, masque: Option<&[u8]>, torsion: &Torsion) {
+fn or_gel(sc: &mut CpuSu2, gel: Gel, masque: Option<&[u8]>, torsion: &Torsion, xi0: f64) {
     let g = sc.geo;
     let half = g.v / 2;
     for mu in 0..4 {
@@ -259,7 +272,7 @@ fn or_gel(sc: &mut CpuSu2, gel: Gel, masque: Option<&[u8]>, torsion: &Torsion) {
                     if masque.is_some_and(|m| m[li] != 0) {
                         return None; // lien gelé par le masque (boîte à bord fixé)
                     }
-                    let a = torsion::agrafe_tordue(&sc.u, &g, mu, s, &x, torsion);
+                    let a = if xi0 == 1.0 { torsion::agrafe_tordue(&sc.u, &g, mu, s, &x, torsion) } else { torsion::agrafe_aniso(&sc.u, &g, mu, s, &x, torsion, xi0) };
                     let k = su2_hb::qnorm(a);
                     if k.partial_cmp(&1e-300) != Some(std::cmp::Ordering::Greater) {
                         return None;
@@ -366,6 +379,11 @@ impl NoyauxSu2 for Cpu64 {
         }
         Ok(())
     }
+    /// B10 : un run tordu déclare son moteur et sa torsion (accepte un point de reprise antérieur, sans invariants : même
+    /// moteur d'origine) ; sans torsion, aucun invariant (points de reprise identiques à l'octet).
+    fn invariants_reprise(&self) -> Option<serde_json::Value> {
+        (!self.torsion.est_triviale()).then(|| super::geo_gpu::invariants_cpu_tordu(&self.torsion))
+    }
     fn fixer_torsion(&mut self, t: &Torsion) -> Resultat<()> {
         if !t.est_triviale() {
             if self.cfg.chaines.iter().any(|c| c.beta == 0.0) {
@@ -389,11 +407,12 @@ impl NoyauxSu2 for Cpu64 {
         let gel = self.gel;
         let masque = if self.app_masque.surrelax() { self.masque.as_deref() } else { None };
         let torsion = self.torsion;
+        let xi0 = self.xi0;
         for sc in self.chaines.iter_mut() {
-            if gel == Gel::Aucun && masque.is_none() && torsion.est_triviale() {
+            if gel == Gel::Aucun && masque.is_none() && torsion.est_triviale() && xi0 == 1.0 {
                 sc.sweep_or();
             } else {
-                or_gel(sc, gel, masque, &torsion);
+                or_gel(sc, gel, masque, &torsion, xi0);
             }
         }
         Ok(())
@@ -651,5 +670,181 @@ mod tests {
         c.chaines.clear();
         assert!(Cpu64::nouveau(c).is_err());
         assert!(Cpu64::nouveau(lot(5, &[2.3], &[1])).is_err());
+    }
+
+    // ---------------- réseau anisotrope (A4) ----------------
+
+    /// Action anisotrope SANS le β global : Σ_p w̃_p (1 − ½ReTr U_p), w̃ = ξ₀ (temporelle) ou 1/ξ₀ (spatiale).
+    #[allow(clippy::needless_range_loop)] // style seulement (indices explicites conservés : aucun changement numérique)
+    fn action_aniso(g: &Geo, u: &[Q], xi0: f64) -> f64 {
+        let ld = |nu: usize, site: usize| u[nu * g.v + site];
+        let mut a = 0.0;
+        for s in 0..g.v {
+            let x = g.coords(s);
+            for mu in 0..4 {
+                let smu = g.nb_up(s, mu, x[mu]);
+                for nu in mu + 1..4 {
+                    let snu = g.nb_up(s, nu, x[nu]);
+                    let p = su2_hb::qmul(su2_hb::qmul(ld(mu, s), ld(nu, smu)), su2_hb::qmul(su2_hb::qdag(ld(mu, snu)), su2_hb::qdag(ld(nu, s))));
+                    let w = if nu == 3 { xi0 } else { 1.0 / xi0 };
+                    a += w * (1.0 - p[0]);
+                }
+            }
+        }
+        a
+    }
+
+    fn champ_chaud(l: usize, beta: f64, xi0: f64, graine: u64, sweeps: usize) -> Cpu64 {
+        let mut c = Cpu64::nouveau(lot(l, &[beta], &[graine])).unwrap();
+        c.init().unwrap();
+        c.fixer_xi0(xi0).unwrap();
+        for _ in 0..sweeps {
+            c.sweep_hb().unwrap();
+            c.sweep_or().unwrap();
+        }
+        c
+    }
+
+    #[test]
+    fn aniso_agrafe_xi1_egale_tordue_au_bit() {
+        let c = champ_chaud(4, 2.3, 1.0, 3, 3);
+        let sc = &c.chaines[0];
+        let t = Torsion::triviale();
+        for s in (0..sc.geo.v).step_by(7) {
+            let x = sc.geo.coords(s);
+            for mu in 0..4 {
+                assert_eq!(torsion::agrafe_aniso(&sc.u, &sc.geo, mu, s, &x, &t, 1.0), torsion::agrafe_tordue(&sc.u, &sc.geo, mu, s, &x, &t));
+            }
+        }
+    }
+
+    #[test]
+    fn aniso_agrafe_est_la_derivee_exacte_de_l_action() {
+        let xi0 = 2.0;
+        let c = champ_chaud(4, 2.3, xi0, 5, 4);
+        let sc = &c.chaines[0];
+        let t = Torsion::triviale();
+        let mut pire = 0.0f64;
+        for (k, s) in (0..sc.geo.v).step_by(11).enumerate() {
+            let x = sc.geo.coords(s);
+            for mu in 0..4 {
+                let a = torsion::agrafe_aniso(&sc.u, &sc.geo, mu, s, &x, &t, xi0);
+                let li = mu * sc.geo.v + s;
+                let mut u2 = sc.u.clone();
+                let r = haar_q(li as u32, 0, 7, 100 + k as u32, 3);
+                u2[li] = r;
+                let ds = action_aniso(&sc.geo, &u2, xi0) - action_aniso(&sc.geo, &sc.u, xi0);
+                let attendu = -(su2_hb::qmul(r, a)[0] - su2_hb::qmul(sc.u[li], a)[0]);
+                pire = pire.max((ds - attendu).abs());
+            }
+        }
+        eprintln!("aniso derivée exacte : écart max {pire:.3e}");
+        assert!(pire < 1e-11, "écart {pire}");
+    }
+
+    #[test]
+    fn aniso_surrelaxation_conserve_l_action() {
+        let xi0 = 2.0;
+        let mut c = champ_chaud(4, 2.3, xi0, 9, 4);
+        let a0 = action_aniso(&c.chaines[0].geo, &c.chaines[0].u, xi0);
+        c.sweep_or().unwrap();
+        let a1 = action_aniso(&c.chaines[0].geo, &c.chaines[0].u, xi0);
+        let a1_faux = action_aniso(&c.chaines[0].geo, &c.chaines[0].u, 1.0);
+        eprintln!("aniso OR : S avant {a0:.12}, après {a1:.12}, |Δ| = {:.3e}", (a1 - a0).abs());
+        assert!((a1 - a0).abs() < 1e-9 * a0.abs());
+        assert!((a1_faux - a0).abs() > 1e-3, "contrôle négatif : l'action isotrope n'est pas conservée");
+    }
+
+    /// Fonction de répartition de x0 de densité ∝ √(1−x²) e^{αx} (x = cos θ ⇒ sin²θ e^{α cos θ} dθ).
+    fn cdf_x0(alpha: f64, x: f64) -> f64 {
+        let n = 40_000;
+        let h = std::f64::consts::PI / n as f64;
+        let f = |th: f64| th.sin().powi(2) * (alpha * th.cos()).exp();
+        let (mut tot, mut part) = (0.0, 0.0);
+        let th_x = x.clamp(-1.0, 1.0).acos();
+        for i in 0..n {
+            let m = (i as f64 + 0.5) * h;
+            let w = f(m) * h;
+            tot += w;
+            if m >= th_x {
+                part += w;
+            }
+        }
+        part / tot
+    }
+
+    #[test]
+    fn aniso_bain_un_lien_loi_conditionnelle() {
+        let (xi0, beta) = (2.0, 2.3);
+        let c = champ_chaud(4, beta, xi0, 21, 4);
+        let sc = &c.chaines[0];
+        let t = Torsion::triviale();
+        // une direction temporelle (mu = 3) et une spatiale (mu = 0) : alpha = beta |A_w| diffère
+        for mu in [3usize, 0] {
+            let (s, x) = sc.geo.site_of(5, 0);
+            let a = torsion::agrafe_aniso(&sc.u, &sc.geo, mu, s, &x, &t, xi0);
+            let k = su2_hb::qnorm(a);
+            let alpha = beta * k;
+            let vv = su2_hb::qscale(a, 1.0 / k);
+            let n = 20_000usize;
+            let mut xs = Vec::with_capacity(n);
+            let mut sc2 = CpuSu2::new(4, 77).unwrap();
+            sc2.u = sc.u.clone();
+            for i in 0..n {
+                sc2.sweep_id = i as u32;
+                let m = hb_lien(&sc2, beta, Gel::Aucun, None, &t, xi0, mu, 0, 5).unwrap();
+                assert_eq!(m.li, mu * sc.geo.v + s);
+                xs.push(su2_hb::qmul(m.q.unwrap(), vv)[0]);
+            }
+            xs.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            let mut ks = 0.0f64;
+            for (i, &xv) in xs.iter().enumerate().step_by(20) {
+                let f = cdf_x0(alpha, xv); // P(X <= x)
+                ks = ks.max((f - i as f64 / n as f64).abs()).max((f - (i + 1) as f64 / n as f64).abs());
+            }
+            let seuil = 1.63 / (n as f64).sqrt();
+            eprintln!("aniso bain mu={mu} : alpha = {alpha:.4}, KS = {ks:.5} (seuil 1 % = {seuil:.5})");
+            assert!(ks < seuil, "KS {ks} ≥ {seuil}");
+        }
+    }
+
+    fn moyennes_ss_st(l: usize, beta: f64, xi0: f64, graine: u64, therm: usize, nmes: usize) -> (f64, f64, f64, f64) {
+        let mut c = champ_chaud(l, beta, xi0, graine, therm);
+        let (mut vs, mut vt) = (Vec::new(), Vec::new());
+        for _ in 0..nmes {
+            c.sweep_hb().unwrap();
+            c.sweep_or().unwrap();
+            let sc = &c.chaines[0];
+            let (s, t) = torsion::plaquettes_ss_st(&sc.geo, &sc.u);
+            vs.push(s);
+            vt.push(t);
+        }
+        let stat = |v: &[f64]| {
+            let nb = 10;
+            let m = v.len() / nb;
+            let blocs: Vec<f64> = (0..nb).map(|b| v[b * m..(b + 1) * m].iter().sum::<f64>() / m as f64).collect();
+            let moy = blocs.iter().sum::<f64>() / nb as f64;
+            let var = blocs.iter().map(|x| (x - moy).powi(2)).sum::<f64>() / (nb as f64 - 1.0);
+            (moy, (var / nb as f64).sqrt())
+        };
+        let (ms, es) = stat(&vs);
+        let (mt, et) = stat(&vt);
+        (ms, es, mt, et)
+    }
+
+    #[test]
+    fn aniso_couplage_fort() {
+        // β = 0,1, ξ₀ = 2 : β_s = β/ξ₀ = 0,05, β_t = β ξ₀ = 0,2 ; P ≈ β/4 − β³/96 : P_ss ≈ 0,0125, P_st ≈ 0,0499
+        let (ms, es, mt, et) = moyennes_ss_st(4, 0.1, 2.0, 31, 50, 400);
+        eprintln!("aniso couplage fort : P_ss = {ms:.5}±{es:.5} (0,01250), P_st = {mt:.5}±{et:.5} (0,04992)");
+        assert!((ms - 0.0125).abs() < 0.002 && (mt - 0.04992).abs() < 0.002);
+    }
+
+    #[test]
+    #[ignore]
+    fn aniso_mesure_8x4_beta23_xi2() {
+        // lancement manuel : cargo test --release aniso_mesure -- --ignored --nocapture
+        let (ms, es, mt, et) = moyennes_ss_st(8, 2.3, 2.0, 41, 300, 1000);
+        eprintln!("CPU 8^4 beta=2.3 xi0=2 : P_ss = {ms:.6}±{es:.6}, P_st = {mt:.6}±{et:.6}");
     }
 }

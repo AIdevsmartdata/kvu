@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "config": {
+    "l": 4,
+    "chaines": [
+      {
+        "beta": 2.3,
+        "graine": 26111112,
+        "depart": "chaud"
+      }
+    ],
+    "nor": 4,
+    "precision": "f64",
+    "options": {
+      "fp_contract": "off",
+      "optimisation": 3,
+      "extra": []
+    },
+    "mutant_metro": false
+  },
+  "sweep_id": 10,
+  "pas_faits": 10,
+  "mesures_faites": 3,
+  "compteurs": [
+    {
+      "plafond": 0,
+      "essais": 10754
+    }
+  ],
+  "sha256_champs": "9ef9d2335a70a954b25bc141f617a589ab3a0fc501074167dc61ef6f4fe4ff0c"
+}

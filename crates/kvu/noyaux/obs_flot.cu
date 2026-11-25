@@ -282,3 +282,75 @@ extern "C" __global__ void k_topo_cool_id(const Q* W, Q* U, long n, int dagger) 
   long i = (long)blockIdx.x * blockDim.x + threadIdx.x;
   if (i < n) U[i] = topo_maj_cooling(W[i], dagger);
 }
+
+// ------------------------------------------------------------------------------------------
+// mesure-gpu (11/11, `rg correlateur --mesure gpu`) : plaquettes par plan et par site, densité en trèfle d(x), plaquettes
+// « spatiales » pp(x) (plans qui ne contiennent pas dir_temps) et sommes par tranche x[dir_temps] = t. Ajout seul.
+// Conventions de rg::correlateur (référence CPU, même ordre des termes) :
+//   p_munu(x) = 1 - 1/2 Tr[ (U_mu(x) U_nu(x+mu)) (U_nu(x) U_mu(x+nu))^+ ], plans 01, 02, 03, 12, 13, 23 ;
+//   d(x)      = sum_{mu<nu} 1/4 [p(x) + p(x-mu) + p(x-nu) + p(x-mu-nu)]_munu ;
+//   pp(x)     = somme des p_munu(x) des plans sans dir_temps (dir_temps = 0 : plans 12, 13, 23).
+// `mutant` = 1 (porte CORR-GPU-CPU seulement) : plaquette mal orientée, (U_mu U_nu)(U_nu U_mu) au lieu de (...)(...)^+.
+// ------------------------------------------------------------------------------------------
+extern "C" __global__ void k_corr_plaq(const Q* __restrict__ V, int Lg, int mutant, double* __restrict__ P) {
+  Geo g = mkgeo(Lg);
+  long s = (long)blockIdx.x * blockDim.x + threadIdx.x;
+  if (s >= g.V) return;
+  int x[4];
+  coords(g, s, x);
+  int p = 0;
+  for (int mu = 0; mu < 4; ++mu) {
+    long smu = nb_up(g, s, mu, x[mu]);
+    for (int nu = mu + 1; nu < 4; ++nu, ++p) {
+      long snu = nb_up(g, s, nu, x[nu]);
+      Q a = qmul(ld(V, g, mu, s), ld(V, g, nu, smu));
+      Q b = qmul(ld(V, g, nu, s), ld(V, g, mu, snu));
+      Q w = mutant ? qmul(a, b) : qmul(a, qdag(b));
+      P[(long)p * g.V + s] = 1.0 - w.x;
+    }
+  }
+}
+
+extern "C" __global__ void k_corr_dens(const double* __restrict__ P, int Lg, int dir_temps, double* __restrict__ D,
+                                       double* __restrict__ PP) {
+  Geo g = mkgeo(Lg);
+  long s = (long)blockIdx.x * blockDim.x + threadIdx.x;
+  if (s >= g.V) return;
+  int x[4];
+  coords(g, s, x);
+  double d = 0.0, pp = 0.0;
+  int p = 0;
+  for (int mu = 0; mu < 4; ++mu) {
+    long sm = nb_dn(g, s, mu, x[mu]);
+    for (int nu = mu + 1; nu < 4; ++nu, ++p) {
+      long sn = nb_dn(g, s, nu, x[nu]);
+      long smn = nb_dn(g, sm, nu, x[nu]);
+      const double* Pp = P + (long)p * g.V;
+      d += 0.25 * (Pp[s] + Pp[sm] + Pp[sn] + Pp[smn]);
+      if (mu != dir_temps && nu != dir_temps) pp += Pp[s];
+    }
+  }
+  D[s] = d;
+  PP[s] = pp;
+}
+
+// Somme par tranche : un bloc de OBS_BLOC fils par t = blockIdx.x ; le fil j prend les sites j, j + OBS_BLOC, ... de la
+// tranche (les trois autres coordonnées par ordre de direction croissante, la dernière la plus rapide), arbre fixe.
+extern "C" __global__ void k_corr_tranches(const double* __restrict__ F, int Lg, int dir_temps, double* __restrict__ out) {
+  Geo g = mkgeo(Lg);
+  __shared__ double sh[OBS_BLOC];
+  long t = blockIdx.x;
+  long l3 = g.V / g.L;
+  int autres[3];
+  for (int d = 0, k = 0; d < 4; ++d)
+    if (d != dir_temps) autres[k++] = d;
+  double a = 0.0;
+  for (long j = threadIdx.x; j < l3; j += OBS_BLOC) {
+    long s = t * g.st[dir_temps] + (j % g.L) * g.st[autres[2]] + ((j / g.L) % g.L) * g.st[autres[1]] +
+             (j / ((long)g.L * g.L)) * g.st[autres[0]];
+    a += F[s];
+  }
+  sh[threadIdx.x] = a;
+  obs_arbre(sh);
+  if (threadIdx.x == 0) out[t] = sh[0];
+}

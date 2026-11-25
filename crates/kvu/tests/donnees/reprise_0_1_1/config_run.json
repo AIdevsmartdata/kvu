@@ -1,0 +1,30 @@
+{
+  "lot": {
+    "l": 4,
+    "chaines": [
+      {
+        "beta": 2.3,
+        "graine": 26111112,
+        "depart": "chaud"
+      }
+    ],
+    "nor": 4,
+    "precision": "f64",
+    "options": {
+      "fp_contract": "off",
+      "optimisation": 3,
+      "extra": []
+    },
+    "mutant_metro": false
+  },
+  "therm": 6,
+  "nmeas": 6,
+  "skip": 2,
+  "dump_every": 0,
+  "dump_initial": false,
+  "format_dump": "c16",
+  "zstd": false,
+  "reprise_every": 2,
+  "outdir": "run",
+  "bord": null
+}

@@ -1,119 +1,8 @@
 //! Torsion de 't Hooft pour SU(2) (M4).
 
-use crate::commun::{Erreur, Resultat};
+pub use crate::geom::Torsion;
 use crate::heritage::su2_hb::{k_final, k_reduce, qadd, qdag, qmul, qscale, Geo, Q};
 use rayon::prelude::*;
-use serde::{Deserialize, Serialize};
-
-/// Torsion de 't Hooft n_{μν} ∈ ℤ₂, représentée par les 6 plans indépendants (μ<ν).
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Default, Serialize, Deserialize)]
-pub struct Torsion {
-    plans: [bool; 6],
-}
-
-impl Torsion {
-    /// Paires (μ,ν), μ<ν, ordre canonique.
-    pub const PLANS: [(usize, usize); 6] = [(0,1), (0,2), (0,3), (1,2), (1,3), (2,3)];
-
-    /// Torsion triviale (tous les plans périodiques).
-    pub fn triviale() -> Self {
-        Torsion { plans: [false; 6] }
-    }
-
-    /// Analyse une spécification : "aucune" ou liste de paires "01,23".
-    pub fn analyser(t: &str) -> Resultat<Self> {
-        let s = t.trim();
-        if s.is_empty() {
-            return Err(Erreur::Config("torsion vide : attendu « aucune » ou une liste de paires 01,23,...".into()));
-        }
-        if s == "aucune" {
-            return Ok(Torsion::triviale());
-        }
-        let mut plans = [false; 6];
-        for token in s.split(',') {
-            let token = token.trim();
-            if token.len() != 2 {
-                return Err(Erreur::Config(format!("torsion : « {token} » n'est pas une paire de deux chiffres (ex: 01)")));
-            }
-            let d0 = token.as_bytes()[0];
-            let d1 = token.as_bytes()[1];
-            if !d0.is_ascii_digit() || !d1.is_ascii_digit() {
-                return Err(Erreur::Config(format!("torsion : « {token} » contient des caractères non numériques")));
-            }
-            let mu = usize::from(d0 - b'0');
-            let nu = usize::from(d1 - b'0');
-            if mu > 3 || nu > 3 {
-                return Err(Erreur::Config(format!("torsion : les directions doivent être entre 0 et 3, reçu {mu} et {nu}")));
-            }
-            if mu == nu {
-                return Err(Erreur::Config(format!("torsion : μ = ν = {mu} interdit")));
-            }
-            // normaliser
-            let (a, b) = if mu < nu { (mu, nu) } else { (nu, mu) };
-            let idx = Torsion::PLANS.iter().position(|&(x, y)| x == a && y == b)
-                .ok_or_else(|| Erreur::Config(format!("torsion : plan {a}{b} hors domaine")))?;
-            if plans[idx] {
-                return Err(Erreur::Config(format!("torsion : plan {a}{b} dupliqué")));
-            }
-            plans[idx] = true;
-        }
-        Ok(Torsion { plans })
-    }
-
-    pub fn est_triviale(&self) -> bool {
-        self.plans.iter().all(|&b| !b)
-    }
-
-    pub fn tordu(&self, mu: usize, nu: usize) -> bool {
-        if mu >= 4 || nu >= 4 || mu == nu {
-            return false;
-        }
-        let (a, b) = if mu < nu { (mu, nu) } else { (nu, mu) };
-        match Torsion::PLANS.iter().position(|&(x, y)| x == a && y == b) {
-            Some(idx) => self.plans[idx],
-            None => false,
-        }
-    }
-
-    pub fn texte(&self) -> String {
-        if self.est_triviale() {
-            return "aucune".to_string();
-        }
-        let mut parties = Vec::new();
-        for (i, &present) in self.plans.iter().enumerate() {
-            if present {
-                let (m, n) = Torsion::PLANS[i];
-                parties.push(format!("{m}{n}"));
-            }
-        }
-        parties.join(",")
-    }
-
-    pub fn json(&self) -> serde_json::Value {
-        let plans: Vec<String> = self.plans.iter().enumerate()
-            .filter(|(_, &b)| b)
-            .map(|(i, _)| format!("{}{}", Torsion::PLANS[i].0, Torsion::PLANS[i].1))
-            .collect();
-        serde_json::json!({
-            "plans": plans,
-            "pile": "coins (L-1, L-1) de chaque plan tordu (convention kvu M4)",
-            "facteur": -1
-        })
-    }
-
-    /// z de la plaquette de coin y dans le plan {mu,nu}, réseau de côté l.
-    pub fn z(&self, y: &[usize; 4], mu: usize, nu: usize, l: usize) -> f64 {
-        if l == 0 || !self.tordu(mu, nu) {
-            return 1.0;
-        }
-        // la pile est définie par y_mu = l-1 et y_nu = l-1
-        if y[mu] == l - 1 && y[nu] == l - 1 {
-            -1.0
-        } else {
-            1.0
-        }
-    }
-}
 
 /// Agrafe tordue pour le lien (x, μ). Égale à `su2_hb::staple` si torsion triviale.
 pub fn agrafe_tordue(u: &[Q], g: &Geo, mu: usize, s: usize, x: &[usize; 4], t: &Torsion) -> Q {
@@ -142,6 +31,56 @@ pub fn agrafe_tordue(u: &[Q], g: &Geo, mu: usize, s: usize, x: &[usize; 4], t: &
         a = qadd(a, qadd(qscale(t_plaq, zt), qscale(b_plaq, zb)));
     }
     a
+}
+
+/// Agrafe anisotrope (A4) : comme `agrafe_tordue`, mais chaque plaquette (t ou b) du plan (μ, ν) est pondérée par
+/// w = ξ₀ si le plan contient la direction 3 (le temps), 1/ξ₀ sinon. À n'appeler que pour ξ₀ ≠ 1 (le chemin ξ₀ = 1 reste
+/// `agrafe_tordue`, aucune opération de plus). Action : S = (β/ξ₀) Σ_spatiales + β ξ₀ Σ_temporelles ; β reste dehors.
+pub fn agrafe_aniso(u: &[Q], g: &Geo, mu: usize, s: usize, x: &[usize; 4], t: &Torsion, xi0: f64) -> Q {
+    let ld = |nu: usize, site: usize| u[nu * g.v + site];
+    let mut a: Q = [0.0; 4];
+    let smu = g.nb_up(s, mu, x[mu]);
+    for nu in 0..4 {
+        if nu == mu {
+            continue;
+        }
+        let w = if mu == 3 || nu == 3 { xi0 } else { 1.0 / xi0 };
+        let snu = g.nb_up(s, nu, x[nu]);
+        let sdn = g.nb_dn(s, nu, x[nu]);
+        let smu_dn = g.nb_dn(smu, nu, x[nu]);
+        let t_plaq = qmul(qmul(ld(nu, smu), qdag(ld(mu, snu))), qdag(ld(nu, s)));
+        let zt = t.z(x, mu, nu, g.l);
+        let mut xb = *x;
+        if xb[nu] == 0 {
+            xb[nu] = g.l - 1;
+        } else {
+            xb[nu] -= 1;
+        }
+        let b_plaq = qmul(qmul(qdag(ld(nu, smu_dn)), qdag(ld(mu, sdn))), ld(nu, sdn));
+        let zb = t.z(&xb, mu, nu, g.l);
+        a = qadd(a, qscale(qadd(qscale(t_plaq, zt), qscale(b_plaq, zb)), w));
+    }
+    a
+}
+
+/// (P_ss, P_st) : moyennes de ½ReTr sur les 3V plaquettes spatiales et les 3V temporelles (direction 3 = temps).
+#[allow(clippy::needless_range_loop)] // style seulement (indices explicites conservés : aucun changement numérique)
+pub fn plaquettes_ss_st(g: &Geo, u: &[Q]) -> (f64, f64) {
+    let ld = |nu: usize, site: usize| u[nu * g.v + site];
+    let (mut ss, mut st) = (0.0, 0.0);
+    for s in 0..g.v {
+        let x = g.coords(s);
+        for mu in 0..4 {
+            let smu = g.nb_up(s, mu, x[mu]);
+            for nu in mu + 1..4 {
+                let snu = g.nb_up(s, nu, x[nu]);
+                let p = qmul(qmul(ld(mu, s), ld(nu, smu)), qmul(qdag(ld(mu, snu)), qdag(ld(nu, s))));
+                if nu == 3 { st += p[0] } else { ss += p[0] }
+            }
+        }
+    }
+    let n = 3.0 * g.v as f64;
+    (ss / n, st / n)
 }
 
 /// Plaquette moyenne tordue : P_tw = (1/6V) Σ_p z_p (1/2) Tr U_p.

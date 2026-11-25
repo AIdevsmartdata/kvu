@@ -353,6 +353,18 @@ impl ModuleObs {
         let e = self.flot_prepare(champ, c)?;
         self.flot_densites(&e)
     }
+
+    /// Ajout mesure-gpu (11/11) : noyau `nom` du module déjà compilé (ex. `k_corr_plaq` de `obs_flot.cu`).
+    pub fn fonction(&self, nom: &str) -> Resultat<Fonction> {
+        self.app.fonction(&self.module, nom)
+    }
+}
+
+impl EspaceFlot {
+    /// Ajout mesure-gpu (11/11) : argument noyau du champ de travail FP64 (4V quaternions, disposition de `ChampHote.q`).
+    pub fn champ_arg(&self) -> Arg {
+        self.u.arg()
+    }
 }
 
 /// Tampons d'un flot : copie FP64 du champ (4V quaternions), forces Z0..Z2 (3 doubles par lien),

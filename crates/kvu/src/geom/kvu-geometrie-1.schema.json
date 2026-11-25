@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kvu-geometrie/1",
+  "title": "kvu-geometrie/1 : géométrie et conditions au bord d'une configuration kvu",
+  "description": "Bloc « geometrie » des manifestes kvu et contenu du fichier geometrie.json voisin d'une configuration. Sous-ensemble de JSON Schema du validateur embarqué (regen/schema.rs). Le schéma contrôle la STRUCTURE ; les règles croisées (4 côtés exactement, 4 bords exactement, 6 facteurs exactement, champs propres à chaque type de bord, recollement sur la direction 0 seulement, champs dérivés chemin/coloriage/disposition/pile égaux à ceux que kvu recalcule) sont vérifiées par geom::GeoSpec::depuis_json (code 2).",
+  "type": "object",
+  "required": ["schema", "cotes", "dir_temps", "bords", "torsion", "beta_plans", "masque", "chemin", "disposition", "coloriage"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "kvu-geometrie/1" },
+    "cotes": {
+      "description": "côtés (ℓ0, ℓ1, ℓ2, ℓ3) ; avec un bord « recolle », côtés d'UNE réplique",
+      "type": "array",
+      "minItems": 4,
+      "items": { "type": "integer", "minimum": 2 }
+    },
+    "dir_temps": {
+      "description": "direction du temps, TOUJOURS explicite",
+      "type": "integer",
+      "enum": [0, 1, 2, 3]
+    },
+    "bords": {
+      "description": "un bord par direction μ = 0..3",
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "additionalProperties": false,
+        "properties": {
+          "type": { "enum": ["periodique", "fixe", "recolle"] },
+          "valeurs": {
+            "description": "bord « fixe » : origine des valeurs des liens gelés",
+            "type": "object",
+            "required": ["type"],
+            "additionalProperties": false,
+            "properties": {
+              "type": { "enum": ["froid", "chaud", "copie", "npy", "par_chaine"] },
+              "graine": { "type": "integer", "minimum": 0 },
+              "source": { "type": "string", "minLength": 1 },
+              "chemin": { "type": "string", "minLength": 1 },
+              "sha256": { "type": ["string", "null"] }
+            }
+          },
+          "repliques": { "type": "integer", "minimum": 2 },
+          "region": {
+            "type": "object",
+            "required": ["type", "axe", "largeur"],
+            "additionalProperties": false,
+            "properties": {
+              "type": { "const": "tranche" },
+              "axe": { "type": "integer", "enum": [1, 2, 3] },
+              "largeur": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "couture": { "enum": ["symetrique"] }
+        }
+      }
+    },
+    "torsion": {
+      "type": "object",
+      "required": ["plans", "facteur", "pile"],
+      "additionalProperties": false,
+      "properties": {
+        "plans": { "type": "array", "items": { "enum": ["01", "02", "03", "12", "13", "23"] } },
+        "facteur": { "const": -1 },
+        "pile": { "type": "string", "minLength": 1 }
+      }
+    },
+    "beta_plans": {
+      "description": "facteur de β par plan, ordre 01, 02, 03, 12, 13, 23 ; null = 1 partout",
+      "type": ["array", "null"],
+      "minItems": 6,
+      "items": { "type": "number" }
+    },
+    "masque": {
+      "description": "liens gelés supplémentaires ; null = aucun",
+      "type": ["object", "null"],
+      "required": ["type", "ell", "valeurs"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "boite" },
+        "ell": { "type": "integer", "minimum": 2 },
+        "valeurs": {
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "enum": ["froid", "chaud", "copie", "npy", "par_chaine"] },
+            "graine": { "type": "integer", "minimum": 0 },
+            "source": { "type": "string", "minLength": 1 },
+            "chemin": { "type": "string", "minLength": 1 },
+            "sha256": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "chemin": { "description": "dérivé : C0 cubique, C1 régulier, C2 explicite", "enum": ["C0", "C1", "C2"] },
+    "disposition": { "description": "dérivé : disposition des sites et des liens", "type": "string", "minLength": 1 },
+    "coloriage": { "description": "dérivé : parite, glouton ou explicite (C2)", "enum": ["parite", "glouton", "explicite"] }
+  }
+}

@@ -3,6 +3,7 @@
 //! ```text
 //! kvu rg action --ensemble DIR [--filtre MOTIF] [--operateur 3centre|dec|ape:<α>:<n>|flot:<t>[:<ε>]|agr:<c>] [--hors-famille] [--pas K]
 //!               [--famille P,R,C,T] [--estimateurs pl,sd] [--jackknife chaines|blocs:B] [--max-configs N] [--sortie DIR]
+//!               [--erreurs jackknife|bootstrap] [--bootstrap-b N] [--bootstrap-bloc K] [--graine S]
 //!               [--fils N] [--memoire-max-go X]
 //! kvu rg action-gates [--grandl DIR] [--seul ID,…] [--sans-mutants] [--json] [--fils N]
 //! ```
@@ -10,6 +11,10 @@
 //! `action` écrit `<sortie>/action.json` (refus d'écraser, écriture atomique). Son contenu ne dépend
 //! ni de la durée ni du nombre de fils.
 
+use super::bootstrap::{
+    bootstrap_estimateur, plans_bootstrap, p_sous_seuil, resumer, resumer_estimateur,
+    EstimateurBootstrap, ModeErreurs, ResumeBootstrap, StatBootstrap,
+};
 use super::boucles::{Famille, TableFormes};
 use super::estimation::{
     accumuler_config, differences_appariees, estimer, verifier_tailles_groupes, Estimateur,
@@ -56,7 +61,11 @@ pub fn sous_commandes() -> Vec<Command> {
             .arg(Arg::new("pas").long("pas").num_args(1).default_value("0").help("nombre de pas de blocage (défaut : aucun)"))
             .arg(Arg::new("famille").long("famille").num_args(1).default_value("P,R,C,T").help("famille de boucles : sous-ensemble de P,R,C,T (P obligatoire)"))
             .arg(Arg::new("estimateurs").long("estimateurs").num_args(1).default_value("pl,sd").help("estimateurs demandés : pl,sd"))
-            .arg(Arg::new("jackknife").long("jackknife").num_args(1).default_value("chaines").help("mode jackknife : chaines | blocs:B"))
+            .arg(Arg::new("jackknife").long("jackknife").num_args(1).default_value("chaines").help("mode jackknife : chaines | blocs:B (ignoré par --erreurs bootstrap)"))
+            .arg(Arg::new("erreurs").long("erreurs").num_args(1).default_value("jackknife").help("incertitudes : jackknife (défaut, delete-group sur les groupes) | bootstrap (rééchantillonnage des configurations, stratifié par chaîne)"))
+            .arg(Arg::new("bootstrap-b").long("bootstrap-b").num_args(1).default_value("200").help("bootstrap : nombre de réplicats"))
+            .arg(Arg::new("bootstrap-bloc").long("bootstrap-bloc").num_args(1).default_value("1").help("bootstrap : taille K des blocs circulaires dans chaque chaîne (K = 1 : tirage iid)"))
+            .arg(Arg::new("graine").long("graine").num_args(1).default_value("20261109").help("bootstrap : graine du tirage (SplitMix64)"))
             .arg(Arg::new("max-configs").long("max-configs").num_args(1).help("nombre maximal de configurations par chaîne"))
             .arg(Arg::new("sortie").long("sortie").num_args(1).default_value(".").help("dossier de sortie (action.json)"))
             .arg(Arg::new("memoire-max-go").long("memoire-max-go").num_args(1).default_value("4").help("mémoire maximale pour PL (Go)"))
@@ -261,6 +270,16 @@ fn action_cmd(m: &ArgMatches) -> Resultat<i32> {
         ),
         None => None,
     };
+    let mode_erreurs = ModeErreurs::analyser(texte(m, "erreurs")?)?;
+    let bootstrap_b: usize = texte(m, "bootstrap-b")?
+        .parse()
+        .map_err(|_| Erreur::Config("--bootstrap-b invalide".into()))?;
+    let bootstrap_bloc: usize = texte(m, "bootstrap-bloc")?
+        .parse()
+        .map_err(|_| Erreur::Config("--bootstrap-bloc invalide".into()))?;
+    let graine: u64 = texte(m, "graine")?
+        .parse()
+        .map_err(|_| Erreur::Config("--graine invalide (entier) ".into()))?;
     let memoire_max_go: f64 = texte(m, "memoire-max-go")?
         .parse()
         .map_err(|_| Erreur::Config("--memoire-max-go invalide".into()))?;
@@ -273,6 +292,16 @@ fn action_cmd(m: &ArgMatches) -> Resultat<i32> {
     }
     if max_configs == Some(0) {
         return Err(Erreur::Config("--max-configs doit être ≥ 1".into()));
+    }
+    if matches!(mode_erreurs, ModeErreurs::Bootstrap) {
+        if bootstrap_b < 2 {
+            return Err(Erreur::Config(
+                "--bootstrap-b doit être ≥ 2 (écart-type des réplicats, ddof 1)".into(),
+            ));
+        }
+        if bootstrap_bloc == 0 {
+            return Err(Erreur::Config("--bootstrap-bloc doit être ≥ 1".into()));
+        }
     }
     // L'opérateur et 3^K sont validés avant toute découverte/lecture de manifeste.
     let operateur = Operateur::analyser(&operateur_spec)?;
@@ -294,7 +323,10 @@ fn action_cmd(m: &ArgMatches) -> Resultat<i32> {
     if chaines.is_empty() {
         return Err(Erreur::Config("ensemble sans configuration".into()));
     }
-    if matches!(mode_jackknife, ModeJackknife::Chaines) && chaines.len() < 2 {
+    if matches!(mode_erreurs, ModeErreurs::Jackknife)
+        && matches!(mode_jackknife, ModeJackknife::Chaines)
+        && chaines.len() < 2
+    {
         return Err(Erreur::Config(
             "jackknife chaines requiert au moins 2 chaînes".into(),
         ));
@@ -333,7 +365,12 @@ fn action_cmd(m: &ArgMatches) -> Resultat<i32> {
     if n_configs_total == 0 {
         return Err(Erreur::Config("aucune configuration à lire".into()));
     }
-    let tailles = match mode_jackknife {
+    let tailles = match mode_erreurs {
+        // Bootstrap : les « groupes » stockés sont les CONFIGURATIONS (un groupe d'une
+        // configuration), ce qui permet à un réplicat d'être un simple Vec<&StatsGroupe>
+        // pris dans la concaténation, sans copie. Le jackknife n'est pas utilisé.
+        ModeErreurs::Bootstrap => vec![1usize; n_configs_total],
+        ModeErreurs::Jackknife => match mode_jackknife {
         ModeJackknife::Chaines => effectifs.clone(),
         ModeJackknife::Blocs(b) => {
             if b > n_configs_total {
@@ -345,8 +382,16 @@ fn action_cmd(m: &ArgMatches) -> Resultat<i32> {
                 .map(|g| n_configs_total / b + usize::from(g < n_configs_total % b))
                 .collect()
         }
+        },
     };
     verifier_tailles_groupes(&tailles)?;
+    // Plans bootstrap : ne dépendent que des effectifs par chaîne, de K, de b et de la graine.
+    // Calculés avant toute lecture, identiques pour tous les estimateurs demandés.
+    let plans: Vec<Vec<usize>> = if matches!(mode_erreurs, ModeErreurs::Bootstrap) {
+        plans_bootstrap(&effectifs, bootstrap_bloc, bootstrap_b, graine)
+    } else {
+        Vec::new()
+    };
     let liens_par_config = l_estimation
         .checked_pow(4)
         .and_then(|v| v.checked_mul(4))
@@ -448,19 +493,54 @@ fn action_cmd(m: &ArgMatches) -> Resultat<i32> {
             - stats_sd_toutes.somme_w
     });
     drop(stats_sd_toutes);
-    let beta_sd_un_res = jackknife_groupes(&groupes_sd, |g| {
-        beta_sd_verifie(&StatsSd::somme(g.iter().copied()))
-    });
-    let beta_sd_un_erreur = match (beta_sd_un_valeur, beta_sd_un_res) {
-        (Some(_), Some(r)) => Some(r.erreur),
-        _ => None,
+    // Erreur du témoin β_sd^(1) : jackknife delete-group (défaut) ou bootstrap sur les MÊMES
+    // plans que les couplages (en mode bootstrap, groupes_sd contient une configuration par
+    // groupe, donc les indices globaux des plans s'appliquent tels quels).
+    let mut temoin_echoues = 0usize;
+    let (beta_sd_un_erreur, beta_sd_un_ic95) = match mode_erreurs {
+        ModeErreurs::Jackknife => {
+            let res = jackknife_groupes(&groupes_sd, |g| {
+                beta_sd_verifie(&StatsSd::somme(g.iter().copied()))
+            });
+            match (beta_sd_un_valeur, res) {
+                (Some(_), Some(r)) => (Some(r.erreur), None),
+                _ => (None, None),
+            }
+        }
+        ModeErreurs::Bootstrap => {
+            let mut reps = Vec::with_capacity(plans.len());
+            for plan in &plans {
+                match beta_sd_verifie(&StatsSd::somme(plan.iter().map(|&i| &groupes_sd[i]))) {
+                    Some(b) => reps.push(b),
+                    None => temoin_echoues += 1,
+                }
+            }
+            match beta_sd_un_valeur {
+                Some(v) => {
+                    let s = resumer(v, &reps);
+                    (Some(s.erreur), Some(s.ic95))
+                }
+                None => (None, None),
+            }
+        }
     };
+    let mut temoin_json = json!({"valeur": beta_sd_un_valeur, "erreur": beta_sd_un_erreur,
+        "residu": residu_temoin, "domaine": [0, 50],
+        "note": "témoin de Wilson limité à [0,50] ; null si racine ou résidu invalide"});
+    if let (ModeErreurs::Bootstrap, Some(obj)) = (mode_erreurs, temoin_json.as_object_mut()) {
+        obj.insert("erreur_mode".to_string(), json!("bootstrap"));
+        obj.insert("ic95".to_string(), json!(beta_sd_un_ic95));
+        obj.insert("replicats_echoues".to_string(), json!(temoin_echoues));
+    }
 
     // Estimation des estimateurs demandés
     let mut resultats: serde_json::Map<String, Value> = serde_json::Map::new();
     let mut tous_ok = true;
     let mut couplages_pl = None;
     let mut couplages_sd = None;
+    let mut boot_pl: Option<EstimateurBootstrap> = None;
+    let mut boot_sd: Option<EstimateurBootstrap> = None;
+    let mut replicats_echoues = 0usize;
 
     if estimateurs_demandes.contains(&Estimateur::Pl) {
         if pl_memoire_insuffisante {
@@ -469,6 +549,25 @@ fn action_cmd(m: &ArgMatches) -> Resultat<i32> {
                 json!({"etat": "echec", "message": "mémoire insuffisante pour PL"}),
             );
             tous_ok = false;
+        } else if matches!(mode_erreurs, ModeErreurs::Bootstrap) {
+            match bootstrap_estimateur(&groupes, &plans, &famille, Estimateur::Pl, fils) {
+                Ok(est) => {
+                    let resume = resumer_estimateur(&est, &famille);
+                    replicats_echoues += resume.echoues;
+                    resultats.insert(
+                        "pl".to_string(),
+                        json_resultat_bootstrap(&resume, &est, &famille),
+                    );
+                    boot_pl = Some(est);
+                }
+                Err(e) => {
+                    resultats.insert(
+                        "pl".to_string(),
+                        json!({"etat": "echec", "message": e.to_string()}),
+                    );
+                    tous_ok = false;
+                }
+            }
         } else {
             match estimer(&groupes, &famille, Estimateur::Pl, fils) {
                 Ok(res) => {
@@ -487,17 +586,38 @@ fn action_cmd(m: &ArgMatches) -> Resultat<i32> {
     }
 
     if estimateurs_demandes.contains(&Estimateur::Sd) {
-        match estimer(&groupes, &famille, Estimateur::Sd, fils) {
-            Ok(res) => {
-                resultats.insert("sd".to_string(), json_resultat_sd(&res, &famille));
-                couplages_sd = Some(res.couplages);
+        if matches!(mode_erreurs, ModeErreurs::Bootstrap) {
+            match bootstrap_estimateur(&groupes, &plans, &famille, Estimateur::Sd, fils) {
+                Ok(est) => {
+                    let resume = resumer_estimateur(&est, &famille);
+                    replicats_echoues += resume.echoues;
+                    resultats.insert(
+                        "sd".to_string(),
+                        json_resultat_bootstrap(&resume, &est, &famille),
+                    );
+                    boot_sd = Some(est);
+                }
+                Err(e) => {
+                    resultats.insert(
+                        "sd".to_string(),
+                        json!({"etat": "echec", "message": e.to_string()}),
+                    );
+                    tous_ok = false;
+                }
             }
-            Err(e) => {
-                resultats.insert(
-                    "sd".to_string(),
-                    json!({"etat": "echec", "message": e.to_string()}),
-                );
-                tous_ok = false;
+        } else {
+            match estimer(&groupes, &famille, Estimateur::Sd, fils) {
+                Ok(res) => {
+                    resultats.insert("sd".to_string(), json_resultat_sd(&res, &famille));
+                    couplages_sd = Some(res.couplages);
+                }
+                Err(e) => {
+                    resultats.insert(
+                        "sd".to_string(),
+                        json!({"etat": "echec", "message": e.to_string()}),
+                    );
+                    tous_ok = false;
+                }
             }
         }
     }
@@ -516,6 +636,40 @@ fn action_cmd(m: &ArgMatches) -> Resultat<i32> {
             })
             .collect();
         resultats.insert("ecart_pl_sd".into(), Value::Object(ecart));
+    } else if let (Some(pl), Some(sd)) = (&boot_pl, &boot_sd) {
+        // Écart PL − SD en mode bootstrap : apparié plan par plan, un plan ne compte que si
+        // les deux ajustements ont réussi.
+        let paires: Vec<Vec<f64>> = pl
+            .betas
+            .iter()
+            .zip(&sd.betas)
+            .filter_map(|(p, s)| match (p, s) {
+                (Some(p), Some(s)) => {
+                    Some(p.iter().zip(s).map(|(a, b)| a - b).collect::<Vec<_>>())
+                }
+                _ => None,
+            })
+            .collect();
+        let centrale: Vec<f64> = pl.central.iter().zip(&sd.central).map(|(a, b)| a - b).collect();
+        let ecart: serde_json::Map<String, Value> = famille
+            .noms()
+            .iter()
+            .enumerate()
+            .map(|(i, nom)| {
+                let reps: Vec<f64> = paires.iter().map(|b| b[i]).collect();
+                let s = resumer(centrale[i], &reps);
+                (
+                    (*nom).to_string(),
+                    json!({
+                        "valeur": s.valeur,
+                        "erreur": s.erreur,
+                        "ic95": s.ic95,
+                        "replicats": s.replicats,
+                    }),
+                )
+            })
+            .collect();
+        resultats.insert("ecart_pl_sd".into(), Value::Object(ecart));
     }
 
     let mut doc = json!({
@@ -530,21 +684,41 @@ fn action_cmd(m: &ArgMatches) -> Resultat<i32> {
         "l_estimation": l_estimation,
         "famille": famille.noms(),
         "estimateurs": estimateurs_demandes.iter().map(|e| e.nom()).collect::<Vec<_>>(),
-        "jackknife": {"mode": match mode_jackknife { ModeJackknife::Chaines => "chaines", ModeJackknife::Blocs(_) => "blocs" }, "groupes": groupes.len()},
+        "jackknife": match mode_erreurs {
+            ModeErreurs::Jackknife => json!({"mode": match mode_jackknife { ModeJackknife::Chaines => "chaines", ModeJackknife::Blocs(_) => "blocs" }, "groupes": groupes.len()}),
+            // Mode bootstrap : le jackknife n'est pas utilisé ; les « groupes » stockés sont
+            // les configurations (une configuration par groupe).
+            ModeErreurs::Bootstrap => json!({"mode": "aucun", "groupes": groupes.len(),
+                "note": "mode bootstrap : jackknife non utilisé, groupes = configurations"}),
+        },
         "n_chaines": chaines.len(),
         "n_configs": n_configs_total,
         "n_liens": n_liens_total,
         "chaines": info_chaines,
         "boucles": boucles_json(&famille),
-        "beta_sd_un_couplage": {"valeur": beta_sd_un_valeur, "erreur": beta_sd_un_erreur,
-            "residu": residu_temoin, "domaine": [0, 50],
-            "note": "témoin de Wilson limité à [0,50] ; null si racine ou résidu invalide"},
+        "beta_sd_un_couplage": temoin_json,
         "note": "mesure de schéma : couplages d'une action tronquée par identités exactes ; aucune lecture physique",
     });
 
     doc.as_object_mut()
         .ok_or_else(|| Erreur::Format("objet JSON action invalide".into()))?
         .extend(resultats.clone());
+
+    if matches!(mode_erreurs, ModeErreurs::Bootstrap) {
+        if let Some(obj) = doc.as_object_mut() {
+            obj.insert(
+                "bootstrap".to_string(),
+                json!({
+                    "b": bootstrap_b,
+                    "bloc": bootstrap_bloc,
+                    "graine": graine,
+                    "replicats_echoues": replicats_echoues,
+                    "stratification": "par chaîne : l'effectif de chaque chaîne est préservé à chaque réplicat",
+                    "note": "erreur = écart-type (ddof 1) des réplicats ; ic95 = percentiles 2,5 % / 97,5 % ; replicats_echoues = somme sur les estimateurs demandés (détail par estimateur)",
+                }),
+            );
+        }
+    }
 
     // Écriture atomique, refus d'écraser
     if chemin_sortie.exists() {
@@ -723,6 +897,76 @@ fn json_resultat_sd(res: &super::estimation::ResultatEstimateur, famille: &Famil
         "valeurs_propres_m": details["valeurs_propres_m"],
         "conditionnement": details["conditionnement"],
     })
+}
+
+/// Bloc JSON d'une [`StatBootstrap`] : valeur centrale, erreur (écart-type des réplicats,
+/// ddof 1), IC95 percentiles, réplicats. `seuil` ajoute `p_sous_seuil` (fraction de réplicats
+/// strictement sous le seuil).
+fn stat_json(s: &StatBootstrap, seuil: Option<f64>) -> Value {
+    let mut obj = serde_json::Map::new();
+    obj.insert("valeur".to_string(), json!(s.valeur));
+    obj.insert("erreur".to_string(), json!(s.erreur));
+    obj.insert("ic95".to_string(), json!(s.ic95));
+    obj.insert("replicats".to_string(), json!(s.replicats));
+    if let Some(t) = seuil {
+        obj.insert("p_sous_seuil".to_string(), json!(p_sous_seuil(&s.replicats, t)));
+    }
+    Value::Object(obj)
+}
+
+/// Bloc d'un estimateur en mode `--erreurs bootstrap` : même charpente que
+/// [`json_resultat_pl`] / [`json_resultat_sd`], plus `ic95` partout, `p_sous_seuil` sur
+/// `r4.norme` (seuil N4 < 4) et `critere_pr.valeur` (seuil 2/9), `r4.alpha_pond` et les
+/// compteurs de réplicats. Réservé au mode bootstrap : en mode jackknife la sortie reste
+/// octet pour octet celle de l'historique.
+fn json_resultat_bootstrap(
+    res: &ResumeBootstrap,
+    est: &EstimateurBootstrap,
+    famille: &Famille,
+) -> Value {
+    let mut couplages = serde_json::Map::new();
+    for (i, nom) in famille.noms().iter().enumerate() {
+        couplages.insert((*nom).to_string(), stat_json(&res.couplages[i], None));
+    }
+    let details = est.details.clone();
+    let mut bloc = json!({
+        "etat": "ok",
+        "message": Value::Null,
+        "erreurs": "bootstrap",
+        "couplages": Value::Object(couplages),
+        "r4": {
+            "norme": stat_json(&res.r4, Some(SEUIL_R4)),
+            "alpha4": res.r4.valeur / 4.0,
+            "alpha_pond": res.r4.valeur / 4.0,
+            "note_alpha": "alpha4 (nom hérité) et alpha_pond contiennent le même nombre, N4/4",
+            "seuil": SEUIL_R4,
+            "inferieur_a_4": res.r4.valeur < SEUIL_R4,
+            "note": "mesure de schéma (trou de type Dobrushin), pas une preuve",
+        },
+        "critere_pr": {
+            "valeur": stat_json(&res.pr, Some(SEUIL_PR)),
+            "seuil": SEUIL_PR,
+            "inferieur_au_seuil": res.pr.valeur < SEUIL_PR,
+            "note": "ignore C et T",
+        },
+        "correlations": res.correlations.chunks(famille.n()).collect::<Vec<_>>(),
+        "replicats": res.n_valides,
+        "replicats_echoues": res.echoues,
+    });
+    if let Some(obj) = bloc.as_object_mut() {
+        for cle in [
+            "iterations",
+            "norme_gradient",
+            "valeurs_propres_information",
+            "conditionnement",
+            "valeurs_propres_m",
+        ] {
+            if let Some(v) = details.get(cle) {
+                obj.insert((*cle).to_string(), v.clone());
+            }
+        }
+    }
+    bloc
 }
 
 pub fn executer(nom: &str, m: &ArgMatches) -> Resultat<i32> {

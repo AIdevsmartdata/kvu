@@ -618,7 +618,7 @@ impl Store {
     pub fn ouvrir(racine: &Path) -> Resultat<Store> {
         if !racine.is_dir() {
             return Err(Erreur::Config(format!(
-                "le store {} n'existe pas (ou n'est pas un répertoire)",
+                "le store {} n'existe pas (ou n'est pas un répertoire) ; pour vérifier un répertoire de run, donner son dossier parent avec --store DIR ou KEVINOTRON_STORE=DIR",
                 racine.display()
             )));
         }

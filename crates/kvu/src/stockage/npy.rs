@@ -873,6 +873,141 @@ pub fn lire_u32(chemin: &Path) -> Resultat<(Vec<usize>, Vec<u32>)> {
     lire_tableau(chemin, &[("<u4", 4)], |b| u32::from_le_bytes([b[0], b[1], b[2], b[3]]))
 }
 
+// ------------------------------------------------------------------------------------------
+// Champs à côtés quelconques (socle geom, v0.2)
+// ------------------------------------------------------------------------------------------
+
+/// En-tête d'un champ régulier quelconque ; identique à entete_champ lorsque les quatre côtés sont égaux.
+pub fn entete_champ_cotes(cotes: &[usize; 4], format: FormatChamp) -> Vec<u8> {
+    let [c0, c1, c2, c3] = *cotes;
+    match format {
+        FormatChamp::C16 => entete_tableau("<c16", &[4, c0, c1, c2, c3, 2, 2]),
+        FormatChamp::Q64 => entete_tableau("<f8", &[4, c0, c1, c2, c3, 4]),
+    }
+}
+
+/// Disposition d'un champ SU(2) sans exigence de côtés égaux ; chaque côté stocké doit être ≥ 1.
+pub fn disposition_champ_geo(e: &EnteteNpy) -> Resultat<(FormatChamp, [usize; 4])> {
+    if e.fortran {
+        return Err(Erreur::Format("fortran_order True refusé (C-order attendu)".into()));
+    }
+    let (format, cotes) = match (e.descr.as_str(), e.forme.as_slice()) {
+        ("<c16", [4, c0, c1, c2, c3, 2, 2]) => (FormatChamp::C16, [*c0, *c1, *c2, *c3]),
+        ("<f8", [4, c0, c1, c2, c3, 4]) => (FormatChamp::Q64, [*c0, *c1, *c2, *c3]),
+        _ => {
+            return Err(Erreur::Format(format!(
+                "en-tête de champ géométrique refusé : descr {} forme {:?} ; \
+                 attendu <c16 (4,c0,c1,c2,c3,2,2) ou <f8 (4,c0,c1,c2,c3,4)",
+                e.descr, e.forme
+            )));
+        }
+    };
+    if cotes.contains(&0) {
+        return Err(Erreur::Format("champ géométrique : chaque côté stocké doit être ≥ 1".into()));
+    }
+    Ok((format, cotes))
+}
+
+/// Variante de parcourir_liens prenant le nombre total de liens, sans hypothèse cubique.
+fn parcourir_n_liens<R: Read>(
+    r: &mut R,
+    format: FormatChamp,
+    total: usize,
+    mut f: impl FnMut(&[f64]) -> Resultat<()>,
+) -> Resultat<()> {
+    let taille = format.octets_par_lien();
+    let mut tampon = vec![0u8; LIENS_PAR_BLOC.min(total) * taille];
+    let mut quats = Vec::with_capacity(4 * LIENS_PAR_BLOC.min(total));
+    let mut fait = 0usize;
+    while fait < total {
+        let n = LIENS_PAR_BLOC.min(total - fait);
+        lire_exact(r, &mut tampon[..n * taille], &format!("lien {fait} sur {total}"))?;
+        quats.clear();
+        decoder_bloc(format, &tampon[..n * taille], fait, &mut quats)?;
+        f(&quats)?;
+        fait += n;
+    }
+    let mut un = [0u8; 1];
+    match r.read(&mut un) {
+        Ok(0) => Ok(()),
+        Ok(_) => Err(Erreur::Format("octets en trop après les données du champ".into())),
+        Err(e) => Err(Erreur::io("lecture de la fin du champ", e)),
+    }
+}
+
+/// Lit un champ avec sa géométrie voisine ; sans métadonnée, seul le chemin cubique pair C0 est admis.
+pub fn lire_champ_geo(chemin: &Path, dir_temps_si_absent: u8) -> Resultat<crate::geom::ChampGeo> {
+    let mut flux = Lecture::ouvrir(chemin)?;
+    let e = lire_entete(&mut flux).map_err(|er| avec_chemin(er, chemin))?;
+    let (format, cotes) = disposition_champ_geo(&e).map_err(|er| avec_chemin(er, chemin))?;
+    let geo = match crate::geom::geometrie_voisine(chemin)? {
+        Some((spec, source)) => {
+            if spec.cotes_stockees() != cotes {
+                return Err(Erreur::Config(format!(
+                    "{} : côtés NPY {cotes:?} incompatibles avec les côtés stockés {:?} de {}",
+                    chemin.display(), spec.cotes_stockees(), source.display()
+                )));
+            }
+            spec
+        }
+        None => {
+            if cotes[0] < 2 || !cotes[0].is_multiple_of(2) || !cotes.iter().all(|&c| c == cotes[0]) {
+                return Err(Erreur::Config(format!(
+                    "configuration non C0 sans geometrie.json : {} : côtés NPY {cotes:?}", chemin.display()
+                )));
+            }
+            crate::geom::GeoSpec::cubique(cotes[0], dir_temps_si_absent)
+        }
+    };
+    geo.valider()?;
+    let total = cotes.iter().try_fold(4usize, |n, &c| n.checked_mul(c))
+        .ok_or_else(|| Erreur::Format(format!("{} : nombre de liens hors limites", chemin.display())))?;
+    let reels = total.checked_mul(4)
+        .ok_or_else(|| Erreur::Config(format!("{} : 16·V hors limites", chemin.display())))?;
+    verifier_taille(chemin, &e, (total as u64).checked_mul(format.octets_par_lien() as u64))?;
+    let mut q = Vec::with_capacity(reels.min(1 << 24));
+    parcourir_n_liens(&mut flux, format, total, |bloc| {
+        q.extend_from_slice(bloc);
+        Ok(())
+    }).map_err(|er| avec_chemin(er, chemin))?;
+    flux.terminer()?;
+    let champ = crate::geom::ChampGeo { geo, q };
+    champ.valider()?;
+    Ok(champ)
+}
+
+/// Écrit un champ quelconque avec garde SSD et sha256 ; geometrie.json est écrit séparément par l'appelant.
+pub fn ecrire_champ_geo(
+    chemin: &Path,
+    c: &crate::geom::ChampGeo,
+    format: FormatChamp,
+    garde: &GardeSsd,
+) -> Resultat<ResumeEcriture> {
+    c.valider()?;
+    for (i, q) in c.q.chunks_exact(4).enumerate() {
+        let defaut = (qnorm([q[0], q[1], q[2], q[3]]) - 1.0).abs();
+        if !q.iter().all(|x| x.is_finite()) || defaut.is_nan() || defaut > TOLERANCE_SU2 {
+            return Err(Erreur::Validation(format!(
+                "écriture refusée : lien {i} hors SU(2) (défaut {defaut:e} > 1e-12) ; \
+                 les quaternions doivent être renormalisés en double précision avant l'écriture"
+            )));
+        }
+    }
+    let entete = entete_champ_cotes(&c.geo.cotes_stockees(), format);
+    let prevu = entete.len() as u64 + (c.q.len() as u64 / 4) * format.octets_par_lien() as u64;
+    let mut ec = Ecriture::creer(chemin, prevu, garde, true)?;
+    ec.ecrire(&entete)?;
+    let mut tampon = Vec::with_capacity(LIENS_PAR_BLOC * format.octets_par_lien());
+    for bloc in c.q.chunks(4 * LIENS_PAR_BLOC) {
+        tampon.clear();
+        encoder_bloc(format, bloc, &mut tampon);
+        ec.ecrire(&tampon)?;
+    }
+    let resume = ec.fermer()?;
+    ec.publier()?;
+    Ok(resume)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

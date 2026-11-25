@@ -14,7 +14,9 @@
 //! ```
 //! Les noms historiques `--seed` et `--bc-seed` sont acceptés (alias) : les lignes de commande de su2_hip et de
 //! su2_bord fonctionnent telles quelles. Défaut des options numériques : F64 ⇒ `ref-k1`, F32 ⇒ `rapide`.
-//! `--torsion PLANS` : « aucune » ou liste de paires (ex. `01,23`) ; CPU F64 uniquement, incompatible avec bord, mesures, GPU.
+//! `--torsion PLANS` : « aucune » ou liste de paires (ex. `01,23`) ; F64, backend explicite (cpu, hip, cuda), incompatible avec bord, mesures.
+//! `--cotes l0,l1,l2,l3` (module tube) : tore anisotrope, CPU F64 (`su2::tube`), avec `--torsion`, `--tube-obs ab:R:T` ;
+//! `su2 tube smin | apparie` : action minimale et secteurs appariés.
 
 use super::run::{self, ConfigBord, ConfigRun, MesureEnLigne, OptionsRun};
 use super::torsion::Torsion;
@@ -27,13 +29,16 @@ use std::path::{Path, PathBuf};
 
 pub fn commandes() -> Vec<clap::Command> {
     vec![Command::new("su2")
-        .about("Générateur SU(2) unifié : gen | archive | test-hb | boite | boite-obs | selftest")
+        .about("Générateur SU(2) unifié : gen | archive | test-hb | boite | boite-obs | tube | selftest")
         .subcommand_required(true)
         .subcommand(gen())
         .subcommand(super::archive_cli::sous_commande())
         .subcommand(test_hb())
         .subcommand(super::boite_cli::boite())
         .subcommand(super::boite_cli::boite_obs())
+        .subcommand(super::thermo_cli::thermo())
+        .subcommand(super::tube::cli::commande())
+        .subcommand(super::spectro::cli::commande())
         .subcommand(Command::new("selftest").about("Auto-test : vecteurs de Philox4x32-10 (Random123) et bornes de u01"))]
 }
 
@@ -49,7 +54,7 @@ fn communs(c: Command) -> Command {
 }
 
 fn gen() -> Command {
-    communs(Command::new("gen").about("Génère un ensemble (lot de chaînes), périodique ou à bord gelé R2-3"))
+    super::tube::cli::args_gen(communs(Command::new("gen").about("Génère un ensemble (lot de chaînes), périodique ou à bord gelé R2-3"))
         .arg(arg("L", "côté du réseau (pair)").default_value("8"))
         .arg(arg("beta", "β, ou liste β1,β2,… (un par chaîne)").default_value("2.3"))
         .arg(arg("graine", "graine 64 bits, ou liste (une par chaîne)").alias("seed").default_value("1"))
@@ -65,9 +70,11 @@ fn gen() -> Command {
         .arg(arg("format", "format des dumps : c16 | q64").default_value("c16"))
         .arg(Arg::new("zstd").long("zstd").action(ArgAction::SetTrue).help("compresse les dumps"))
         .arg(super::archive_cli::arg_archive())
-        .arg(arg("mesures", "mesures en ligne, ex. wilson:R4xT4:10,flot:0.01:3:20"))
-        .arg(arg("reprise-every", "point de reprise tous les N pas (0 = jamais)").default_value("0"))
-        .arg(arg("torsion", "torsion de 't Hooft : « aucune » ou liste de paires (ex: 01,23) ; CPU F64 uniquement"))
+        .arg(arg("mesures", "mesures en ligne, séparées par des virgules : wilson:R<r>xT<t>:<période> | flot:<dt>:<tmax>:<période> | corr:<lissages>:<période> (ex. corr:brut+flot/0.02/50:1) | polyakov_corr:<période> | bloc:3:<période> ; ex. wilson:R4xT4:10,flot:0.01:3:20 (voir GUIDE §3, « Mesures en ligne »)"))
+        .arg(arg("reprise-every", "point de reprise tous les N pas (0 = jamais) ; sans point de reprise, un run interrompu ne se reprend pas").default_value("0"))
+        .arg(arg("torsion", "torsion de 't Hooft : « aucune » ou liste de paires (ex: 01,23) ; F64, --backend cpu, hip ou cuda"))
+        .arg(arg("decalage", "(--cotes, --backend cpu) couture DÉCALÉE : v0,v1,v2,v3 entiers relatifs ; le tour de l'axe --decalage-axe ramène le champ décalé de ce vecteur (tore oblique, M7)"))
+        .arg(arg("decalage-axe", "axe recollé avec décalage (0..3)").default_value("0"))
         .arg(Arg::new("bord").long("bord").action(ArgAction::SetTrue).help("mode R2-3 : liens spatiaux de x0 = 0 gelés"))
         .arg(arg("bc", "bord : cold | hot | eq"))
         .arg(arg("bc-graine", "graine du bord").alias("bc-seed").default_value("0"))
@@ -75,10 +82,10 @@ fn gen() -> Command {
         .arg(arg("pre", "pas de pré-thermalisation périodique (bord)").default_value("2000"))
         .arg(arg("bloc", "pas par bloc (bord)").default_value("100"))
         .arg(arg("outdir", "répertoire de sortie (NEUF)"))
-        .arg(arg("reprendre", "reprend le run du répertoire DIR (point de reprise)"))
+        .arg(arg("reprendre", "reprend le run interrompu du répertoire DIR (sans COMPLETE) au dernier point de reprise ; --mesures, --torsion… sont rechargées du run (ne pas les répéter)"))
         .arg(Arg::new("arret-apres").long("arret-apres").hide(true).num_args(1).help("tests : s'arrête après N pas, avec point de reprise"))
         .arg(Arg::new("fenetre-s").long("fenetre-s").hide(true).num_args(1).help("WP10 : s'arrête proprement (point de reprise, `--reprendre`) après ce nombre de secondes"))
-        .arg(arg("source-hash", "accepté pour compatibilité avec su2_hip (ignoré : la provenance est dans manifest.json)"))
+        .arg(arg("source-hash", "accepté pour compatibilité avec su2_hip (ignoré : la provenance est dans manifest.json)")))
 }
 
 fn test_hb() -> Command {
@@ -162,7 +169,7 @@ pub fn chaines_depuis_listes(betas: &[f64], graines: &[u64], k: Option<usize>, p
     Ok((0..k)
         .map(|i| ParamChaine {
             beta: if betas.len() == 1 { betas[0] } else { betas[i] },
-            graine: Graine(if graines.len() == 1 { graines[0].wrapping_add(i as u64 * pas.unwrap_or(0)) } else { graines[i] }),
+            graine: Graine(if graines.len() == 1 { graines[0].wrapping_add((i as u64).wrapping_mul(pas.unwrap_or(0))) } else { graines[i] }),
             depart,
         })
         .collect())
@@ -241,12 +248,28 @@ pub fn executer(nom: &str, m: &clap::ArgMatches) -> Resultat<i32> {
         Some(("test-hb", g)) => executer_test_hb(g),
         Some(("boite", g)) => super::boite_cli::executer_boite(g),
         Some(("boite-obs", g)) => super::boite_cli::executer_boite_obs(g),
+        Some(("thermo", g)) => super::thermo_cli::executer(g),
+        Some(("tube", g)) => super::tube::cli::executer(g),
+        Some(("spectro", g)) => super::spectro::cli::executer(g),
         Some(("selftest", _)) => Ok(selftest()),
-        _ => Err(Erreur::Config("su2 : sous-commande attendue (gen | archive | test-hb | boite | boite-obs | selftest)".into())),
+        _ => Err(Erreur::Config("su2 : sous-commande attendue (gen | archive | test-hb | boite | boite-obs | tube | selftest)".into())),
     }
 }
 
 fn executer_gen(g: &ArgMatches) -> Resultat<i32> {
+    // Module tube : tore anisotrope (CPU F64), chemin séparé ; sans --cotes, rien ne change.
+    if texte(g, "decalage").is_some() && texte(g, "cotes").is_none() {
+        return Err(Erreur::Config("--decalage n'existe qu'avec --cotes (su2 gen --cotes … --decalage v0,v1,v2,v3)".into()));
+    }
+    if let Some(c) = texte(g, "cotes") {
+        return super::tube::cli::executer_gen_cotes(g, c);
+    }
+    if texte(g, "xi0").is_some() {
+        return Err(Erreur::Config("--xi0 n'existe qu'avec --cotes (su2 gen --cotes … --xi0 X)".into()));
+    }
+    if let Some(d) = texte(g, "reprendre") {
+        super::tube::cli::refuser_reprise(Path::new(d))?; // un run du module tube n'a pas de point de reprise
+    }
     // M4 : déterminer la torsion EFFECTIVE avant toute ouverture de backend.
     let torsion_cli = texte(g, "torsion").map(Torsion::analyser).transpose()?;
     let (cfg_reprise, opts) = match texte(g, "reprendre") {
@@ -267,9 +290,14 @@ fn executer_gen(g: &ArgMatches) -> Resultat<i32> {
     };
     let backend_demande = texte(g, "backend").unwrap_or("auto").trim().to_ascii_lowercase();
     if !opts.torsion.est_triviale() {
-        // CPU explicite requis : même « auto » est refusé, sans sonder/ouvrir de GPU.
+        // Backend EXPLICITE requis (B10 : cpu, ou GPU hip/cuda par le chemin C1) ; « auto » reste refusé, sans sonder/ouvrir de GPU.
+        if !matches!(backend_demande.as_str(), "cpu" | "hip" | "cuda") {
+            return Err(Erreur::Config("torsion de 't Hooft : backend explicite requis (--backend cpu, ou GPU hip ou cuda ; « auto » refusé)".into()));
+        }
         if backend_demande != "cpu" {
-            return Err(Erreur::Config("torsion de 't Hooft : les noyaux GPU ne portent pas la torsion (--backend cpu requis)".into()));
+            // B10 (O5) : validation PURE du chemin C1 GPU avant toute ouverture de GPU (code 2, rien d'écrit).
+            let l = match &cfg_reprise { Some(c) => c.lot.l, None => nombre::<usize>(g, "L")? };
+            super::geo_gpu::valider_c1(l, &super::geo_gpu::spec_su2_gen(l, opts.torsion))?;
         }
         let precision: Precision = texte(g, "precision").unwrap_or("f64").parse()?;
         if precision != Precision::F64 || cfg_reprise.as_ref().is_some_and(|c| c.lot.precision != Precision::F64) {
@@ -290,6 +318,10 @@ fn executer_gen(g: &ArgMatches) -> Resultat<i32> {
         }
     }
 
+    if let Some(c) = &cfg_reprise {
+        // B10 (O1) : moteur consigné dans reprise.json contre moteur demandé, AVANT d'ouvrir un GPU (code 2).
+        super::geo_gpu::verifier_reprise_su2_gen(&c.outdir, c.lot.l, &opts.torsion, &backend_demande)?;
+    }
     let app = ouvrir_backend(&backend_demande)?;
     let backend = app.as_ref().map_or(BackendKind::Cpu, |a| a.backend());
     let arret = match texte(g, "arret-apres") {
@@ -308,15 +340,15 @@ fn executer_gen(g: &ArgMatches) -> Resultat<i32> {
         None => (config_run(g, backend)?, false),
     };
     let archive = super::archive_cli::preparer_gen(g, &mut cfg, reprendre)?;
-    // 0.1.1 (PUB-01) : à la reprise, une --mesures absente est RECHARGÉE de la spécification enregistrée (comme la torsion) ;
+    // c08b (B08) : à la reprise, une --mesures absente est RECHARGÉE de la spécification enregistrée (comme la torsion) ;
     // une --mesures présente est comparée à celle-ci par le run, avant toute écriture.
     let spec_mesures: Option<String> = match (texte(g, "reprendre"), texte(g, "mesures")) {
         (Some(d), None) => run::charger_spec_mesures(Path::new(d))?.map(|e| {
             eprintln!("su2 gen : reprise : --mesures « {} » rechargée de {}", e.spec, run::NOM_FICHIER_MESURES);
             e.spec
         }),
-        // une --mesures ÉQUIVALENTE à la spécification enregistrée est remplacée par celle-ci (noms des sorties inchangés) ;
-        // une --mesures différente est refusée par le run
+        // c08d (V4) : une --mesures ÉQUIVALENTE à la spécification enregistrée est remplacée par celle-ci (noms des sorties
+        // inchangés) ; une --mesures différente est refusée par le run
         (Some(d), Some(m)) => match run::charger_spec_mesures(Path::new(d))? {
             Some(e) if run::specs_mesures_equivalentes(m, &e.spec) => Some(e.spec),
             _ => Some(m.to_string()),

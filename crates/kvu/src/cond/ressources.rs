@@ -21,7 +21,11 @@ pub struct InfoSsd {
 
 /// Refuse (Erreur::SsdPlein, code 7) si l'écriture de `octets` laisserait moins que le seuil de Go libres.
 pub fn verifier_ssd(chemin: &Path, octets: u64) -> Resultat<InfoSsd> {
-    let garde = GardeSsd::machine();
+    verifier_ssd_avec(&GardeSsd::machine(), chemin, octets)
+}
+
+/// Comme [`verifier_ssd`], avec une garde donnée (les tests n'ont ainsi pas à modifier l'environnement du processus, partagé par tous les tests).
+fn verifier_ssd_avec(garde: &GardeSsd, chemin: &Path, octets: u64) -> Resultat<InfoSsd> {
     garde.verifier(chemin, octets)?;
     Ok(InfoSsd { seuil_go: garde.seuil_go, libre_go: GardeSsd::libre_go(chemin)?, projection_go: octets as f64 / crate::stockage::garde::OCTETS_PAR_GO })
 }
@@ -74,19 +78,14 @@ mod tests {
 
     #[test]
     fn projection_et_libre_renseignes() {
-        std::env::set_var("KEVINOTRON_SSD_MIN_GO", "0");
-        let i = verifier_ssd(&std::env::temp_dir(), 1_000_000);
-        std::env::remove_var("KEVINOTRON_SSD_MIN_GO");
-        let i = i.unwrap();
+        let i = verifier_ssd_avec(&GardeSsd::nouvelle(0.0), &std::env::temp_dir(), 1_000_000).unwrap();
         assert!(i.libre_go > 0.0 && (i.projection_go - 1e6 / crate::stockage::garde::OCTETS_PAR_GO).abs() < 1e-12);
     }
 
     #[test]
     fn seuil_trop_haut_refuse_avant_toute_ecriture() {
         // « seuil forcé au-dessus du libre ⇒ refus » (SSD-1)
-        std::env::set_var("KEVINOTRON_SSD_MIN_GO", "1e9");
-        let r = verifier_ssd(&std::env::temp_dir(), 1);
-        std::env::remove_var("KEVINOTRON_SSD_MIN_GO");
+        let r = verifier_ssd_avec(&GardeSsd::nouvelle(1e9), &std::env::temp_dir(), 1);
         match r {
             Err(e @ Erreur::SsdPlein { .. }) => assert_eq!(e.code_sortie(), 7),
             autre => panic!("refus attendu, obtenu {autre:?}"),

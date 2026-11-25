@@ -11,7 +11,7 @@
 #
 # Usage : scripts/recette_locale.sh [--offline] [--sans-clippy] [--sans-cuda] [--reference FICHIER] [DOSSIER_SORTIE]
 #   DOSSIER_SORTIE : journaux (défaut : target/recette_locale). Variables : CARGO_BUILD_JOBS (défaut : 8).
-#   Référence par défaut : scripts/recette/noms_tests/v0.1.0.cpu.txt (suite sans la fonctionnalité `cuda`).
+#   Référence par défaut : scripts/recette/noms_tests/v0.5.1.cpu.txt (suite sans la fonctionnalité `cuda` ; v0.1.0.cpu.txt reste valide : aucun test de la 0.1.0 n'a été retiré).
 # Code de retour : 0 si tout est vert, 1 sinon. Le résumé est écrit sur la sortie standard et dans DOSSIER_SORTIE/RESUME.txt.
 set -u
 OFF=(); CLIPPY=1; CUDA=1; REF=""; SORTIE=""
@@ -32,7 +32,7 @@ cd "$RACINE" || exit 2
 SORTIE=${SORTIE:-$RACINE/target/recette_locale}
 mkdir -p "$SORTIE" || exit 2
 SORTIE=$(cd "$SORTIE" && pwd)
-REF=${REF:-$RACINE/scripts/recette/noms_tests/v0.1.0.cpu.txt}
+REF=${REF:-$RACINE/scripts/recette/noms_tests/v0.5.1.cpu.txt}
 JOBS=${CARGO_BUILD_JOBS:-8}
 export CARGO_TERM_COLOR=never
 R="$SORTIE/RESUME.txt"; : > "$R"

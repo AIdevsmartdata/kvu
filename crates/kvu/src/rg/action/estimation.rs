@@ -833,7 +833,7 @@ pub fn verifier_tailles_groupes(tailles: &[usize]) -> Resultat<()> {
 }
 
 /// Matrice de corrélation (n×n, ligne par ligne) des couplages à partir des réplicats.
-fn correlations(replicats: &[Vec<f64>], n: usize) -> Vec<f64> {
+pub(crate) fn correlations(replicats: &[Vec<f64>], n: usize) -> Vec<f64> {
     let g = replicats.len();
     let mut corr = vec![0.0; n * n];
     if g < 2 {
@@ -875,36 +875,20 @@ pub struct ResultatEstimateur {
     pub details: serde_json::Value,
 }
 
-/// Estimation complète d'une liste de groupes (valeur centrale + jackknife par groupe).
-pub fn estimer(
-    groupes: &[StatsGroupe],
+/// Ajustement central (sans réplicat) d'une liste de groupes : c'est le bloc central de
+/// [`estimer`], exposé pour que le bootstrap de configurations réutilise EXACTEMENT le même
+/// estimateur (mêmes départs, mêmes solveurs). Les groupes sont passés par référence : un
+/// réplicat bootstrap est un `Vec<&StatsGroupe>` avec répétitions, sans copie des Gram.
+pub fn ajuster_centrale(
+    groupes: &[&StatsGroupe],
     famille: &Famille,
     quoi: Estimateur,
     fils: usize,
-) -> Resultat<ResultatEstimateur> {
+) -> Resultat<(Vec<f64>, serde_json::Value)> {
     let n = famille.n();
-    if n == 0 || groupes.is_empty() || groupes.len() < 2 {
-        return Err(Erreur::Config(
-            "estimation requiert au moins 2 groupes".into(),
-        ));
-    }
-    if fils == 0 {
-        return Err(Erreur::Config("le nombre de fils doit être ≥ 1".into()));
-    }
-    for g in groupes {
-        if g.w.len() != n || g.m.len() != n * n {
-            return Err(Erreur::Config("StatsGroupe incohérent".into()));
-        }
-    }
-
-    verifier_tailles_groupes(&groupes.iter().map(|g| g.n_configs).collect::<Vec<_>>())?;
-
-    let refs: Vec<&StatsGroupe> = groupes.iter().collect();
-
-    // ---- Valeur centrale ----
-    let (beta_central, details_central) = match quoi {
+    let central = match quoi {
         Estimateur::Sd => {
-            let sol = resoudre_sd(&refs, n)?;
+            let sol = resoudre_sd(groupes, n)?;
             let vals = sol.valeurs_propres_m.clone();
             let cond = vals[n - 1] / vals[0];
             (
@@ -917,7 +901,7 @@ pub fn estimer(
         }
         Estimateur::Pl => {
             // départ : SD si possible, sinon beta_sd(P) des données réduites à P
-            let depart = match resoudre_sd(&refs, n) {
+            let depart = match resoudre_sd(groupes, n) {
                 Ok(sol) => sol.beta,
                 Err(_) => {
                     // données réduites à P : w_P total et k_P par lien
@@ -956,7 +940,7 @@ pub fn estimer(
                     depart
                 }
             };
-            let sol = resoudre_pl(&refs, n, &depart, fils)?;
+            let sol = resoudre_pl(groupes, n, &depart, fils)?;
             let vals = sol.valeurs_propres_information.clone();
             let cond = vals[n - 1] / vals[0];
             (
@@ -970,6 +954,53 @@ pub fn estimer(
             )
         }
     };
+    Ok(central)
+}
+
+/// Ajustement d'un RÉPLICAT bootstrap : même estimateur que la valeur centrale, départ
+/// `depart` (le β central, comme les réplicats jackknife de [`estimer`]).
+pub fn ajuster_replicat(
+    groupes: &[&StatsGroupe],
+    famille: &Famille,
+    quoi: Estimateur,
+    depart: &[f64],
+    fils: usize,
+) -> Resultat<Vec<f64>> {
+    let n = famille.n();
+    match quoi {
+        Estimateur::Sd => Ok(resoudre_sd(groupes, n)?.beta),
+        Estimateur::Pl => Ok(resoudre_pl(groupes, n, depart, fils)?.beta),
+    }
+}
+
+/// Estimation complète d'une liste de groupes (valeur centrale + jackknife par groupe).
+pub fn estimer(
+    groupes: &[StatsGroupe],
+    famille: &Famille,
+    quoi: Estimateur,
+    fils: usize,
+) -> Resultat<ResultatEstimateur> {
+    let n = famille.n();
+    if n == 0 || groupes.is_empty() || groupes.len() < 2 {
+        return Err(Erreur::Config(
+            "estimation requiert au moins 2 groupes".into(),
+        ));
+    }
+    if fils == 0 {
+        return Err(Erreur::Config("le nombre de fils doit être ≥ 1".into()));
+    }
+    for g in groupes {
+        if g.w.len() != n || g.m.len() != n * n {
+            return Err(Erreur::Config("StatsGroupe incohérent".into()));
+        }
+    }
+
+    verifier_tailles_groupes(&groupes.iter().map(|g| g.n_configs).collect::<Vec<_>>())?;
+
+    let refs: Vec<&StatsGroupe> = groupes.iter().collect();
+
+    // ---- Valeur centrale ----
+    let (beta_central, details_central) = ajuster_centrale(&refs, famille, quoi, fils)?;
 
     // ---- Réplicats ----
     let mut betas_replicats: Vec<Vec<f64>> = Vec::with_capacity(groupes.len());

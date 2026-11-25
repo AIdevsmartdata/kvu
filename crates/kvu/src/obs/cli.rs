@@ -66,6 +66,7 @@ pub fn commandes() -> Vec<clap::Command> {
         .about("Observables : wilson | polyakov | flot")
         .subcommand_required(true)
         .subcommands(super::topo_cli::commandes())
+        .subcommands(super::champs_cli::commandes())
         .subcommand(
             Command::new("wilson")
                 .about("Boucles de Wilson R×T")
@@ -110,6 +111,7 @@ pub fn executer(nom: &str, m: &ArgMatches) -> Resultat<i32> {
     match m.subcommand() {
         Some(("topo", sm)) => super::topo_cli::mesurer(sm),
         Some(("topo-gates", sm)) => super::topo_cli::gates(sm),
+        Some(("champs", sm)) => super::champs_cli::executer(sm),
         Some((sous, sm)) => lancer(sous, sm),
         None => Err(Erreur::Config("obs : wilson | polyakov | flot attendu".into())),
     }

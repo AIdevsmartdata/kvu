@@ -1,4 +1,4 @@
-# Préparation de la publication v0.1 : ce qui a été retiré ou neutralisé
+# Préparation de la publication : ce qui a été retiré ou neutralisé (0.1 ; section 0.5.0 en fin de fichier)
 
 Ce dépôt public est un instantané du dépôt de travail de l'auteur. Pour la publication (novembre 2026), trois choses ont
 été faites, et seulement celles-ci : des chemins et identifiants privés ont été remplacés par des valeurs neutres, des
@@ -63,3 +63,48 @@ Rien d'autre n'a été retiré. Les fichiers retirés restent dans le dépôt de
   code, les tests et les variables d'environnement (`KEVINOTRON_*`) jusqu'à la 0.2 (décision de l'auteur) : les renommer
   change l'interface et le format des manifestes. Ils ne désignent aucune donnée privée.
 - Les messages de commit et l'historique du dépôt de travail ne font pas partie de l'instantané.
+
+## 4. Version 0.5.0 (novembre 2026)
+
+Même démarche que pour la 0.1, appliquée à la ligne de développement (`integration/v0.5`, qui contient les versions internes 0.2 à 0.4) :
+
+- Retirés, comme pour la 0.1 : `rapports/`, `crates/kvu/validation/wp9_av1/`, les trois pré-enregistrements WP9-AV1, les journaux et résultats de
+  validation interne (`crates/kvu/validation/**/resultats*`, dont 122 fichiers apparus depuis la 0.1). Retirés en plus : huit scripts de campagne
+  qui portent des chemins absolus de la machine de l'auteur (`scripts/accord_xi.sh`, `accord_xi.py`, `balayage_xi2.sh`, `analyse_point_xi.py`,
+  `test_aniso_bits.sh`, `test_aniso_stat.sh`, `test_ops_bruts.sh`, `verif_ops_bruts.py`).
+- Neutralisés à la main : `scripts/lecture_graine/*` (chemins de données de production remplacés par `/chemin/vers/…` ou la variable
+  `KVU_DONNEES_REELLES` ; ces tests exigent des données de l'auteur et ne tournent pas telles quelles), `docs/ETAT_v0.3.md`, le fichier de test
+  `crates/kvu/tests/donnees/reprise_0_1_1/manifest.json` (chemins de travail remplacés par `/chemin/travail/…`).
+- Remplacés par la version publiée de la 0.1.1 (la ligne de développement portait l'état d'avant) : `docs/DEFAUTS_CONNUS.md` (complété d'un avertissement),
+  `crates/kvu/validation/machine/test_build_auto*.sh`. Rétablis : `docs/NOTE_0.1.1.md`, `scripts/verifier_mesures_en_ligne.py`.
+- Non faits : ajout d'en-têtes SPDX aux fichiers source (la licence est déclarée par `LICENSE`, `NOTICE`, `Cargo.toml` et `CITATION.cff` ; modifier les
+  sources changerait leur empreinte `kvu-source/1` et les épingles des tests) ; renommage des noms hérités. Les deux sont reportés à la 0.6 (le fichier `LICENSE` Apache-2.0 et le champ `license` de `Cargo.toml` portent la licence en 0.5.1).
+- Recette (tests verts, clippy rouge : 65 lints de style non corrigés) : voir `CHANGELOG.md` (« Recette de cette version »). Le code Rust et les noyaux sont identiques, octet pour octet, à ceux de la tête `e9f9f12` de
+  la ligne de développement (même empreinte `kvu-source/1` : `ec75d990…`) ; les qualifications de carte graphique de cette ligne (identité au bit AMD et NVIDIA,
+  tests de carte) datent du 23 novembre au matin et n'ont PAS été rejouées depuis l'archive publique, à l'exception de deux essais courts sur la carte AMD
+  (voir les notes de version).
+- Aucun changement de code Rust ni de noyau. Les seuls fichiers de test ou de fixture modifiés sont ceux cités plus haut (`test_build_auto*.sh`, `reprise_0_1_1/manifest.json`, `scripts/lecture_graine/test_*.py`).
+
+## 5. Version 0.5.1 (23 novembre 2026)
+
+La 0.5.0 était une version interne, non publiée ; la 0.5.1 est la version publique de la ligne 0.5 : 0.5.0 interne + reports de correctifs de reprise + durabilité avant la clôture + gardes d'entrée + lints (détail : `CHANGELOG.md`).
+
+- Reportés depuis la 0.1.1 : PUB-14 et PUB-16 (trois commits, `crates/kvu/src/su2/run.rs`, tests `pub14_*` et `pub16_*` dans `crates/kvu/tests/su2_reprise_mesures.rs`), puis, après un audit des correctifs de la 0.1.1 un par un : PUB-14 pour `--bord` (`su2/bord.rs`) et `--mesures ""` à la reprise (`su2/run.rs`), avec les tests `pub01_*`, `pub02_bord_et_mesures_refuse`, `run_sans_mesures_sans_compagnon`, `mesures_vide_vaut_sans_mesures` et `pub14_bord_kill9_en_thermalisation_reprise_acceptee` de la 0.1.1 (détail : `docs/DEFAUTS_CONNUS.md`, note de tête).
+- Durabilité avant la clôture (chemin standard) et gardes d'entrée : fichiers consignés synchronisés avant `manifest.json` et `COMPLETE` ; synchronisation du répertoire après les renommages de `reprise.champs` avant `reprise.json`, erreur de synchronisation rendue par l'écriture atomique ; remise en place de la génération désignée avant chaque point (deux arrêts successifs) ; volumes de `su2 thermo mesure` contrôlés (`checked_mul`) ; `etat.bin` : `usize::try_from` (nombre de liens et identifiant de balayage) ; garde `b >= usize::BITS` dans `gpu_torelon.rs`. La reprise après coupure de courant n'est pas établie (PUB-05, PUB-20). Aucune boucle numérique modifiée.
+- `cargo clippy --locked -p kvu --all-targets -- -D warnings` vert (avec et sans `--features cuda`) : corrections de style (`is_multiple_of`, `div_ceil`, `slice::from_ref`, un `0 *` inutile, deux branches identiques fusionnées) et `#[allow(clippy::needless_range_loop | too_many_arguments | type_complexity)]` locaux commentés sur les fonctions concernées, `#![allow(clippy::doc_lazy_continuation | doc_overindented_list_items)]` de fichier pour des listes de documentation. Aucune boucle numérique n'a été réécrite.
+- Trois mentions d'un projet sans rapport retirées (`machine/processus.rs`, `validation/machine/kevinotron-queue.service.exemple`, `reference/noyau2/README.md` ; l'empreinte de ce dernier fichier est mise à jour dans `validation/historique/SHA256_REFERENCE.txt`, test G-H02).
+- Identité numérique : `outils/identite_au_bit.sh` (script du paquet de préparation, non publié ; il exige le binaire interne de référence) `BINAIRE_0.5.0_e9f9f12 BINAIRE_0.5.1 SORTIE` lance sept essais processeur (`su2 gen` L = 6 avec mesures wilson et flot ; archive zstd ; torsion ; réseau anisotrope `--cotes --xi0` ; points de reprise ; couture décalée ; `su2 spectro neutre`) avec les deux binaires et compare tous les fichiers de sortie, SAUF les manifestes, `COMPLETE`, les journaux, `config_run.json`, `bilan*` et `regen*` (exclus) et, pour `archive.json` et `resume.json`, hors champs de provenance, chemins et durées. Résultat : **7 essais sur 7 identiques au bit** (`preuves/identite_au_bit.txt`). Binaire de référence : la qualification de ce jour (`kvu 0.5.0`, source `ec75d990…`, git `e9f9f12`). Éléments exclus de la comparaison : manifestes (`manifest*`), `COMPLETE`, journaux (`*.log`), `config_run.json`, `bilan*`, `regen*`, et, pour `archive.json` et `resume.json`, les champs de provenance (binaire, empreintes, version, chemins) et les durées ; tout le reste de chaque dossier de sortie est comparé octet pour octet.
+  Liste exhaustive des sept essais (chaque ligne : nom, puis arguments de `kvu` ; `@OUT` = dossier de sortie) :
+
+```
+  cas ens_L6 su2 gen --backend cpu --L 6 --beta 2.3 --graine 1 --start cold --therm 20 --nmeas 20 --nor 1 --dump-every 10 --format q64 --mesures wilson:R2xT2:1,flot:0.02:0.2:10 --outdir @OUT
+  cas arch_L4 su2 gen --backend cpu --L 4 --beta 2.3 --graine 2 --start cold --therm 10 --nmeas 10 --nor 1 --dump-every 5 --format q64 --zstd --archive --outdir @OUT
+  cas tordu_L4 su2 gen --backend cpu --L 4 --beta 2.3 --graine 3 --start cold --therm 10 --nmeas 10 --nor 1 --torsion 01,23 --outdir @OUT
+  cas aniso su2 gen --backend cpu --cotes 4,4,4,6 --xi0 1.5 --beta 2.3 --graine 5 --start hot --therm 10 --nmeas 10 --nor 1 --dump-every 5 --outdir @OUT
+  cas reprise_pt su2 gen --backend cpu --L 4 --beta 2.3 --graine 7 --start cold --therm 12 --nmeas 12 --nor 1 --reprise-every 4 --dump-every 6 --format q64 --mesures wilson:R1xT1:1 --outdir @OUT
+  cas spectro_neutre su2 spectro neutre --cotes 4,4,4,8 --beta 2.3 --graine 11 --therm 10 --nmeas 10 --skip 2 --nor 2 --sortie @OUT
+  cas decalage su2 gen --backend cpu --cotes 4,4,4,4 --decalage 0,1,0,0 --beta 2.3 --graine 6 --start cold --therm 10 --nmeas 10 --nor 1 --dump-every 5 --outdir @OUT
+```
+
+- Les empreintes de source (`kvu-source/1`) de la 0.5.1 et de la 0.5.0 diffèrent (commentaires, correctifs, version) : les manifestes des mesures de ce jour portent « 0.5.0 » et l'empreinte `ec75d990…`.
+- Essais sur la Radeon (HIP) et état de la validation sur carte : section « État de la validation sur carte (0.5.1) » du `README.md` (bilan détaillé de référence).

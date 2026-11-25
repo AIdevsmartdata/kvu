@@ -137,6 +137,8 @@ pub fn commandes() -> Vec<Command> {
         )
         .subcommands(super::flot::cli::sous_commandes())
         .subcommands(super::action::cli::sous_commandes())
+        .subcommands(super::apparier::sous_commandes())
+        .subcommands(super::correlateur::sous_commandes())
         .subcommands(super::flux::cli::sous_commandes())]
 }
 
@@ -182,6 +184,9 @@ pub fn executer(nom: &str, m: &ArgMatches) -> Resultat<i32> {
         Some((n @ ("flot" | "etalonner" | "flot-gates" | "etalonnage-gates"), s)) => super::flot::cli::executer(n, s),
         Some((n @ ("action" | "action-gates"), s)) => super::action::cli::executer(n, s),
         Some((n @ ("flux" | "flux-gates"), s)) => super::flux::cli::executer(n, s),
+        Some((n @ ("apparier" | "choisir-c"), s)) => super::apparier::executer(n, s),
+        Some(("correlateur", s)) => super::correlateur::executer(s),
+        Some(("correlateur-comparer", s)) => super::correlateur::executer_comparer(s),
         _ => Err(Erreur::Config("sous-commande de `rg` manquante".into())),
     }
 }
@@ -491,6 +496,10 @@ pub(crate) struct Calcul {
 }
 
 impl Calcul {
+    /// L'appareil ouvert (`None` sur CPU) ; le verrou reste tenu tant que `self` vit.
+    pub(crate) fn appareil(&self) -> Option<&crate::gpu::Appareil> {
+        self.app.as_ref()
+    }
     /// Le pilote du bloc pour la géométrie demandée (`None` sur CPU).
     pub(crate) fn bloc(&self, g: Geometrie) -> Resultat<Option<BlocGpu>> {
         match &self.app {

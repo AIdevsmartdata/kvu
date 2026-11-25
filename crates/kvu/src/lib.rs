@@ -21,6 +21,7 @@
 //! - [`regen`]    manifestes de régénération kvu-regen/1, `kvu regen`, classement A/B/C   [WP4]
 //! - [`groupes`]  registre des groupes de jauge et gates à réponse connue            [WP5]
 //! - [`rg`]       module RG par blocs : bloc de Bałaban L_b = 3, témoin Swendsen b = 2, domaine  [WP6]
+//! - [`intrication`] entropie de Rényi-2 par répliques (géométrie recousue, interpolation en α), CPU F64  [intrication]
 //! - [`cli`]      ligne de commande unifiée, valide, bench                       [T9]
 
 pub mod commun;
@@ -40,7 +41,10 @@ pub mod regen;
 pub mod groupes;
 pub mod rg;
 pub mod hess;
+pub mod experience;
 pub mod fibre_contrainte;
+pub mod geom;
+pub mod intrication;
 pub mod cli;
 
 pub use commun::{BackendKind, Depart, Erreur, Graine, Machine, Precision, Resultat};

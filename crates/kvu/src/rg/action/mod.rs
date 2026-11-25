@@ -5,9 +5,11 @@
 //! L'action tronquée est S_β(U) = − Σ_{γ ∈ F} β_γ Σ_{C ∈ 𝒞_γ} ½ Tr U_C ; deux estimateurs
 //! sont fournis : la pseudo-vraisemblance à un lien (PL, maximum de la loi conditionnelle de
 //! von Mises–Fisher) et l'équation de Schwinger–Dyson linéaire (SD). Les incertitudes sont
-//! calculées par jackknife. Un échantillonneur de Gibbs de l'action tronquée sert d'instrument
-//! de contrôle.
+//! calculées par jackknife (défaut) ou par bootstrap de configurations stratifié par chaîne
+//! ([`bootstrap`], option `--erreurs bootstrap`). Un échantillonneur de Gibbs de l'action
+//! tronquée sert d'instrument de contrôle.
 
+pub mod bootstrap;
 pub mod boucles;
 pub mod cli;
 pub mod estimation;

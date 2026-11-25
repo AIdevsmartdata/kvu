@@ -171,6 +171,16 @@ impl CudaInterne {
         Ok(libre as u64)
     }
 
+    /// Taille du cache L2 (octets), lue sur le périphérique ; `None` si illisible.
+    pub(crate) fn cache_l2_octets(&self) -> Option<u64> {
+        self.lier().ok()?;
+        let v = self
+            .ctx
+            .attribute(cudarc::driver::sys::CUdevice_attribute::CU_DEVICE_ATTRIBUTE_L2_CACHE_SIZE)
+            .ok()?;
+        (v > 0).then_some(v as u64)
+    }
+
     /// CUBIN produit par NVRTC. Le journal de compilation est renvoyé en entier en cas d'échec.
     pub(crate) fn compiler_objet(&self, nom: &str, texte: &str, arguments: &[String]) -> Resultat<Vec<u8>> {
         let src = CString::new(texte).map_err(|e| Erreur::Config(format!("source « {nom} » : octet NUL ({e})")))?;

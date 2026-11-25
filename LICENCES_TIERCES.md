@@ -3,7 +3,8 @@
 kvu est sous licence Apache-2.0. Aucune dépendance n'est copiée dans ce dépôt : cargo télécharge les crates ci-dessous
 depuis crates.io, aux versions exactes de `Cargo.lock`. Toutes sont sous licences permissives compatibles avec
 Apache-2.0 ; aucune n'est sous GPL, LGPL, AGPL ou licence non commerciale. Relevé du 8 novembre 2026 (champ `license` du
-`Cargo.toml` de chaque crate, à la version de `Cargo.lock`).
+`Cargo.toml` de chaque crate, à la version de `Cargo.lock`), revérifié le 23 novembre 2026 pour la version 0.5.0 : `Cargo.lock` est
+identique à celui de la 0.1.1 (mêmes 38 dépendances, mêmes versions), aucune dépendance n'a été ajoutée.
 
 ## Crates Rust (38 dépendances, directes et transitives)
 

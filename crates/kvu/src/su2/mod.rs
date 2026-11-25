@@ -23,11 +23,17 @@ pub mod boite_run;
 pub mod champ;
 pub mod cli;
 pub mod cpu;
+pub mod geo_gpu;
 pub mod rapide32;
 pub mod ref64;
 pub mod reprise;
 pub mod run;
+pub mod spectro;
 pub mod torsion;
+pub mod tube;
+pub mod thermo;
+pub mod thermo_cli;
+pub mod une_boite;
 
 pub use champ::{ChampGpu, TamponChamp};
 
@@ -179,6 +185,12 @@ pub trait NoyauxSu2 {
         } else {
             Err(Erreur::Config("torsion de 't Hooft : générateur CPU F64 requis".into()))
         }
+    }
+
+    /// AJOUT B10 (méthode fournie, défaut None) : invariants du MOTEUR (moteur, géométrie, gel, masque…) consignés dans le point
+    /// de reprise (`reprise.json`, champ `invariants`) et comparés à la reprise (écart ⇒ code 2). Absents = moteur d'origine seulement.
+    fn invariants_reprise(&self) -> Option<serde_json::Value> {
+        None
     }
 }
 

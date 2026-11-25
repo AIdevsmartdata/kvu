@@ -40,6 +40,9 @@ pub struct EtatReprise {
     pub compteurs: Vec<super::Compteurs>,
     /// sha256 du fichier binaire des champs (vérifié à la relecture).
     pub sha256_champs: String,
+    /// B10 : invariants du moteur (`NoyauxSu2::invariants_reprise`), omis s'ils valent None (points de reprise C0 inchangés).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invariants: Option<serde_json::Value>,
 }
 
 fn io(contexte: &str, chemin: &Path, e: std::io::Error) -> Erreur {
@@ -96,15 +99,48 @@ pub fn ecrire(dir: &Path, n: &dyn NoyauxSu2, pas_faits: u64, mesures_faites: u64
         mesures_faites,
         compteurs: n.compteurs()?,
         sha256_champs: hex(&h.finalize()),
+        invariants: n.invariants_reprise(),
     };
     let json = serde_json::to_vec_pretty(&etat).map_err(|e| Erreur::Format(format!("reprise.json : {e}")))?;
+    // B2-1 : un arrêt entre (3) et (4) d'une écriture précédente laisse `.prev` = génération que reprise.json désigne encore et
+    // `champs` = génération orpheline. Sans réparation, le renommage (2) ci-dessous écraserait `.prev`, seule copie de la
+    // génération désignée. On la remet en place AVANT toute bascule.
+    reparer_apres_arret(dir)?;
     // (2)-(5) bascule
     if champs.exists() {
         fs::rename(&champs, &prev).map_err(|e| io("renommage", &champs, e))?;
     }
     fs::rename(&nouveau, &champs).map_err(|e| io("renommage", &nouveau, e))?;
+    // les deux renommages sont rendus durables AVANT de publier reprise.json (sinon, après une coupure de courant, l'ordre des
+    // renommages n'est pas garanti par POSIX)
+    File::open(dir).and_then(|f| f.sync_all()).map_err(|e| io("fsync du répertoire", dir, e))?;
+    // B2-2 : `.prev` n'est supprimé qu'après publication durable de reprise.json (l'erreur de synchronisation est rendue)
     ecrire_atomique(&dir.join(NOM_JSON), &json).map_err(|e| io("écriture", &dir.join(NOM_JSON), e))?;
     let _ = fs::remove_file(&prev);
+    Ok(())
+}
+
+/// Réparation avant écriture (B2-1). Si `reprise.champs.prev` existe :
+/// - `reprise.champs` correspond au sha256 de reprise.json : `.prev` est périmé (arrêt entre 4 et 5), supprimé ;
+/// - sinon, si `.prev` correspond : la génération désignée est `.prev` (arrêt entre 3 et 4) ; elle redevient
+///   `reprise.champs` par renommage (qui remplace atomiquement la génération orpheline) ;
+/// - sinon (reprise.json absent ou illisible, ou aucun fichier ne correspond) : rien n'est touché.
+///
+/// Ne coûte un calcul d'empreinte que si un `.prev` existe, c'est-à-dire après un arrêt : un run sans arrêt n'y passe jamais.
+fn reparer_apres_arret(dir: &Path) -> Resultat<()> {
+    let champs = dir.join(NOM_CHAMPS);
+    let prev = dir.join(format!("{NOM_CHAMPS}.prev"));
+    if !prev.exists() {
+        return Ok(());
+    }
+    let Ok(txt) = fs::read_to_string(dir.join(NOM_JSON)) else { return Ok(()) };
+    let Ok(etat) = serde_json::from_str::<EtatReprise>(&txt) else { return Ok(()) };
+    if champs.exists() && sha256_fichier(&champs)? == etat.sha256_champs {
+        let _ = fs::remove_file(&prev);
+    } else if sha256_fichier(&prev)? == etat.sha256_champs {
+        fs::rename(&prev, &champs).map_err(|e| io("renommage", &prev, e))?;
+        File::open(dir).and_then(|f| f.sync_all()).map_err(|e| io("fsync du répertoire", dir, e))?;
+    }
     Ok(())
 }
 
@@ -117,15 +153,34 @@ fn lire_etat(dir: &Path) -> Resultat<(EtatReprise, PathBuf)> {
         return Err(Erreur::Format(format!("reprise.json de schéma {} (attendu {SCHEMA})", etat.schema)));
     }
     let attendu = octets_champs(etat.config.l, etat.config.chaines.len());
+    // B2-10 : les deux candidats sont essayés ; une erreur d'accès à l'un n'empêche pas d'essayer l'autre et, si aucun ne
+    // convient, elle est distinguée d'une empreinte incorrecte.
+    let mut acces: Vec<String> = Vec::new();
     for nom in [NOM_CHAMPS.to_string(), format!("{NOM_CHAMPS}.prev")] {
         let p = dir.join(&nom);
-        let Ok(m) = fs::metadata(&p) else { continue };
+        let m = match fs::metadata(&p) {
+            Ok(m) => m,
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => continue,
+            Err(e) => {
+                acces.push(format!("{} : {e}", p.display()));
+                continue;
+            }
+        };
         if m.len() != attendu {
             continue;
         }
-        if sha256_fichier(&p)? == etat.sha256_champs {
-            return Ok((etat, p));
+        match sha256_fichier(&p) {
+            Ok(h) if h == etat.sha256_champs => return Ok((etat, p)),
+            Ok(_) => {}
+            Err(e) => acces.push(format!("{e}")),
         }
+    }
+    if !acces.is_empty() {
+        return Err(Erreur::Format(format!(
+            "reprise impossible dans {} : erreur d'accès aux fichiers de champs ({})",
+            dir.display(),
+            acces.join(" ; ")
+        )));
     }
     Err(Erreur::Format(format!(
         "reprise corrompue dans {} : aucun fichier de champs ne correspond au sha256 de reprise.json",
@@ -143,6 +198,7 @@ pub fn lire(dir: &Path, n: &mut dyn NoyauxSu2) -> Resultat<EtatReprise> {
             dir.join(NOM_JSON).display()
         )));
     }
+    verifier_invariants(etat.invariants.as_ref(), n.invariants_reprise().as_ref(), dir)?;
     let l = etat.config.l;
     let nvals = 16 * l * l * l * l;
     let mut f = File::open(&chemin).map_err(|e| io("ouverture", &chemin, e))?;
@@ -168,6 +224,36 @@ pub fn lire(dir: &Path, n: &mut dyn NoyauxSu2) -> Resultat<EtatReprise> {
 }
 
 /// Lit seulement l'état (sans restaurer) : le répertoire de run existe-t-il avec une reprise valide ?
+/// B10 : invariants du point de reprise contre ceux du moteur. Règle : invariants absents (point de reprise d'un binaire
+/// antérieur) = moteur d'origine seulement : un moteur sans invariants (C0), ou un moteur qui le déclare
+/// (`"accepte_sans_invariants": true`, CPU tordu) si le manifeste du run PROUVE une provenance CPU ([`provenance_cpu`]) ;
+/// sinon égalité exacte. Écart ou provenance ambiguë ⇒ `Erreur::Config` (code 2).
+pub fn verifier_invariants(consignes: Option<&serde_json::Value>, moteur: Option<&serde_json::Value>, dir: &Path) -> Resultat<()> {
+    let tolerant = moteur.is_some_and(|m| m.get("accepte_sans_invariants") == Some(&serde_json::Value::Bool(true)));
+    match (consignes, moteur) {
+        (None, None) => Ok(()),
+        (None, Some(_)) if tolerant && provenance_cpu(dir) == Some(true) => Ok(()),
+        (Some(a), Some(b)) if a == b => Ok(()),
+        (a, b) => Err(Erreur::Config(format!(
+            "reprise : le moteur ({}) ne correspond pas aux invariants du point de reprise {} ({})",
+            b.map_or("sans invariants".into(), |v| v.to_string()),
+            dir.join(NOM_JSON).display(),
+            a.map_or("sans invariants : moteur d'origine seulement".into(), |v| v.to_string())
+        ))),
+    }
+}
+
+/// B10 (c09c) : provenance, lue au manifeste du run, d'un point de reprise SANS invariants : `Some(true)` = run CPU (backend
+/// « cpu », aucun module `su2_geo64`), `Some(false)` = run GPU, `None` = indéterminée (manifeste absent ou illisible).
+pub fn provenance_cpu(dir: &Path) -> Option<bool> {
+    let p = dir.join(crate::heritage::manifest::NOM_MANIFESTE);
+    let v: serde_json::Value = serde_json::from_str(&fs::read_to_string(p).ok()?).ok()?;
+    let backend = v.get("backend")?.as_str()?;
+    let modules = v.get("modules_compiles")?.as_array()?;
+    let c1 = modules.iter().any(|m| m.get("nom").and_then(|n| n.as_str()) == Some("su2_geo64"));
+    Some(backend == "cpu" && !c1)
+}
+
 pub fn lire_etat_seul(dir: &Path) -> Resultat<EtatReprise> {
     lire_etat(dir).map(|x| x.0)
 }
@@ -257,6 +343,46 @@ mod tests {
         let e = lire(&d, &mut c).unwrap();
         assert_eq!(e.pas_faits, 2);
         assert_eq!(c.telecharger(0).unwrap().q, a.telecharger(0).unwrap().q);
+        fs::remove_dir_all(&d).unwrap();
+    }
+
+    /// B2-1 (seconde lecture) : arrêt entre les étapes 3 et 4, reprise sur `.prev`, puis écriture suivante : la génération
+    /// désignée par reprise.json ne doit jamais disparaître, même si l'arrêt suivant frappe juste après le renommage (2).
+    #[test]
+    fn deux_arrets_successifs_ne_perdent_pas_la_generation_designee() {
+        use crate::su2::NoyauxSu2;
+        let d = dossier("deux_arrets");
+        let mut a = Cpu64::nouveau(cfg(1)).unwrap();
+        a.init().unwrap();
+        avancer(&mut a, 2);
+        ecrire(&d, &a, 2, 0).unwrap(); // génération 1 (désignée)
+        let gen1 = fs::read(d.join(NOM_CHAMPS)).unwrap();
+        let json1 = fs::read(d.join(NOM_JSON)).unwrap();
+        avancer(&mut a, 2);
+        ecrire(&d, &a, 4, 0).unwrap(); // génération 2
+        let gen2 = fs::read(d.join(NOM_CHAMPS)).unwrap();
+        assert_ne!(gen1, gen2);
+        // arrêt n°1 entre (3) et (4) de la génération 2 : champs = gen2 orphelin, .prev = gen1, JSON = gen1
+        fs::write(d.join(NOM_JSON), &json1).unwrap();
+        fs::write(d.join(format!("{NOM_CHAMPS}.prev")), &gen1).unwrap();
+        // reprise sur .prev
+        let mut c = Cpu64::nouveau(cfg(1)).unwrap();
+        assert_eq!(lire(&d, &mut c).unwrap().pas_faits, 2);
+        // l'écriture suivante répare d'abord : la génération désignée est remise en place AVANT la bascule
+        reparer_apres_arret(&d).unwrap();
+        assert_eq!(fs::read(d.join(NOM_CHAMPS)).unwrap(), gen1, "la génération désignée doit être reprise.champs");
+        assert!(!d.join(format!("{NOM_CHAMPS}.prev")).exists());
+        // la bascule complète ensuite aboutit et se relit
+        avancer(&mut c, 1);
+        ecrire(&d, &c, 3, 0).unwrap();
+        let mut e = Cpu64::nouveau(cfg(1)).unwrap();
+        assert_eq!(lire(&d, &mut e).unwrap().pas_faits, 3);
+        // cas « arrêt entre 4 et 5 » : .prev périmé, champs désigné : .prev est supprimé, rien d'autre ne change
+        let bon = fs::read(d.join(NOM_CHAMPS)).unwrap();
+        fs::write(d.join(format!("{NOM_CHAMPS}.prev")), &gen1).unwrap();
+        reparer_apres_arret(&d).unwrap();
+        assert_eq!(fs::read(d.join(NOM_CHAMPS)).unwrap(), bon);
+        assert!(!d.join(format!("{NOM_CHAMPS}.prev")).exists());
         fs::remove_dir_all(&d).unwrap();
     }
 

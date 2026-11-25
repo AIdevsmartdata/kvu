@@ -1,0 +1,290 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "anteriorite": {
+      "additionalProperties": false,
+      "properties": {
+        "garde": {
+          "additionalProperties": false,
+          "properties": {
+            "chemin": { "minLength": 1, "type": "string" },
+            "sha256": { "format": "sha256", "type": "string" }
+          },
+          "required": ["chemin", "sha256"],
+          "type": "object"
+        },
+        "sha256sums": {
+          "additionalProperties": false,
+          "properties": {
+            "chemin": { "minLength": 1, "type": "string" },
+            "sha256": { "format": "sha256", "type": "string" }
+          },
+          "required": ["chemin", "sha256"],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "auteurs": { "type": "object" },
+    "carnet": {
+      "items": {
+        "additionalProperties": false,
+        "if": { "properties": { "type": { "const": "resultat" } } },
+        "properties": {
+          "date": { "minLength": 1, "type": "string" },
+          "enonce": { "minLength": 1, "type": "string" },
+          "id": { "minLength": 1, "type": "string" },
+          "liens": { "items": { "minLength": 1, "type": "string" }, "type": "array" },
+          "sources": {
+            "items": { "minLength": 1, "type": "string" },
+            "minItems": 1,
+            "type": "array"
+          },
+          "statut": {
+            "enum": [
+              "numerique", "proposition_une_famille", "retrograde", "echec",
+              "lecture", "une_famille", "a_corriger", "corrigee", "garde_fabriquee",
+              "sans_consequence", "prise", "en_attente", "ouverte",
+              "conditionnelle", "en_test", "refutee", "retiree", "bornee", "close", "gelee"
+            ],
+            "type": "string"
+          },
+          "titre": { "minLength": 1, "type": "string" },
+          "tomberait": { "type": "string" },
+          "type": { "enum": ["resultat", "erreur", "decision", "hypothese", "piste", "fait"] }
+        },
+        "required": ["type", "id", "titre", "statut", "enonce", "sources", "liens", "date"],
+        "then": {
+          "properties": {
+            "statut": { "enum": ["numerique", "proposition_une_famille", "retrograde", "echec"] }
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "carnet_id": { "minLength": 5, "type": "string" },
+    "chemin_projet": { "minLength": 1, "type": "string" },
+    "code": {
+      "additionalProperties": false,
+      "properties": {
+        "binaires": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "arch": { "type": ["string", "null"] },
+              "backend": { "type": ["string", "null"] },
+              "sha256": { "format": "sha256", "type": "string" },
+              "source_hash": { "format": "sha256", "type": ["string", "null"] },
+              "version": { "type": ["string", "null"] },
+              "versions": { "type": "object" }
+            },
+            "required": ["sha256", "source_hash", "version", "arch", "backend", "versions"],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "branche": { "type": "string" },
+        "commit": { "type": "string" }
+      },
+      "required": ["commit", "branche", "binaires"],
+      "type": "object"
+    },
+    "donnees": { "type": "object" },
+    "graines": {
+      "additionalProperties": false,
+      "properties": {
+        "regle": { "type": "string" },
+        "toutes_distinctes": { "type": "boolean" }
+      },
+      "required": ["toutes_distinctes"],
+      "type": "object"
+    },
+    "horodatage": {
+      "additionalProperties": false,
+      "properties": {
+        "cree_le": { "minLength": 1, "type": "string" },
+        "horloge_imposee": { "type": "boolean" },
+        "modifie_le": { "minLength": 1, "type": "string" }
+      },
+      "required": ["cree_le", "modifie_le"],
+      "type": "object"
+    },
+    "id": { "minLength": 1, "type": "string" },
+    "incidents": { "type": "array" },
+    "index": { "type": "object" },
+    "machine_principale": { "minLength": 1, "type": "string" },
+    "machines": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "arch": { "type": ["string", "null"] },
+          "backend": { "type": ["string", "null"] },
+          "classe": { "enum": ["A", "B"] },
+          "hote": { "minLength": 1, "type": "string" },
+          "nom": { "minLength": 1, "type": "string" }
+        },
+        "required": ["nom", "hote", "backend", "arch", "classe"],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "portes": {
+      "items": {
+        "additionalProperties": false,
+        "if": { "properties": { "statut": { "const": "rouge_attendu" } } },
+        "properties": {
+          "enonce": { "minLength": 1, "type": "string" },
+          "id": { "minLength": 1, "type": "string" },
+          "mutant": { "type": ["string", "null"] },
+          "seuil": { "type": ["number", "string", "boolean", "null"] },
+          "source": {
+            "additionalProperties": false,
+            "properties": {
+              "chemin": { "minLength": 1, "type": "string" },
+              "sha256": { "format": "sha256", "type": "string" }
+            },
+            "required": ["chemin", "sha256"],
+            "type": "object"
+          },
+          "statut": { "enum": ["vert", "rouge", "rouge_attendu", "non_lance"] },
+          "valeur": { "type": ["number", "string", "boolean", "null"] }
+        },
+        "required": ["id", "enonce", "seuil", "valeur", "statut", "source", "mutant"],
+        "then": { "properties": { "mutant": { "minLength": 1, "type": "string" } } },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "prereg": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "change_un_critere": { "type": "boolean" },
+          "chemin": { "minLength": 1, "type": "string" },
+          "gele_le": { "minLength": 1, "type": "string" },
+          "gele_source": { "enum": ["mtime", "declare"] },
+          "hachage_consigne": { "minLength": 1, "type": "string" },
+          "hachage_consigne_sha256": { "format": "sha256", "type": "string" },
+          "id": { "minLength": 1, "type": "string" },
+          "remplace": { "type": ["string", "null"] },
+          "sections": { "items": { "type": "string" }, "type": "array" },
+          "sha256": { "format": "sha256", "type": "string" }
+        },
+        "required": ["id", "chemin", "sha256", "gele_le", "gele_source", "change_un_critere", "remplace"],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "question": { "minLength": 1, "type": "string" },
+    "reserves": { "items": { "type": "string" }, "type": "array" },
+    "runs": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "binaire_sha256": { "format": "sha256", "type": "string" },
+          "debut": { "minLength": 1, "type": "string" },
+          "fin": { "minLength": 1, "type": "string" },
+          "geometrie": {
+            "additionalProperties": false,
+            "properties": {
+              "cotes": { "items": { "minimum": 1, "type": "integer" }, "type": "array" }
+            },
+            "required": ["cotes"],
+            "type": "object"
+          },
+          "graines": { "items": { "minimum": 0, "type": "integer" }, "type": "array" },
+          "hote": { "minLength": 1, "type": "string" },
+          "id": { "minLength": 1, "type": "string" },
+          "machine": { "minLength": 1, "type": "string" },
+          "manifeste": { "minLength": 1, "type": "string" },
+          "parametres": { "type": "object" },
+          "prereg": { "items": { "minLength": 1, "type": "string" }, "minItems": 1, "type": "array" },
+          "rc": { "type": "integer" },
+          "schema": { "const": "kevinotron-unifie/1" },
+          "sha256": { "format": "sha256", "type": "string" },
+          "sortie": {
+            "additionalProperties": false,
+            "properties": {
+              "chemin": { "minLength": 1, "type": "string" },
+              "sha256": { "format": "sha256", "type": "string" }
+            },
+            "required": ["chemin", "sha256"],
+            "type": "object"
+          }
+        },
+        "required": [
+          "id", "manifeste", "sha256", "schema", "machine", "hote", "debut", "fin",
+          "rc", "graines", "binaire_sha256", "geometrie", "parametres", "prereg"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "schema": { "const": "kvu-experience/1" },
+    "titre": { "minLength": 1, "type": "string" },
+    "verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "chiffres": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "nom": { "minLength": 1, "type": "string" },
+              "source": { "minLength": 1, "type": "string" },
+              "statut_lecture": { "enum": ["[calcul exact]", "[numérique]", "[lecture]", "[estimé]"] },
+              "valeur": { "type": "number" }
+            },
+            "required": ["nom", "valeur", "statut_lecture", "source"],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "classe": { "enum": ["A", "B"] },
+        "historique": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "chiffres": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "nom": { "minLength": 1, "type": "string" },
+                    "source": { "minLength": 1, "type": "string" },
+                    "statut_lecture": { "enum": ["[calcul exact]", "[numérique]", "[lecture]", "[estimé]"] },
+                    "valeur": { "type": "number" }
+                  },
+                  "required": ["nom", "valeur", "statut_lecture", "source"],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "classe": { "enum": ["A", "B"] },
+              "provisoire": { "type": "boolean" },
+              "precedent": { "format": "sha256", "type": "string" },
+              "remplace_le": { "minLength": 1, "type": "string" },
+              "statut": { "enum": ["en_cours", "non_concluant", "compatible", "refute", "indetermine"] },
+              "texte": { "type": "string" }
+            },
+            "required": ["statut", "provisoire", "classe", "texte", "chiffres", "remplace_le"],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "chaine": { "format": "sha256", "type": "string" },
+        "migre_le": { "minLength": 1, "type": "string" },
+        "provisoire": { "type": "boolean" },
+        "statut": { "enum": ["en_cours", "non_concluant", "compatible", "refute", "indetermine"] },
+        "texte": { "type": "string" }
+      },
+      "required": ["statut", "provisoire", "classe", "texte", "chiffres", "historique"],
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema", "id", "titre", "question", "carnet_id", "machine_principale",
+    "prereg", "code", "machines", "runs", "graines", "portes", "verdict", "carnet", "horodatage"
+  ],
+  "type": "object"
+}

@@ -17,7 +17,7 @@ Type=simple
 # Binaire figé par scripts/build_auto.sh (acemagic : /chemin/vers/projet/kevinotron_dev/bin/acemagic ; gamer : ~/kevinotron_dev/bin).
 ExecStart=%h/kevinotron_dev/bin/kevinotron queue run --boucle --pause-s 10
 Nice=10
-# Gamer : cœurs E seulement (les cœurs P sont instables et réservés à maison3d).
+# Gamer : cœurs E seulement (les cœurs P sont instables et réservés à un autre usage).
 # CPUAffinity=12-19
 MemoryMax=2G
 Restart=on-failure

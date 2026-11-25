@@ -56,8 +56,8 @@ fn les_quatre_exemples_existent() {
         .iter()
         .map(|p| p.file_name().unwrap().to_string_lossy().into_owned())
         .collect();
-    assert_eq!(noms.len(), 4, "{noms:?}");
-    for attendu in ["r2_3_s2", "saturation_v3", "desert", "balayage_beta"] {
+    assert_eq!(noms.len(), 5, "{noms:?}");
+    for attendu in ["r2_3_s2", "saturation_v3", "desert", "balayage_beta", "mesure_enligne_reprise"] {
         assert!(
             noms.iter().any(|n| n.contains(attendu)),
             "exemple {attendu} absent : {noms:?}"

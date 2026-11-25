@@ -25,7 +25,8 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 /// Sous-commandes reconnues par le dispatch de `kevinotron` (main.rs les délègue ici avant clap).
 /// Aucun drapeau historique ne commence sans `--` : pas d'ambiguïté avec l'ancienne interface.
 pub const SOUS_COMMANDES: &[&str] = &[
-    "doctor", "etat", "queue", "su2", "cond", "fibre", "obs", "store", "fetch", "valide", "bench", "regen", "groupe", "gen", "rg", "hess",
+    "doctor", "etat", "queue", "su2", "cond", "fibre", "obs", "store", "fetch", "valide", "bench", "regen", "groupe", "gen", "rg", "hess", "experience",
+    "intrication",
 ];
 
 /// Version du crate.
@@ -95,6 +96,16 @@ pub const MODULES: &[Module] = &[
         id: "hess",
         commandes: crate::hess::cli::commandes,
         executer: crate::hess::cli::executer,
+    },
+    Module {
+        id: "experience",
+        commandes: crate::experience::cli::commandes,
+        executer: crate::experience::cli::executer,
+    },
+    Module {
+        id: "intrication",
+        commandes: crate::intrication::cli::commandes,
+        executer: crate::intrication::cli::executer,
     },
     Module {
         id: "valide",

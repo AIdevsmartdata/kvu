@@ -351,14 +351,24 @@ impl Champs {
 // Écritures atomiques et répertoire neuf.
 // ---------------------------------------------------------------------------
 
-fn fsync_repertoire(dir: &Path) {
-    if let Ok(f) = fs::File::open(dir) {
-        let _ = f.sync_all();
+/// Synchronise le répertoire `dir` (rend durable un renommage). L'erreur est RENDUE à l'appelant (B2-2 de la seconde
+/// lecture : elle était avalée). Seul `EINVAL` (22) est toléré : certains systèmes de fichiers ne savent pas
+/// synchroniser un répertoire, et il n'y a alors rien de plus à faire.
+fn fsync_repertoire(dir: &Path) -> io::Result<()> {
+    match fs::File::open(dir)?.sync_all() {
+        Err(e) if e.raw_os_error() == Some(22) => Ok(()),
+        r => r,
     }
 }
 
 /// Écrit `path` de façon atomique : `.<nom>.tmp.<pid>`, fsync, rename, fsync(dir).
+/// Si la synchronisation du répertoire échoue, l'erreur est rendue : le renommage n'est alors PAS garanti durable.
 pub fn ecrire_atomique(path: &Path, contenu: &[u8]) -> io::Result<()> {
+    ecrire_atomique_avec(path, contenu, fsync_repertoire)
+}
+
+/// Variante à synchronisation de répertoire injectable (tests d'erreur).
+pub(crate) fn ecrire_atomique_avec(path: &Path, contenu: &[u8], sync_dir: fn(&Path) -> io::Result<()>) -> io::Result<()> {
     let dir = path.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
     let nom = path.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
     let tmp = dir.join(format!(".{}.tmp.{}", nom, std::process::id()));
@@ -368,8 +378,7 @@ pub fn ecrire_atomique(path: &Path, contenu: &[u8]) -> io::Result<()> {
         f.sync_all()?;
     }
     fs::rename(&tmp, path)?;
-    fsync_repertoire(dir);
-    Ok(())
+    sync_dir(dir)
 }
 
 #[derive(Debug)]
@@ -536,6 +545,24 @@ mod tests {
         let d = std::env::temp_dir().join(format!("k8_manifest_{}_{}", nom, std::process::id()));
         let _ = fs::remove_dir_all(&d);
         d
+    }
+
+    fn sync_en_echec(_: &Path) -> io::Result<()> {
+        Err(io::Error::new(io::ErrorKind::Other, "échec injecté de la synchronisation du répertoire"))
+    }
+
+    /// B2-2 : l'échec de synchronisation du répertoire n'est plus avalé (reprise.json, manifeste, COMPLETE passent par ici).
+    #[test]
+    fn ecrire_atomique_propage_l_echec_de_synchronisation_du_repertoire() {
+        let d = tmp("sync_echec");
+        fs::create_dir_all(&d).unwrap();
+        let p = d.join("x.json");
+        let e = ecrire_atomique_avec(&p, b"{}", sync_en_echec).unwrap_err();
+        assert!(e.to_string().contains("injecté"), "{e}");
+        // chemin sain : Ok et contenu écrit
+        ecrire_atomique(&p, b"{\"a\":1}").unwrap();
+        assert_eq!(fs::read(&p).unwrap(), b"{\"a\":1}");
+        fs::remove_dir_all(&d).unwrap();
     }
 
     #[test]

@@ -176,13 +176,13 @@ impl MesureEnLigne for MesureBloc {
         NOM_MESURE
     }
     fn fichiers_en_ajout(&self, _cfg: &crate::su2::run::ConfigRun) -> Vec<crate::su2::run::FichierEnAjout> {
-        // 0.1.1 (PUB-13) : une seule ligne par pas dans chacun des deux CSV
+        // c08d : une seule ligne par pas dans chacun des deux CSV
         vec![
             crate::su2::run::FichierEnAjout::une_ligne("bloc3.csv", ENTETE_CSV),
             crate::su2::run::FichierEnAjout::une_ligne("bloc3_hist.csv", &entete_hist()),
         ]
     }
-    /// 0.1.1 (PUB-13) : CSV ramenés au point de reprise (restauration générique), et configurations grossières `bloc3_cfg_<pas>.npy` de
+    /// c08c : CSV ramenés au point de reprise (restauration générique), et configurations grossières `bloc3_cfg_<pas>.npy` de
     /// pas postérieur au point supprimées (elles seront réécrites, identiques, par la reprise).
     fn restaurer(&mut self, cfg: &crate::su2::run::ConfigRun, dirs: &[PathBuf], pas_point: u64) -> Resultat<()> {
         crate::su2::run::restaurer_fichiers_en_ajout(dirs, &self.fichiers_en_ajout(cfg), cfg, self.periode as u64, pas_point)?;

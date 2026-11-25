@@ -1,0 +1,6 @@
+# Empreintes SHA-256 de référence du générateur publié su2-heatbath-gpu (DOI 10.5281/zenodo.23644087),
+# lignes « hip » (backend HIP, F64) de son fichier tests/anchors.sha256 ; copiées telles quelles, sans les lignes « cuda ».
+# Paramètres de l'essai associé : voir README.md, section « État de la validation sur carte (0.5.1) ».
+hip cfg_002000.npy 357246ceab4588bb2fce78c2b769271e775dd8419adbcb390fce45d59aa77c7e
+hip measurements.csv 6fac196b736521f8ed17a3e4a8abcfa36c8780341e4b89e5eda88c1d663ba589
+hip therm.csv 2a3e1967289ad62233f2879ec7e0f24ba892cfe40bf183384362684a05e6a762

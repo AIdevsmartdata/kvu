@@ -81,7 +81,7 @@ impl fmt::Display for Erreur {
             Erreur::Verrou(m) => write!(f, "verrou GPU : {m}"),
             Erreur::SsdPlein { chemin, libre_go, besoin_go, seuil_go } => write!(
                 f,
-                "garde SSD : {} a {libre_go:.1} Go libres, l'écriture demande {besoin_go:.2} Go, seuil {seuil_go:.0} Go : REFUS",
+                "garde SSD : {} a {libre_go:.1} Go libres, l'écriture demande {besoin_go:.2} Go, seuil {seuil_go:.0} Go : REFUS (libérer de la place, écrire sur un autre disque, ou abaisser le seuil avec KEVINOTRON_SSD_MIN_GO ; /tmp est souvent en RAM)",
                 chemin.display()
             ),
             Erreur::Format(m) => write!(f, "format : {m}"),

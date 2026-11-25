@@ -2,7 +2,7 @@
 //! surcharge de machine. Propriétaire : T1 (correctif du vérificateur, 04/10).
 //!
 //! Avant ce correctif, l'affinité « obligatoire » du profil (ex. 12-19) (cœurs E ; les cœurs P sont instables et
-//! réservés à maison3d) n'était appliquée que par la file de jobs (`taskset`). Un appel direct
+//! réservés à un autre usage) n'était appliquée que par la file de jobs (`taskset`). Un appel direct
 //! (`kevinotron cond chaine --backend cpu`, `su2 gen`…) tournait sur les 20 CPU. Désormais le binaire pose
 //! lui-même son affinité (`sched_setaffinity`) dès que la politique a `cpus`, AVANT de créer le moindre fil :
 //! tous les fils (rayon, runtime GPU) et tous les processus enfants en héritent.

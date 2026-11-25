@@ -328,6 +328,15 @@ impl Appareil {
         }
     }
 
+    /// Taille du cache L2 du périphérique en octets (CUDA seulement ; `None` sur HIP ou si illisible).
+    pub fn cache_l2_octets(&self) -> Option<u64> {
+        match &*self.interne {
+            Interne::Hip(_) => None,
+            #[cfg(feature = "cuda")]
+            Interne::Cuda(c) => c.cache_l2_octets(),
+        }
+    }
+
     /// Compile (ou relit du cache) une source assemblée POUR CE backend.
     /// Cache : celui de l'environnement (`Cache::depuis_env`), absent si KEVINOTRON_CACHE_DISABLE=1.
     pub fn compiler(&self, src: &SourceAssemblee, opts: &OptionsCompil) -> Resultat<Module> {
